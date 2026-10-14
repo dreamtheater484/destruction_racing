@@ -22,6 +22,9 @@ public sealed record Personality(
     /// <summary>The PlayerProxy bot's "average returning fan" profile (plan §17.1).</summary>
     public static Personality AverageFan => new("AverageFan", 0.55f, 0.65f, 0.4f, 0.6f, 0.5f);
     public static Personality SkilledPlayer => new("Skilled", 0.85f, 0.7f, 0.3f, 0.7f, 0.6f);
+    /// <summary>Wreckin' strategy bots at equal skill (plan §17.4: racer vs. hunter points within ±15%).</summary>
+    public static Personality RacerPlayer => new("RacerBot", 0.55f, 0.25f, 0.2f, 0.4f, 0.7f);
+    public static Personality HunterPlayer => new("HunterBot", 0.55f, 0.95f, 0.4f, 0.8f, 0.3f);
 
     /// <summary>The M1b field mix for 19 AI cars.</summary>
     public static Personality[] FieldMix() => new[]

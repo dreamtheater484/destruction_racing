@@ -896,8 +896,12 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A16 | Spin hit threshold | 3 kJ (≈ 11 km/h closing): taps score spins, as in DD | Reference feel: a rear‑quarter tap spins the leader |
 | A17 | Grinding and scraping | Repeat contact of the same pair within 0.8 s deals 30%; sliding contact above 20 km/h grinds the touching zone; the squeezer gets the credit (DD Code T4) | Keeps pile‑ups from stripping every car, makes squeezes pay |
 | A18 | Damage on a destroyed zone | Half of it reaches the front (engine) | Without it, cars with destroyed sides and rear could never be finished off |
-| A19 | Opening crunch and first minute | Derby damage starts at ×0.6 at GO and ramps to ×1 over 60 s (calibration) | Frustration targets: player wrecked in 30 s ≤ 5%, in 60 s ≤ 15% |
+| A19 | Opening crunch and first minute | Derby damage starts at ×0.5 at GO and ramps to ×1 over 75 s (calibration; M1b had ×0.6 over 60 s, re-checked with reproducible sims in M1c) | Frustration targets: player wrecked in 30 s ≤ 5%, in 60 s ≤ 15% |
 | A20 | DD2 Fast Steer at derby speeds | Loosens the rear and adds yaw torque below ~80 km/h, so sharp turns (DD Code T5) are possible | The DD2 manual only says "fast steering" |
+| A21 | Race damage | All damage in a race is ×0.5 (`RaceDamageScale`, calibration) | At ×1 the PlayerProxy was wrecked before half distance in 83–100% of races (target ≤ 10%): race contact is constant and incidental, the derby curve assumes deliberate rams |
+| A22 | AI pace in Division 4 | The racing AI drives at ×0.97 of its skill's pace (division scaling, §10.5) | At ×1 the AI racers out‑pace an average player, so only hunting paid; at ×0.97 racer and hunter bots score within ±15% |
+| A23 | Crossover and wall ends | The walls open where the figure‑8 legs cross; where a wall resumes it is flared (≈8°) and the four corners are closed | Blunt wall ends at the opening wrecked cars that drifted into the gap; DD1 footage shows no detail |
+| A24 | Race end | The race ends when the player finishes; if the player is wrecked, when the winner takes the flag. Everyone else is classified by distance | Not documented; keeps "skip to results" short |
 
 ---
 

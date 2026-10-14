@@ -6,7 +6,7 @@ using DestructionRacing.Vehicles;
 namespace DestructionRacing.AI;
 
 /// <summary>
-/// The PlayerProxy bot (plan §17.1): a derby brain decides, but its decisions go through the same path as a
+/// The PlayerProxy bot (plan §17.1): an AI brain (derby or race) decides, but its decisions go through the same path as a
 /// human's — digital keys, a 150–250 ms reaction delay, occasional mistakes, then the keyboard steering filter.
 /// Used by the sim harness to measure the player's experience.
 /// </summary>
@@ -31,19 +31,37 @@ public sealed class PlayerProxyInput : ICarInput
     private double _mistakeUntil;
     private double _nextMistake;
     private bool _mistakeLeft;
+    private float _plannedSteer;
+    private int _tapDir;
+    private double _tapChangedAt;
+    /// <summary>The shortest key tap or release a player manages (about 10 taps a second at most).</summary>
+    private const double MinTap = 0.05;
 
-    public PlayerProxyInput(DerbyBrain brain, IArenaView view, int seed)
+    private readonly Func<Car, float, CarControls> _think;
+
+    public PlayerProxyInput(DerbyBrain brain, IArenaView view, int seed) : this((car, dt) => brain.Think(car, view, dt), seed) { }
+
+    /// <summary>Races: a human taps the steering keys to hold a line at speed, so the race proxy does too.</summary>
+    public PlayerProxyInput(RaceBrain brain, IRaceView view, int seed) : this((car, dt) => brain.Think(car, view, dt), seed)
     {
-        Brain = brain;
-        View = view;
+        TapSteering = true;
+    }
+
+    /// <summary>
+    /// Steering by taps, as a player holds a line through a long bend: the proxy knows how the keyboard filter
+    /// turns key presses into steering (ramp in, faster return) and taps so the steering follows what the brain
+    /// asks for, with taps no shorter than 50 ms. Off for the derby proxy (its M1b calibration used held keys).
+    /// </summary>
+    public bool TapSteering { get; set; }
+
+    public PlayerProxyInput(Func<Car, float, CarControls> think, int seed)
+    {
+        _think = think;
         _rng = new Random(seed);
         _delay = 0.2f;
         _nextMistake = 6 + _rng.NextDouble() * 8;
         _filter.IsHeld = Held;
     }
-
-    public DerbyBrain Brain { get; }
-    public IArenaView View { get; }
 
     public CarControls GetControls(Car car, float delta)
     {
@@ -55,20 +73,45 @@ public sealed class PlayerProxyInput : ICarInput
         }
 
         // What the brain wants now, as keys.
-        var c = Brain.Think(car, View, delta);
+        var c = _think(car, delta);
+        bool left = c.Steer < -0.3f, right = c.Steer > 0.3f;
+        if (TapSteering)
+        {
+            float target = c.Steer;
+            int want = target > 0.03f ? (_plannedSteer < target ? 1 : 0)
+                     : target < -0.03f ? (_plannedSteer > target ? -1 : 0)
+                     : 0;
+            if (MathF.Abs(target) > 0.95f) want = MathF.Sign(target) > 0 ? 1 : -1;
+            if (want != _tapDir && _clock - _tapChangedAt >= MinTap)
+            {
+                _tapDir = want;
+                _tapChangedAt = _clock;
+            }
+            // The same filter the keys will go through (PlayerInput), run on the planned keys.
+            float rate = _tapDir == 0 ? _filter.SteerReturn
+                : _plannedSteer != 0f && MathF.Sign(_tapDir) != MathF.Sign(_plannedSteer) ? _filter.SteerCounter
+                : _filter.SteerRampIn;
+            if (c.FastSteer) rate *= _filter.FastSteerRateScale;
+            _plannedSteer = Godot.Mathf.MoveToward(_plannedSteer, _tapDir, rate * delta);
+            left = _tapDir < 0;
+            right = _tapDir > 0;
+        }
         var wanted = new Keys(
             gas: c.Throttle >= 0.35f && !c.Reverse,   // a human presses gas for any real throttle request
             brake: c.Brake > 0.5f,
             reverse: c.Reverse,
-            left: c.Steer < -0.3f,
-            right: c.Steer > 0.3f,
+            left: left,
+            right: right,
             fast: c.FastSteer,
             turn: c.TurnAround);
 
         // An occasional mistake: a wrong steering input for a moment.
         if (_clock >= _nextMistake)
         {
-            _mistakeUntil = _clock + 0.25 + _rng.NextDouble() * 0.2;
+            double length = 0.25 + _rng.NextDouble() * 0.2;
+            // In a race a mistake at speed is a twitch, not a held wrong turn (that would crash every lap).
+            if (TapSteering) length *= Math.Clamp(12.0 / Math.Max(car.ForwardSpeed, 12f), 0.25, 1.0);
+            _mistakeUntil = _clock + length;
             _mistakeLeft = _rng.Next(2) == 0;
             _nextMistake = _clock + 6 + _rng.NextDouble() * 10;
         }

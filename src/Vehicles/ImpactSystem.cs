@@ -213,15 +213,15 @@ public partial class ImpactSystem : Node
                 Car other = c.A == car ? c.B : c.B == car ? c.A : null!;
                 if (other != null && !other.IsWrecked) squeezer = other;
             }
-            Referee!.OnScrape(time, car.Id, SideOf(car, point, normal).Zone, slide, dt, squeezer?.Id);
+            Referee!.OnScrape(time, car.Id, SideOf(car, point, normal).Zone, slide, dt, squeezer?.Id, "wall scrape");
         }
         foreach (var c in _pairs.Values)
         {
             Vector3 rel = c.A.LinearVelocity - c.B.LinearVelocity;
             float slide = (rel - c.Normal * rel.Dot(c.Normal)).Length();
             if (slide <= (Referee!.Rules.ScrapeMinSpeed)) continue;
-            Referee.OnScrape(time, c.A.Id, SideOf(c.A, c.Point, c.Normal).Zone, slide, dt, c.B.IsWrecked ? null : c.B.Id);
-            Referee.OnScrape(time, c.B.Id, SideOf(c.B, c.Point, -c.Normal).Zone, slide, dt, c.A.IsWrecked ? null : c.A.Id);
+            Referee.OnScrape(time, c.A.Id, SideOf(c.A, c.Point, c.Normal).Zone, slide, dt, c.B.IsWrecked ? null : c.B.Id, "car scrape");
+            Referee.OnScrape(time, c.B.Id, SideOf(c.B, c.Point, -c.Normal).Zone, slide, dt, c.A.IsWrecked ? null : c.A.Id, "car scrape");
         }
     }
 

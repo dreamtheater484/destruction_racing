@@ -18,7 +18,7 @@ namespace DestructionRacing.Modes;
 /// bonus). When the player is wrecked they can watch another car or skip to the results.
 /// Also runs headless with the PlayerProxy bot for the sim harness.
 /// </summary>
-public partial class DerbyMode : Node3D, IArenaView
+public partial class DerbyMode : Node3D, IArenaView, IHudMode
 {
     private static readonly Color[] Liveries =
     {
@@ -74,7 +74,7 @@ public partial class DerbyMode : Node3D, IArenaView
     private Car _player = null!;
     private GreyBoxArena _arena = null!;
     private CameraRig? _rig;
-    private DerbyHud? _hud;
+    private EventHud? _hud;
     private Node3D? _beacon;
     private Random _rng = null!;
     private bool _skipping;
@@ -87,6 +87,29 @@ public partial class DerbyMode : Node3D, IArenaView
     public bool PlayerOut => _referee.IsWrecked(_player.Id);
     public double CountdownLeft => _countdown;
     public string DriverName(Car car) => car == _player ? "You" : _brains.TryGetValue(car.Id, out var b) ? b.Personality.Archetype : "?";
+
+    // ------------------------------------------------------------------ IHudMode
+
+    public string HudRank
+    {
+        get
+        {
+            int points = _referee.Score(_player.Id).Total;
+            return $"{1 + _cars.Count(c => _referee.Score(c.Id).Total > points):00}";
+        }
+    }
+    public string HudStatus => $"{_standings.Remaining}  Still Running";
+    public string? HudWarning => null;
+
+    public string StandingsText()
+    {
+        var lines = _cars
+            .OrderByDescending(c => _referee.Score(c.Id).Total)
+            .Take(12)
+            .Select((c, i) => $"{i + 1,2}.  #{c.Number,-3} {DriverName(c),-11} {_referee.Score(c.Id).Total,4} pts" +
+                              (_referee.IsWrecked(c.Id) ? "   wrecked" : ""));
+        return "STANDINGS (points)\n" + string.Join("\n", lines);
+    }
 
     // ------------------------------------------------------------------ IArenaView
 
@@ -139,7 +162,7 @@ public partial class DerbyMode : Node3D, IArenaView
         {
             _rig = new CameraRig { Target = _player };
             AddChild(_rig);
-            _hud = new DerbyHud { Mode = this, PlayerCar = _player, ViewName = () => _rig.Mode.ToString() };
+            _hud = new EventHud { Mode = this, PlayerCar = _player, ViewName = () => _rig.Mode.ToString() };
             AddChild(_hud);
             _beacon = BuildBeacon();
             AddChild(_beacon);
@@ -396,14 +419,14 @@ public partial class DerbyMode : Node3D, IArenaView
         foreach (var c in _cars) c.InputLocked = true;
         Engine.TimeScale = 1.0;
         _skipping = false;
-        _hud?.ShowResults(BuildResults());
+        _hud?.ShowResults("DESTRUCTION DERBY  –  RESULTS", "Survivor", BuildResults());
         Finished?.Invoke(this);
     }
 
-    public IReadOnlyList<DerbyHud.ResultRow> BuildResults() =>
+    public IReadOnlyList<EventHud.ResultRow> BuildResults() =>
         _standings.FinishingOrder()
             .Select(id => _byId[id])
-            .Select(c => new DerbyHud.ResultRow(
+            .Select(c => new EventHud.ResultRow(
                 _standings.PlaceOf(c.Id) ?? 0,
                 c.Number,
                 DriverName(c),

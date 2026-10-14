@@ -91,8 +91,14 @@ public sealed record RulesConfig
     /// opening crunch and first minute hurt everyone but rarely eliminate anyone (frustration targets: player
     /// wrecked in 30 s ≤ 5%, in 60 s ≤ 15%).
     /// </summary>
-    public float OpeningCrunchDamageScale { get; init; } = 0.6f;
-    public float OpeningCrunchTime { get; init; } = 60f;
+    public float OpeningCrunchDamageScale { get; init; } = 0.5f;
+    public float OpeningCrunchTime { get; init; } = 75f;
+    /// <summary>
+    /// Calibration ✱ (M1c): all damage in a race is scaled by this. Race contact is constant and mostly incidental
+    /// (packs, crossover traffic, wrecks on the line), where the derby calibration assumes deliberate rams; at full
+    /// damage most of the field and the player were wrecked before half distance (target: player ≤ 10%).
+    /// </summary>
+    public float RaceDamageScale { get; init; } = 0.5f;
     /// <summary>
     /// Scraping (DD Code T4): sustained contact sliding faster than ScrapeMinSpeed (m/s) grinds the touching zone
     /// at ScrapeRate health per second per m/s above it.

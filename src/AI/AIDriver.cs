@@ -16,3 +16,18 @@ public sealed class AIDriver : ICarInput
 
     public CarControls GetControls(Car car, float delta) => Brain.Think(car, View, delta);
 }
+
+/// <summary>Connects a <see cref="RaceBrain"/> to a car.</summary>
+public sealed class RaceDriver : ICarInput
+{
+    public RaceDriver(RaceBrain brain, IRaceView view)
+    {
+        Brain = brain;
+        View = view;
+    }
+
+    public RaceBrain Brain { get; }
+    public IRaceView View { get; }
+
+    public CarControls GetControls(Car car, float delta) => Brain.Think(car, View, delta);
+}

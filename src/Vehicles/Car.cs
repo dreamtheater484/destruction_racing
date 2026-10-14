@@ -67,6 +67,8 @@ public partial class Car : RigidBody3D
     private float _gripLoss;        // 0..1, decays after a hit
     private float _pullDeg;         // smoothed steering pull from side damage
     private float _stutterTimer;
+    /// <summary>Per-car random numbers (seeded by Id) so sims are reproducible; Godot's global RNG is seeded per launch.</summary>
+    private System.Random? _rng;
     private bool _wreckShown;
     private StandardMaterial3D _paint = null!;
     private readonly System.Collections.Generic.List<StandardMaterial3D> _lights = new();
@@ -172,7 +174,11 @@ public partial class Car : RigidBody3D
         {
             // Critical front: the engine stutters.
             _stutterTimer -= dt;
-            if (_stutterTimer < -0.25f) _stutterTimer = (float)GD.RandRange(0.4, 1.6) * (0.3f + frontH * 2f);
+            if (_stutterTimer < -0.25f)
+            {
+                _rng ??= new System.Random(Id * 7919 + 17);
+                _stutterTimer = (0.4f + 1.2f * (float)_rng.NextDouble()) * (0.3f + frontH * 2f);
+            }
             if (_stutterTimer < 0f) powerFactor *= 0.25f;
         }
         // Side damage pulls toward the damaged side; both sides damaged → the car barely turns.

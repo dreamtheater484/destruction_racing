@@ -102,29 +102,70 @@ Probe measurements:
 | T1 brake-check | 100% |
 | T2 rear-corner turn-in | 100% |
 | T3 ram into a braking zone | 100% |
-| T4 squeeze into a wall or wreckage | 90% |
+| T4 squeeze into a wall or wreckage | 100% (90% in M1b) |
 | T5 last-moment turn | 100% |
 
-**Derby pacing** (sim harness, PlayerProxy "average fan", 30 derbies): all plan §17.4 derby targets are met.
+**Derby pacing** (sim harness, PlayerProxy "average fan", 60 derbies, reproducible since M1c): all plan §17.4 derby targets but one are met.
 
 | Metric | Result | Target |
 |---|---|---|
 | First contact | 1.7 s (DD1: ~2.5 s to the centre pile-up) | < 3 s |
 | Longest idle stretch with ≥ 5 cars (median) | 6.8 s | ≤ 8 s |
-| Derby length (median) | 145 s | 120–240 s |
-| Player survival (median) | 100 s | 60–150 s |
-| Player hits per minute | 21 | ≥ 8 |
-| Points from deliberate hits | 71% (median per derby; 61% over all points) | ≥ 70% |
-| Player wrecked within 30 s / 60 s | 3% / 10% | ≤ 5% / ≤ 15% |
-| Player wrecked by 3+ cars at once | 0% | ≤ 10% |
-| Player stuck | 3.4% | ≤ 5% |
+| Derby length (median) | 161 s | 120–240 s |
+| Player survival (median) | 110 s | 60–150 s |
+| Player hits per minute | 18 | ≥ 8 |
+| Points from deliberate hits | **55% ❌** (median per derby; 55% over all points) | ≥ 70% |
+| Player wrecked within 30 s / 60 s | 0% / 15% | ≤ 5% / ≤ 15% |
+| Player wrecked by 3+ cars at once | 2% | ≤ 10% |
+| Player stuck | 4.3% | ≤ 5% |
 | Derbies that end | 100% | 100% |
 
-- The bot wins 17% of derbies and finishes 8.8th on average out of 20.
+- The bot wins 23% of derbies and finishes 8.7th on average out of 20.
+- **Deliberate points:** 55% of the bot's points come from aimed hits (throttle on, heading within 45° of the victim, plan §17.4). Another 30% come from hits it made at a wider angle: side-swipes and last-moment turns (T5). The last 14% come from cars that wrecked themselves on it, which DD credits to you. Open for your derby playtest: either the scoring credits too much incidental contact, or the 45° rule misses DD Code moves.
+- **Correction:** M1b reported all targets met over 30 derbies. That run was one random draw: the engine stutter of damaged cars used Godot's global random generator, which is seeded differently on every launch. Since M1c the sims are reproducible. Re-measured, the first minute was too harsh, so the opening crunch is now ×0.5 ramping over 75 s (was ×0.6 over 60 s).
 - The latest report is in `out/sims/`.
 
-## Still to measure (in M1c and later)
+## M1c: Wreckin' Racing on the figure-8 (calibrated in the grey box)
 
-- Wreckin' Racing pacing: spins per lap, crossover incidents, leader spins.
+**The layout** (`FigureEightTrack`):
+- Two 70 m turns, joined by two straights that cross at grade at 76°: DD1's blind crossover.
+- 13 m wide (three cars abreast), 984 m per lap.
+- The AI laps in about 37–38 s (the fast drivers at full pace in 37 s); the PlayerProxy alone laps in about 38 s (plan: 35–55 s laps, so lapped traffic keeps meeting you).
+- Cornering speed is about 80 km/h in the turns; the straights end at about 150 km/h.
+
+**Wreckin' pacing** (sim harness, PlayerProxy "average fan", 20 races, 6 laps):
+
+| Metric | Result | Target |
+|---|---|---|
+| Spins in the field per lap (median) | 6.7 | ≥ 3 |
+| Crossover incidents per race (median) | 19.5 | ≥ 2 |
+| Player position changes per race (median) | 32 | ≥ 6 |
+| Leader spun per race (median) | 2.0 | ≥ 2 |
+| Cars within 3 s of the player (median share of race time) | 87% | ≥ 60% |
+| Racer vs. hunter bot points, equal skill (mean, 10 seeds) | 44 vs 39 (11% apart) | within ±15% |
+| Player wrecked before half distance | 0% | ≤ 10% |
+| Player stuck | 0.7% | ≤ 5% |
+| Races that end | 100% | 100% |
+
+- The bot finishes 60% of races, in 15th place on average; it is wrecked late in the others.
+- About 5 of 20 cars are wrecked per race, and 11 take the flag. The winner needs about 250 s for the 6 laps.
+- **Crossover incidents (about 20 per race) are far above the minimum.** Whether that is DD1 chaos or too much is for your playtest to decide.
+- The latest reports are in `out/sims/`.
+
+**Strategy balance** (plan §17.4): over 10 seeds, a racer bot and a hunter bot of equal skill (0.55) scored **44 vs 39 points** on average, 11% apart (target ±15%). The hunter is wrecked more often (in 15% of its races before half distance); the racer collects the finishing bonus.
+
+**Calibrations ✱** (plan §20.2):
+- **A21, race damage ×0.5.** At full damage, the player was wrecked before half distance in 83–100% of races, with 12 of 20 cars wrecked per race.
+- **A22, AI pace ×0.97 in Division 4.** At ×1 the AI racers out-pace an average player, and hunting paid 40% more than racing.
+- **A23, crossover walls.** The walls open where the legs cross. Where a wall resumes it is flared (about 8°), and the four corners are closed. Blunt wall ends had wrecked cars that drifted into the gap.
+
+**What the PlayerProxy needed to race like a player:**
+- **Tap steering.** It taps the keys knowing how the keyboard filter responds (ramp-in 4.5/s, return 8/s), in taps of at least 50 ms. Fixed-rhythm taps gave a third of the steering asked for, so it ran wide in every turn.
+- **Anticipation.** It steers from where the car will be in 0.25 s, offsetting its own 150–250 ms reaction time.
+- **Smaller mistakes at speed.** A mistake at speed is a twitch, not a held wrong turn: at 150 km/h a 0.3 s full-lock mistake crashed it every lap.
+- With these, it laps alone with almost no wall contact (4 of 4 clean runs).
+
+## Still to measure (M2 and later)
+
 - DD2 rollovers and flying parts.
 - Pit-stop timing.

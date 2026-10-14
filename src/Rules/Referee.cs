@@ -118,6 +118,12 @@ public sealed class Referee
     public bool IsWrecked(int car) => _cars[car].Damage.IsWrecked;
     public bool IsSpinning(int car) => _cars[car].Spin.IsOpen;
 
+    /// <summary>Diagnostics: total zone damage dealt per source ("car hit", "wall hit", "wall scrape", "car scrape").</summary>
+    public IReadOnlyDictionary<string, float> DamageBySource => _damageBySource;
+    private readonly Dictionary<string, float> _damageBySource = new();
+    private void CountSource(string source, float amount) =>
+        _damageBySource[source] = _damageBySource.GetValueOrDefault(source) + amount;
+
     /// <summary>Global damage multiplier set by the mode (e.g. the opening-crunch calibration).</summary>
     public float DamageScale { get; set; } = 1f;
 
@@ -167,8 +173,8 @@ public sealed class Referee
         bool creditA = !a.Damage.IsWrecked && (aAttacks || hit.SpeedA >= _rules.Spin.MinVictimSpeed);
         bool creditB = !b.Damage.IsWrecked && (bAttacks || hit.SpeedB >= _rules.Spin.MinVictimSpeed);
         float grind = GrindFactor(time, a.Id, b.Id);
-        ApplyDamage(time, b, hit.Energy, hit.SideB, creditA ? a.Id : null, grind);
-        ApplyDamage(time, a, hit.Energy, hit.SideA, creditB ? b.Id : null, grind);
+        ApplyDamage(time, b, hit.Energy, hit.SideB, creditA ? a.Id : null, grind, "car hit");
+        ApplyDamage(time, a, hit.Energy, hit.SideA, creditB ? b.Id : null, grind, "car hit");
         if (!bWasWrecked && b.Damage.IsWrecked) Wreck(time, b, leader);
         if (!aWasWrecked && a.Damage.IsWrecked) Wreck(time, a, leader);
     }
@@ -178,7 +184,7 @@ public sealed class Referee
     {
         if (!_cars.TryGetValue(car, out var c) || c.Damage.IsWrecked) return;
         int? leader = Leader;
-        ApplyDamage(time, c, energy, side, creditTo: null, GrindFactor(time, car, -1));
+        ApplyDamage(time, c, energy, side, creditTo: null, GrindFactor(time, car, -1), "wall hit");
         if (c.Damage.IsWrecked) Wreck(time, c, leader);
     }
 
@@ -186,7 +192,7 @@ public sealed class Referee
     /// Sustained sliding contact (a wall, a wreck, a squeezing car): grinds the touching zone. Credit goes to the
     /// car doing the squeezing, if any (DD Code T4).
     /// </summary>
-    public void OnScrape(double time, int car, ZoneSplit zone, float slideSpeed, float dt, int? creditTo)
+    public void OnScrape(double time, int car, ZoneSplit zone, float slideSpeed, float dt, int? creditTo, string source = "scrape")
     {
         if (!_cars.TryGetValue(car, out var c) || c.Damage.IsWrecked) return;
         float excess = slideSpeed - _rules.ScrapeMinSpeed;
@@ -195,6 +201,7 @@ public sealed class Referee
         float amount = _rules.ScrapeRate * excess * dt * DamageScale / MathF.Max(c.Toughness, 0.1f);
         float dealt = c.Damage.ApplyRaw(_rules, zone, amount);
         if (dealt <= 0f) return;
+        CountSource(source, dealt);
         _events.Add(new RefereeEvent(RefereeEventKind.Damage, time, car, creditTo ?? -1, dealt, zone.Primary));
         if (creditTo is int attacker && attacker != car && _cars.TryGetValue(attacker, out var a) && !a.Damage.IsWrecked)
             c.Attribution.RecordDamage(attacker, time, dealt);
@@ -264,13 +271,14 @@ public sealed class Referee
         victim.Spin.RegisterHit(attacker.Id, time, energy, victimSpeed, victimWrecked: false);
     }
 
-    private void ApplyDamage(double time, CarRecord car, float energy, HitSide side, int? creditTo, float scale)
+    private void ApplyDamage(double time, CarRecord car, float energy, HitSide side, int? creditTo, float scale, string source)
     {
         if (car.Damage.IsWrecked) return;
         float before0 = car.Damage.Health(side.Zone.Primary);
         float before1 = car.Damage.Health(side.Zone.Secondary);
         float dealt = car.Damage.ApplyHit(_rules, energy, side.Zone, car.Toughness / MathF.Max(scale * DamageScale, 0.01f));
         if (dealt <= 0f) return;
+        CountSource(source, dealt);
 
         float d0 = before0 - car.Damage.Health(side.Zone.Primary);
         float d1 = before1 - car.Damage.Health(side.Zone.Secondary);

@@ -9,6 +9,36 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## M1c Grey-box Wreckin' Racing — ready for you to play
+- **Play it:** double-click **Play Wreckin.cmd**. (The derby is **Play Derby.cmd**; **Play Driving Test.cmd** is the empty-arena driving test.)
+- **The track:** a grey-box Crossroads Speedway figure-8 (`src/Tracks/FigureEightTrack.cs`).
+  - Two 70 m turns, joined by straights that cross at grade in the middle: DD1's blind crossover.
+  - 13 m wide (three cars abreast), 984 m per lap, laps of about 37–40 s (plan: 35–55 s).
+  - The walls open where the legs cross. Where a wall resumes it is flared, and the corners are closed.
+- **The race:**
+  - 20 cars on a 3-wide grid, you start 13th; a 3-2-1 countdown, 6 laps.
+  - Spins and wrecks score as in the derby. Hitting the car in 1st (gold **LEADER ×2** beacon) doubles the points.
+  - Finishing bonus 25/15/10 for the top three. A wreck is a DNF, and the wreck stays on the track as an obstacle.
+  - HUD: your race position (big number), lap, LAP and FINAL LAP banners, WRONG WAY, Tab = running order, damage diagram.
+  - Wrecked: ←/→ watch another car, Space ×2 speed, Enter skip to the results.
+- **Racing AI** (`src/AI/RaceBrain.cs`):
+  - Three lanes with pure pursuit, and a curvature speed profile by skill.
+  - Car-following, overtaking into clear lanes only, the inside line for good drivers.
+  - Shoving past wrecks, and the turn-around after a spin.
+  - **Crossover by personality:** cautious drivers yield, bruisers floor it, psychos aim for a T-bone.
+  - **DD Code on offence:** T2 (turn into the rear quarter of a car beside you), T3 (tap a car braking for a bend), and the leader-killer (opportunists hunt the ×2 leader).
+- **Shared code:** the derby and the race share one HUD (`EventHud`), the referee and the impact system. The rules library gained race standings (laps, finishing order, DNFs): **84 unit tests**.
+- **Calibrations ✱** (plan §20.2, A21–A24):
+  - Race damage ×0.5. At full damage the player was wrecked before half distance in almost every race.
+  - AI pace ×0.97 (Division 4), so racing for the finishing bonus pays as well as hunting.
+  - The flared crossover walls, and the race end when you finish (or when the winner finishes, if you are wrecked).
+- **Checks:**
+  - A Wreckin' sim harness (`WreckinSim`), 20 races: all plan §17.4 Wreckin' targets are met. Results in `docs/reference_feel.md`.
+  - DD Code tactics T1–T5: 10/10 each. 84 unit tests pass.
+- **Sims are now reproducible.** The engine stutter of damaged cars used Godot's global random generator, so every launch differed.
+  - Re-measured, the derby's first minute was too harsh: the opening crunch is now ×0.5 over 75 s (was ×0.6 over 60 s).
+  - One derby target is still missed: 55% of points from deliberate hits (target ≥ 70%). It is for your derby playtest.
+
 ## M1b Grey-box Destruction Derby — ready for you to play
 - **Play it:** double-click **Play Derby.cmd**. It is also the default scene now; the driving test has its own launcher.
 - **The event:**
@@ -40,7 +70,7 @@
   - Spin and wreck popups, a wreck feed, the results table.
 - **Checks:**
   - **DD Code T1–T5** scenario tests: 100/100/100/90/100%.
-  - **PlayerProxy** bot that drives through the keyboard path, with a **sim harness**: all derby engagement and frustration targets met over 30 derbies (`docs/reference_feel.md`).
+  - **PlayerProxy** bot that drives through the keyboard path, with a **sim harness** (`docs/reference_feel.md`). Re-measured in M1c with reproducible sims over 60 derbies: every target is met except the share of points from deliberate hits (55%, target ≥ 70%).
   - The M1 handling numbers are unchanged.
 
 ## M1 Driving feel — approved (2026‑10‑14: "that feels pretty good")

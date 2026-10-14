@@ -2,28 +2,50 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DestructionRacing.Core;
-using DestructionRacing.Modes;
 using DestructionRacing.Rules;
 using DestructionRacing.Vehicles;
 using Godot;
 
 namespace DestructionRacing.UI;
 
+/// <summary>What the event HUD reads from the running mode (the derby or a race).</summary>
+public interface IHudMode
+{
+    Referee Referee { get; }
+    IReadOnlyList<Car> Cars { get; }
+    double Time { get; }
+    double CountdownLeft { get; }
+    bool PlayerOut { get; }
+    string DriverName(Car car);
+    /// <summary>The big number top centre (points place in the derby, race position in a race).</summary>
+    string HudRank { get; }
+    /// <summary>First line top right ("12  Still Running", "Lap 2/6").</summary>
+    string HudStatus { get; }
+    /// <summary>A flashing warning in the middle of the screen ("WRONG WAY"), or null.</summary>
+    string? HudWarning { get; }
+    /// <summary>The Tab standings panel.</summary>
+    string StandingsText();
+    void SkipToResults();
+    void ToggleDoubleSpeed();
+    void SpectateNext(int direction);
+}
+
 /// <summary>
-/// Grey-box derby HUD in the DD2 layout (plan §13, reference feel sheet): Speed and Race Points top left, the big
-/// points position top centre, "Still Running" and the clock top right, the damage diagram lower right, popups,
+/// Grey-box event HUD in the DD2 layout (plan §13, reference feel sheet): Speed and Race Points top left, the big
+/// position top centre, "Still Running" or the lap and the clock top right, the damage diagram lower right, popups,
 /// the wreck feed, the countdown, the wrecked overlay, Tab standings and the results table.
 /// </summary>
-public partial class DerbyHud : CanvasLayer
+public partial class EventHud : CanvasLayer
 {
-    public readonly record struct ResultRow(int Place, int Number, string Driver, Color Roof, int Spins, int Wrecks, int Survivor, int Total, bool IsPlayer);
+    /// <summary>One results line. Bonus is the survivor bonus (derby) or the finishing bonus (race).</summary>
+    public readonly record struct ResultRow(int Place, int Number, string Driver, Color Roof, int Spins, int Wrecks, int Bonus, int Total, bool IsPlayer, string Note = "");
 
-    public DerbyMode Mode { get; set; } = null!;
+    public IHudMode Mode { get; set; } = null!;
     public Car PlayerCar { get; set; } = null!;
     public Func<string>? ViewName { get; set; }
 
     private Label _speed = null!, _points = null!, _rank = null!, _running = null!, _clock = null!;
-    private Label _countdown = null!, _spin = null!, _help = null!, _pause = null!, _wrecked = null!;
+    private Label _countdown = null!, _spin = null!, _help = null!, _pause = null!, _wrecked = null!, _warning = null!;
     private VBoxContainer _popups = null!, _feed = null!;
     private DamageDiagram _diagram = null!;
     private PanelContainer _standings = null!, _results = null!;
@@ -77,6 +99,12 @@ public partial class DerbyHud : CanvasLayer
         _wrecked.HorizontalAlignment = HorizontalAlignment.Center;
         _wrecked.CustomMinimumSize = new Vector2(1000, 0);
         _wrecked.Visible = false;
+
+        _warning = MakeLabel(80, Corner.Center, new Vector2(-450, -150));
+        _warning.HorizontalAlignment = HorizontalAlignment.Center;
+        _warning.CustomMinimumSize = new Vector2(900, 0);
+        _warning.AddThemeColorOverride("font_color", new Color(1f, 0.25f, 0.2f));
+        _warning.Visible = false;
 
         _standings = MakePanel(new Vector2(-260, -330), new Vector2(520, 0));
         _standingsText = new Label();
@@ -168,14 +196,14 @@ public partial class DerbyHud : CanvasLayer
 
     public void PulseZone(DamageZone zone) => _diagram.Pulse(zone);
 
-    public void ShowWrecked()
+    public void ShowWrecked(string headline = "WRECKED  –  RACE OVER")
     {
         _wrecked.Visible = true;
-        _wrecked.Text = "WRECKED  –  RACE OVER\n←/→ watch another car   ·   Space ×2 speed   ·   Enter skip to results";
+        _wrecked.Text = headline + "\n←/→ watch another car   ·   Space ×2 speed   ·   Enter skip to results";
         Popup("WRECKED!", new Color(1f, 0.3f, 0.2f), big: true);
     }
 
-    public void ShowResults(IReadOnlyList<ResultRow> rows)
+    public void ShowResults(string heading, string bonusHeader, IReadOnlyList<ResultRow> rows)
     {
         _resultsShown = true;
         _wrecked.Visible = false;
@@ -184,15 +212,19 @@ public partial class DerbyHud : CanvasLayer
 
         var box = new VBoxContainer();
         _results.AddChild(box);
-        var title = new Label { Text = "DESTRUCTION DERBY  –  RESULTS", HorizontalAlignment = HorizontalAlignment.Center };
+        var title = new Label { Text = heading, HorizontalAlignment = HorizontalAlignment.Center };
         title.AddThemeFontSizeOverride("font_size", 34);
         title.AddThemeColorOverride("font_color", new Color(1f, 0.8f, 0.1f));
         box.AddChild(title);
 
-        var grid = new GridContainer { Columns = 8 };
+        bool notes = rows.Any(r => r.Note.Length > 0);
+        var grid = new GridContainer { Columns = notes ? 9 : 8 };
         grid.AddThemeConstantOverride("h_separation", 22);
         box.AddChild(grid);
-        foreach (string h in new[] { "Pos", "", "Car", "Driver", "Spins", "Wrecks", "Survivor", "Points" }) grid.AddChild(Cell(h, new Color(0.7f, 0.7f, 0.7f)));
+        var headers = new List<string> { "Pos", "", "Car", "Driver" };
+        if (notes) headers.Add("");
+        headers.AddRange(new[] { "Spins", "Wrecks", bonusHeader, "Points" });
+        foreach (string h in headers) grid.AddChild(Cell(h, new Color(0.7f, 0.7f, 0.7f)));
         foreach (var r in rows)
         {
             var color = r.IsPlayer ? new Color(1f, 0.85f, 0.3f) : Colors.White;
@@ -200,9 +232,10 @@ public partial class DerbyHud : CanvasLayer
             grid.AddChild(new ColorRect { Color = r.Roof, CustomMinimumSize = new Vector2(18, 18), SizeFlagsVertical = Control.SizeFlags.ShrinkCenter });
             grid.AddChild(Cell($"#{r.Number}", color));
             grid.AddChild(Cell(r.Driver, color));
+            if (notes) grid.AddChild(Cell(r.Note, color));
             grid.AddChild(Cell($"{r.Spins}", color));
             grid.AddChild(Cell($"{r.Wrecks}", color));
-            grid.AddChild(Cell($"{r.Survivor}", color));
+            grid.AddChild(Cell($"{r.Bonus}", color));
             grid.AddChild(Cell($"{r.Total}", color));
         }
         var hint = new Label { Text = "R  race again   ·   Q  quit", HorizontalAlignment = HorizontalAlignment.Center };
@@ -264,9 +297,8 @@ public partial class DerbyHud : CanvasLayer
 
         _speed.Text = $"Speed  {PlayerCar.SpeedKmh:000} KPH";
         _points.Text = $"Race Points  {points:000}";
-        int rank = 1 + Mode.Cars.Count(c => referee.Score(c.Id).Total > points);
-        _rank.Text = $"{rank:00}";
-        _running.Text = $"{Mode.Standings.Remaining}  Still Running";
+        _rank.Text = Mode.HudRank;
+        _running.Text = Mode.HudStatus;
         var t = TimeSpan.FromSeconds(Mode.Time);
         _clock.Text = $"Time  {(int)t.TotalMinutes}:{t.Seconds:00}";
 
@@ -280,19 +312,15 @@ public partial class DerbyHud : CanvasLayer
         _spinTimer -= (float)delta;
         _spin.Visible = _spinTimer > 0f;
 
+        string? warning = _resultsShown ? null : Mode.HudWarning;
+        _warning.Visible = warning != null && (Time.GetTicksMsec() / 350) % 2 == 0;
+        if (warning != null) _warning.Text = warning;
+
         bool showHelp = GetTree().Paused || Mode.Time < 12.0;
         _help.Visible = showHelp;
         _help.Text = Controls.Describe(Controls.Current) + "   ·   Tab standings · F3 next layout";
 
         _standings.Visible = !_resultsShown && Input.IsActionPressed(Controls.Standings);
-        if (_standings.Visible)
-        {
-            var lines = Mode.Cars
-                .OrderByDescending(c => referee.Score(c.Id).Total)
-                .Take(12)
-                .Select((c, i) => $"{i + 1,2}.  #{c.Number,-3} {Mode.DriverName(c),-11} {referee.Score(c.Id).Total,4} pts" +
-                                  (referee.IsWrecked(c.Id) ? "   wrecked" : ""));
-            _standingsText.Text = "STANDINGS (points)\n" + string.Join("\n", lines);
-        }
+        if (_standings.Visible) _standingsText.Text = Mode.StandingsText();
     }
 }
