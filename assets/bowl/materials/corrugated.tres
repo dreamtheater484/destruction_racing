@@ -1,0 +1,16 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/corrugated_iron/corrugated_iron_diff_2k.jpg" id="1_ugee2"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/corrugated_iron/corrugated_iron_nor_gl_2k.jpg" id="2_dkvfh"]
+
+[resource]
+resource_name = "corrugated"
+cull_mode = 2
+albedo_color = Color(0.85, 0.85, 0.85, 1)
+albedo_texture = ExtResource("1_ugee2")
+normal_enabled = true
+normal_texture = ExtResource("2_dkvfh")
+uv1_scale = Vector3(0.35, 0.35, 0.35)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_world_triplanar = true

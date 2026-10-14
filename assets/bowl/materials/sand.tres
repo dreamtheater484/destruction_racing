@@ -1,0 +1,15 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/gravelly_sand/gravelly_sand_diff_2k.jpg" id="1_v8y17"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/gravelly_sand/gravelly_sand_nor_gl_2k.jpg" id="2_ptuqg"]
+
+[resource]
+resource_name = "sand"
+albedo_color = Color(0.95, 0.9, 0.82, 1)
+albedo_texture = ExtResource("1_v8y17")
+normal_enabled = true
+normal_texture = ExtResource("2_ptuqg")
+uv1_scale = Vector3(0.28, 0.28, 0.28)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_world_triplanar = true

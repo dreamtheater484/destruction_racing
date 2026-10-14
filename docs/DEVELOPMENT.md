@@ -16,7 +16,12 @@
 | `src/AI/` | Derby AI (`DerbyBrain`), racing AI (`RaceBrain`), personalities, the PlayerProxy bot |
 | `src/Modes/` | `DerbyMode` (the Bowl), `WreckinMode` (Wreckin' Racing), their metrics and sim harnesses (`DerbySim`, `WreckinSim`) |
 | `src/Cameras/`, `src/UI/` | Camera rig; the event HUD (`EventHud`, shared by derby and race), the damage diagram, the tuning panel |
+| `src/Tools/` | Look-dev scenes: `PhotoStudio` (cars), `BowlLook` and `BowlLookBuilder.gd` (the Bowl), `FogTest` |
+| `src/Audio/` | The granular engine (`GranularEngine`) and `EngineTest` |
 | `src/Tracks/` | Venues and test scenes: `GreyBoxArena` (grey‑box Bowl), `FigureEightTrack` (grey‑box figure‑8) and `TrackPath` (racing line), `DriveTest`, `DdCodeTest` (tactics T1–T5) |
+| `assets/` | Generated cars (`cars/`), shaders (`shaders/`), engine grains (`audio/engines/`), the Bowl's meshes and materials (`bowl/`), CC0 downloads (`third_party/`) |
+| `tools/carsmith/` | The car generator (Python + Blender): SDF bodies, panels, detail parts, templates, race-number digits |
+| `tools/enginesynth/` | The engine sound synthesizer (Python): grains for `GranularEngine` |
 | `scenes/` | Scenes (`boot/`, `derby/`, `race/`, `test/`) |
 | `addons/autobake/` | Editor plugin for unattended lightmap baking |
 | `tools/dev/` | Dev scripts (below) |
@@ -33,6 +38,10 @@
 | `tools/dev/headless.ps1 -Scene res://... [-UserArgs @(...)] [-Filter regex]` | Builds, runs a scene headless as fast as possible (one physics step per frame), prints matching lines |
 | `tools/dev/bake.ps1 -Scene res://...` | Bakes a scene's LightmapGI unattended |
 | `tools/dev/editor.ps1` | Opens the Godot editor |
+| `tools/dev/studio.ps1 -Car kitsune [-Presets studio,outdoor] [-Modes normal,zebra] [-Views q34f,side] [-Damage derby]` | Photo-studio renders of a car into `out/studio` |
+| `tools/dev/gate_m2.ps1` | The M2 art-gate set: all cars clean, zebra and damaged, plus the Bowl, into `out/gate` |
+| `tools/carsmith/build.ps1 <car>` | Generates a car: `assets/cars/<car>/<car>.glb` plus a Blender preview in `out/cars` |
+| `python tools/enginesynth/synth.py assets/audio/engines` | Re-synthesizes the engine grains |
 
 ## Automated gameplay checks
 - **Handling scenarios:** `headless.ps1 -Scene res://scenes/test/DriveTest.tscn -UserArgs '--scenario=accel'` (also `brake`, `circle`, `slalom`, `turnaround`, `keys`).

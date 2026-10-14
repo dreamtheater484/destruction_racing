@@ -1,0 +1,26 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/arena_ground.gdshader" id="1_8hldc"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/brown_mud_dry/brown_mud_dry_diff_2k.jpg" id="2_hm80j"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/brown_mud_dry/brown_mud_dry_nor_gl_2k.jpg" id="3_pfrka"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/brown_mud_dry/brown_mud_dry_arm_2k.jpg" id="4_j2lif"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/gravelly_sand/gravelly_sand_diff_2k.jpg" id="5_bmal6"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/gravelly_sand/gravelly_sand_nor_gl_2k.jpg" id="6_korsq"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/gravelly_sand/gravelly_sand_arm_2k.jpg" id="7_g5lmv"]
+
+[resource]
+resource_name = "ground"
+render_priority = 0
+shader = ExtResource("1_8hldc")
+shader_parameter/sand_albedo = ExtResource("5_bmal6")
+shader_parameter/sand_normal = ExtResource("6_korsq")
+shader_parameter/sand_orm = ExtResource("7_g5lmv")
+shader_parameter/mud_albedo = ExtResource("2_hm80j")
+shader_parameter/mud_normal = ExtResource("3_pfrka")
+shader_parameter/mud_orm = ExtResource("4_j2lif")
+shader_parameter/sand_scale = 0.32
+shader_parameter/mud_scale = 0.22
+shader_parameter/sand_tint = Color(0.78, 0.72, 0.64, 1)
+shader_parameter/mud_tint = Color(0.72, 0.68, 0.62, 1)
+shader_parameter/arena_axes = Vector2(55, 38)
+shader_parameter/rut_strength = 0.6

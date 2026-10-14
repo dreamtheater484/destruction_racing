@@ -390,6 +390,7 @@ Every art gate compares our renders against it.
   - damage layers (paint/primer/metal/rust/soot) from the scrape mask;
   - dirt;
   - crush shapes (blend shapes) plus lattice displacement (sampled by rest position);
+    *M2: the crush shapes became procedural zone crush in the vertex shader (one per DD damage zone), so they need no per-car authoring and work on purchased models too. See `docs/PROGRESS.md`.*
   - crumple normals.
 - **Other materials:** tyres (fictional sidewall lettering), chrome, glass with crack blend, headlight lenses (reflector look), concrete and asphalt with rubbered line and skid marks, dirt with ruts.
 - **Texture sources:** CC0 libraries (Poly Haven, ambientCG), *with your OK*, plus procedural detail.

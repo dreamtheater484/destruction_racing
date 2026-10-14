@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "paint_red"
+albedo_color = Color(0.55, 0.06, 0.05, 1)
+roughness = 0.55
