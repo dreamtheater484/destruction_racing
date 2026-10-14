@@ -53,7 +53,7 @@ public partial class DriveHud : CanvasLayer
         }
         else if (GetTree().Paused && e is InputEventKey { PhysicalKeycode: Key.Q, Pressed: true })
         {
-            GetTree().Quit();
+            DevTools.QuitClean(GetTree(), 0);
         }
         else if (e.IsActionPressed(Controls.NextPreset))
         {

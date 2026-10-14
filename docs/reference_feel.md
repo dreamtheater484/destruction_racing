@@ -68,10 +68,63 @@ The numbers below were measured from PC gameplay videos on YouTube, watched with
 - **Gear top speeds:** 16, 28, 40, 54 and 72 m/s. These only drive the RPM for the HUD and, later, the engine sound.
 - **Saved tunings:** files are versioned, so a tuning saved with older defaults is ignored rather than silently overriding the new ones.
 
-## Still to measure (in M1b and M1c, with crashes in play)
+## M1b: crashes, spins and the derby (calibrated in the grey box)
 
-- Hits to wreck, by zone: front, side, rear.
-- Spin thresholds and how long spins last.
-- Derby pacing with 16 to 20 AI cars.
+Hit energy is measured from pre-solve velocities. Two 1400 kg cars give these energies:
+
+| Closing speed | Car-car energy | Into a wall |
+|---|---|---|
+| 20 km/h (a deliberate ram) | 10.8 kJ | 21.6 kJ |
+| 40 km/h | 43 kJ | 86 kJ |
+
+Probe measurements:
+
+| Hit | Damage |
+|---|---|
+| T-bone at 40 km/h | victim's side −15, attacker's front −18 |
+| Head-on into a wall at 40 km/h | front −33 |
+
+**Damage curve** (`RulesConfig`):
+- Above 25 points, damage from a single hit grows slowly.
+- One hit can never take more than 45 points from a zone, so a front survives at least two of the biggest crashes.
+- Repeated contact within 0.8 s deals 30% (grinding in piles).
+- Sliding contact above 20 km/h grinds the touching zone (squeezes).
+- Hits on a destroyed side or rear pass half their damage on to the engine.
+
+**Spins:** a 12 km/h tap on the rear quarter spins an unprepared car 90–180° (DD Code T2, 10/10). The spin assist and a 0.8 s post-hit grip loss do this calibration.
+
+**DD2 Fast Steer:** at derby speeds it loosens the rear and adds yaw. A last-moment turn in a head-on then takes the hit on the side: your front stays untouched while the other car loses its front (T5, 10/10).
+
+**DD Code tactics** (`DdCodeTest`, 10 trials each):
+
+| Tactic | Result |
+|---|---|
+| T1 brake-check | 100% |
+| T2 rear-corner turn-in | 100% |
+| T3 ram into a braking zone | 100% |
+| T4 squeeze into a wall or wreckage | 90% |
+| T5 last-moment turn | 100% |
+
+**Derby pacing** (sim harness, PlayerProxy "average fan", 30 derbies): all plan §17.4 derby targets are met.
+
+| Metric | Result | Target |
+|---|---|---|
+| First contact | 1.7 s (DD1: ~2.5 s to the centre pile-up) | < 3 s |
+| Longest idle stretch with ≥ 5 cars (median) | 6.8 s | ≤ 8 s |
+| Derby length (median) | 145 s | 120–240 s |
+| Player survival (median) | 100 s | 60–150 s |
+| Player hits per minute | 21 | ≥ 8 |
+| Points from deliberate hits | 71% (median per derby; 61% over all points) | ≥ 70% |
+| Player wrecked within 30 s / 60 s | 3% / 10% | ≤ 5% / ≤ 15% |
+| Player wrecked by 3+ cars at once | 0% | ≤ 10% |
+| Player stuck | 3.4% | ≤ 5% |
+| Derbies that end | 100% | 100% |
+
+- The bot wins 17% of derbies and finishes 8.8th on average out of 20.
+- The latest report is in `out/sims/`.
+
+## Still to measure (in M1c and later)
+
+- Wreckin' Racing pacing: spins per lap, crossover incidents, leader spins.
 - DD2 rollovers and flying parts.
 - Pit-stop timing.

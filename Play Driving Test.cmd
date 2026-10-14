@@ -16,4 +16,4 @@ if not exist ".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_m
 )
 echo Starting the game...
 rem "--path ." (not "%~dp0"): a trailing backslash before a quote breaks the argument.
-start "" ".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64.exe" --path . --log-file "out\last_run.log"
+start "" ".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64.exe" --path . --log-file "out\last_run.log" -- --scene=res://scenes/test/DriveTest.tscn

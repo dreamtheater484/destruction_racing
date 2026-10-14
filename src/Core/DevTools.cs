@@ -63,6 +63,16 @@ public partial class DevTools : Node
         }
     }
 
+    /// <summary>
+    /// Quits after flushing pending .NET finalizers, so no managed wrapper is disposed while the engine shuts down.
+    /// </summary>
+    public static void QuitClean(SceneTree tree, int exitCode)
+    {
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
+        tree.Quit(exitCode);
+    }
+
     private void SaveCapture()
     {
         var image = GetViewport().GetTexture().GetImage();

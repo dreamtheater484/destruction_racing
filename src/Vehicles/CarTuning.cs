@@ -64,12 +64,29 @@ public sealed class CarTuning
     public float MaxSteerHighSpeed = 11f;
     public float SteerSpeedForMin = 36f;        // m/s at which max steer reaches the high-speed value
     public float FastSteerLockScale = 1.35f;
+    /// <summary>
+    /// DD2 Fast Steer at derby speeds: while held with steering, the rear loosens and a yaw torque helps the car
+    /// pivot (sharp turns, the "turn at the last moment" of the DD Code). Fades out above FastSteerMaxSpeed.
+    /// </summary>
+    public float FastSteerRearGrip = 0.6f;
+    public float FastSteerYawTorque = 9_000f;   // N·m at full steer
+    public float FastSteerMaxSpeed = 22f;       // m/s
     public float CounterSteerAssist = 0.35f;    // 0 = off (Purist), 0.35 = Low, 0.7 = High
 
     // DD1 turn-around (Space + gas/brake at low speed)
     public float TurnAroundTorque = 16_000f;
     public float TurnAroundMaxSpeed = 9f;
     public float TurnAroundRearGrip = 0.3f;
+
+    // Hits and damage (plan §6.1, §15.3)
+    /// <summary>Extra yaw from a hit's angular impulse (rear-quarter weighted). 0 = raw physics (calibration).</summary>
+    public float SpinAssist = 1.5f;
+    public float PostHitGripLossTime = 0.8f;    // s, decays linearly
+    public float PostHitRearGrip = 0.2f;        // grip multiplier at the moment of a full-strength hit
+    public float PostHitFrontGrip = 0.6f;
+    public float MaxDamagePullDeg = 4f;         // steering pull with one side fully damaged
+    public float BothSidesLockScale = 0.35f;    // steering lock left when both sides are destroyed
+    public float RearDamagePowerLoss = 0.3f;    // acceleration and top-speed loss at 0 rear health
 
     // Safety
     public float MaxAngularSpeed = 14f;         // rad/s

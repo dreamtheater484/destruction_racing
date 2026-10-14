@@ -12,10 +12,14 @@ public enum RaceEndRule
 /// <summary>Tunables for spin detection and attribution (plan §5.3).</summary>
 public sealed record SpinTuning
 {
-    /// <summary>Minimum hit energy (J) for a contact to count as a hit.</summary>
-    public float HitMinEnergy { get; init; } = 4_000f;
-    /// <summary>Hit energy needed to take over attribution while the victim is already spinning.</summary>
-    public float StealMinEnergy { get; init; } = 12_000f;
+    /// <summary>
+    /// Minimum hit energy (J) for a contact to open a spin window and count as a hit for the rules. DD scores spins
+    /// from taps ("tap the rear, watch it spin"): a 12 km/h side tap between two 1400 kg cars is ~4 kJ, so the
+    /// threshold sits at ~11 km/h closing. (The engagement metrics use their own, higher "deliberate hit" bar.)
+    /// </summary>
+    public float HitMinEnergy { get; init; } = 3_000f;
+    /// <summary>Hit energy needed to take over attribution while the victim is already spinning (~30 km/h closing).</summary>
+    public float StealMinEnergy { get; init; } = 25_000f;
     /// <summary>Max seconds between the hit and the start of rotation.</summary>
     public float AttributionWindow { get; init; } = 1.0f;
     /// <summary>Yaw rate (deg/s) above which the victim counts as rotating.</summary>
@@ -72,13 +76,46 @@ public sealed record RulesConfig
 
     // Damage
     public float FrontToughness { get; init; } = 1.0f;
-    public float SideToughness { get; init; } = 1.2f;
+    public float SideToughness { get; init; } = 1.5f;
     public float RearToughness { get; init; } = 2.5f;
-    /// <summary>Energy (J) below which a hit causes no damage.</summary>
-    public float DamageEnergyThreshold { get; init; } = 3_000f;
-    /// <summary>Damage scale: health points per J^0.8 above the threshold.</summary>
-    public float DamageScale { get; init; } = 0.012f;
+    /// <summary>Energy (J) below which a hit causes no damage (~15 km/h closing car-car, ~10 km/h into a wall).</summary>
+    public float DamageEnergyThreshold { get; init; } = 6_000f;
+    /// <summary>
+    /// Repeated contact between the same two bodies within this window is grinding (piles, squeezes): it deals only
+    /// GrindDamageScale of the damage, so pile-ups don't strip every car in seconds.
+    /// </summary>
+    public float GrindWindow { get; init; } = 0.8f;
+    public float GrindDamageScale { get; init; } = 0.3f;
+    /// <summary>
+    /// Calibration ✱: damage starts at this share at GO and ramps up to full over OpeningCrunchTime seconds, so the
+    /// opening crunch and first minute hurt everyone but rarely eliminate anyone (frustration targets: player
+    /// wrecked in 30 s ≤ 5%, in 60 s ≤ 15%).
+    /// </summary>
+    public float OpeningCrunchDamageScale { get; init; } = 0.6f;
+    public float OpeningCrunchTime { get; init; } = 60f;
+    /// <summary>
+    /// Scraping (DD Code T4): sustained contact sliding faster than ScrapeMinSpeed (m/s) grinds the touching zone
+    /// at ScrapeRate health per second per m/s above it.
+    /// </summary>
+    public float ScrapeMinSpeed { get; init; } = 5.5f;
+    public float ScrapeRate { get; init; } = 1.2f;
+    /// <summary>Damage beyond a destroyed side or rear passes this share on to the front (so wrecks get finished off).</summary>
+    public float OverflowToFront { get; init; } = 0.5f;
+    /// <summary>
+    /// Damage scale: health points per J^0.8 above the threshold. Tuned so a 40 km/h closing ram costs a front
+    /// ~22 of 100 and an 80 km/h one ~30 after the knee (✱ A14, tuned with the derby sims: several solid front hits to wreck).
+    /// </summary>
+    public float DamageScale { get; init; } = 0.0045f;
     public float DamageExponent { get; init; } = 0.8f;
+    /// <summary>Above this much damage from one hit, extra damage is compressed (DamageKneeSlope) …</summary>
+    public float DamageKnee { get; init; } = 25f;
+    public float DamageKneeSlope { get; init; } = 0.35f;
+    /// <summary>… and one hit never takes more than this from a zone, so no single crash wrecks a car (DD feel).</summary>
+    public float MaxDamagePerHit { get; init; } = 45f;
+    /// <summary>Share of a corner hit's zone damage that also goes to the nearest wheel.</summary>
+    public float WheelDamageShare { get; init; } = 0.5f;
+    /// <summary>Below this rear health, rear wheels take double damage (and can come off, Standard).</summary>
+    public float RearCriticalHealth { get; init; } = 25f;
     public float WreckAttributionWindow { get; init; } = 5f;
     /// <summary>A car that cannot move for this long counts as wrecked (✱ A9).</summary>
     public float ImmobilisedWreckTime { get; init; } = 10f;

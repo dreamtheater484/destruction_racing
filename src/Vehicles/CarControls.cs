@@ -12,9 +12,11 @@ public struct CarControls
     public bool FastSteer;
     /// <summary>DD1 turn-around: Space plus gas or brake spins the car round at low speed.</summary>
     public bool TurnAround;
+    /// <summary>Brake without DD2's brake-to-reverse at a standstill (parked, countdown, wrecked).</summary>
+    public bool Hold;
 
     public static CarControls Idle => new() { Brake = 0f };
-    public static CarControls Parked => new() { Brake = 1f };
+    public static CarControls Parked => new() { Brake = 1f, Hold = true };
 }
 
 /// <summary>Anything that drives a car: the player, the AI, a scenario autopilot.</summary>

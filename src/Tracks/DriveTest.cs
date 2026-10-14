@@ -204,6 +204,6 @@ public partial class DriveTest : Node3D
         foreach (var (k, v) in _metrics) if (k != "yaw0" && k != "brake_x") parts.Add($"{k}={v:0.##}");
         GD.Print($"[Scenario] {_scenario}: {string.Join("  ", parts)}");
         _scenario = "";
-        GetTree().Quit();
+        DevTools.QuitClean(GetTree(), 0);
     }
 }

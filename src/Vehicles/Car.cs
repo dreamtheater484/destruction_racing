@@ -1,12 +1,14 @@
 using System;
+using DestructionRacing.Rules;
 using Godot;
 
 namespace DestructionRacing.Vehicles;
 
 /// <summary>
 /// Arcade raycast vehicle on a Jolt rigid body (plan §15.3): spring-damper suspension per wheel,
-/// slip-angle tyre curve with a friction circle, power-limited drive, DD-style reverse and turn-around.
-/// The grey-box visuals are built in code; the final car model replaces them in M2.
+/// slip-angle tyre curve with a friction ellipse, power-limited drive, DD-style reverse and turn-around.
+/// Mechanical damage (plan §6.1) comes from the referee's <see cref="DamageState"/>; spin assist and post-hit
+/// grip loss reproduce DD's "tap the rear, watch it spin". The grey-box visuals are replaced in M2.
 /// </summary>
 public partial class Car : RigidBody3D
 {
@@ -17,8 +19,27 @@ public partial class Car : RigidBody3D
     [Export] public Color RoofColor { get; set; } = new(0.95f, 0.80f, 0.10f);
     [Export] public int Number { get; set; } = 7;
 
+    /// <summary>Car-local half extents of the body box (forward = -Z), used for damage zones.</summary>
+    public static readonly Vector3 HalfExtents = new(0.9f, 0.35f, 2.3f);
+
+    /// <summary>Prints every hit reaction (scenario debugging).</summary>
+    public static bool DebugHits;
+
     public CarTuning Tuning { get; private set; } = new();
     public ICarInput? Driver { get; set; }
+
+    /// <summary>Unique id in the event (the referee's car id).</summary>
+    public int Id { get; set; }
+    /// <summary>Health per zone and wheel, owned by the referee. Null = indestructible (driving test).</summary>
+    public DamageState? Damage { get; set; }
+    public bool IsWrecked => Damage?.IsWrecked ?? false;
+    /// <summary>Holds the car on the brakes and ignores the driver (countdown).</summary>
+    public bool InputLocked { get; set; }
+
+    // Pre-solve state, cached by the ImpactSystem before every physics step (plan §5.3).
+    public Vector3 PreLinearVelocity;
+    public Vector3 PreAngularVelocity;
+    public Vector3 PreCenterOfMass;
 
     // Telemetry for the HUD, cameras and debug panel.
     public float ForwardSpeed { get; private set; }
@@ -40,7 +61,17 @@ public partial class Car : RigidBody3D
 
     private readonly Wheel[] _wheels = new Wheel[4];
     private Godot.Collections.Array<Rid> _exclude = new();
+    // Reused every tick: allocating RefCounted query objects per wheel per tick floods the .NET finalizer.
+    private PhysicsRayQueryParameters3D _rayQuery = null!;
     private float _upsideDownTime;
+    private float _gripLoss;        // 0..1, decays after a hit
+    private float _pullDeg;         // smoothed steering pull from side damage
+    private float _stutterTimer;
+    private bool _wreckShown;
+    private StandardMaterial3D _paint = null!;
+    private readonly System.Collections.Generic.List<StandardMaterial3D> _lights = new();
+    private CpuParticles3D _smoke = null!;
+    private CpuParticles3D _fire = null!;
 
     private sealed class Wheel
     {
@@ -56,6 +87,7 @@ public partial class Car : RigidBody3D
         public float SlipAngle;
         public float Spin;
         public Node3D Visual = null!;
+        public Rules.Wheel Index;
     }
 
     public override void _Ready()
@@ -64,16 +96,22 @@ public partial class Car : RigidBody3D
         CollisionMask = WorldLayer | CarLayer;
         ContinuousCd = true;
         CanSleep = false;
+        // Contacts feed the ImpactSystem. Car-on-car friction is low so cars glance off each other, as in DD.
+        ContactMonitor = true;
+        MaxContactsReported = 12;
+        PhysicsMaterialOverride = new PhysicsMaterial { Friction = 0.35f, Bounce = 0.12f };
         // Drag and rolling resistance are modelled explicitly; the engine's default damping would act as a hidden brake.
         LinearDampMode = DampMode.Replace;
         LinearDamp = 0f;
         AngularDampMode = DampMode.Replace;
         AngularDamp = 0.6f;
         _exclude = new Godot.Collections.Array<Rid> { GetRid() };
+        _rayQuery = new PhysicsRayQueryParameters3D { CollisionMask = WorldLayer, Exclude = _exclude };
 
         BuildBody();
-        for (int i = 0; i < 4; i++) _wheels[i] = new Wheel { Front = i < 2, Left = i % 2 == 0 };
+        for (int i = 0; i < 4; i++) _wheels[i] = new Wheel { Front = i < 2, Left = i % 2 == 0, Index = (Rules.Wheel)i };
         BuildWheelVisuals();
+        BuildDamageEffects();
         ApplyTuning(Tuning);
     }
 
@@ -121,7 +159,27 @@ public partial class Car : RigidBody3D
         Vector3 v = LinearVelocity;
 
         var c = Driver?.GetControls(this, dt) ?? CarControls.Parked;
+        if (InputLocked) c = CarControls.Parked;
+        // A wrecked car's engine is dead: it coasts to a stop and stays as an obstacle.
+        if (IsWrecked) c = new CarControls { Brake = 0.35f, Hold = true };
         LastControls = c;
+
+        // Mechanical damage (plan §6.1).
+        float frontH = Health(DamageZone.Front), rearH = Health(DamageZone.Rear);
+        float leftH = Health(DamageZone.Left), rightH = Health(DamageZone.Right);
+        float powerFactor = (0.55f + 0.45f * frontH) * (1f - t.RearDamagePowerLoss * (1f - rearH));
+        if (frontH < 0.35f && !IsWrecked)
+        {
+            // Critical front: the engine stutters.
+            _stutterTimer -= dt;
+            if (_stutterTimer < -0.25f) _stutterTimer = (float)GD.RandRange(0.4, 1.6) * (0.3f + frontH * 2f);
+            if (_stutterTimer < 0f) powerFactor *= 0.25f;
+        }
+        // Side damage pulls toward the damaged side; both sides damaged → the car barely turns.
+        float pullTarget = t.MaxDamagePullDeg * ((1f - rightH) - (1f - leftH));
+        _pullDeg = Mathf.MoveToward(_pullDeg, pullTarget, 6f * dt);
+        float lockScale = 1f - (1f - t.BothSidesLockScale) * MathF.Min(1f - leftH, 1f - rightH);
+        _gripLoss = MathF.Max(0f, _gripLoss - dt / MathF.Max(t.PostHitGripLossTime, 0.01f));
 
         ForwardSpeed = v.Dot(fwd);
         float lateralSpeed = v.Dot(right);
@@ -129,8 +187,8 @@ public partial class Car : RigidBody3D
 
         // Steering angle: speed-sensitive lock, Fast Steer, counter-steer assist.
         float speedT = Mathf.Clamp(Mathf.Abs(ForwardSpeed) / t.SteerSpeedForMin, 0f, 1f);
-        float maxSteer = Mathf.Lerp(t.MaxSteerLowSpeed, t.MaxSteerHighSpeed, speedT) * (c.FastSteer ? t.FastSteerLockScale : 1f);
-        float steerDeg = c.Steer * maxSteer;
+        float maxSteer = Mathf.Lerp(t.MaxSteerLowSpeed, t.MaxSteerHighSpeed, speedT) * (c.FastSteer ? t.FastSteerLockScale : 1f) * lockScale;
+        float steerDeg = c.Steer * maxSteer + _pullDeg;
         if (t.CounterSteerAssist > 0f && ForwardSpeed > 4f && Mathf.Abs(BodySlipDeg) > 4f)
             steerDeg += t.CounterSteerAssist * BodySlipDeg;
         steerDeg = Mathf.Clamp(steerDeg, -maxSteer * 1.25f, maxSteer * 1.25f);
@@ -146,7 +204,7 @@ public partial class Car : RigidBody3D
             if (ForwardSpeed > 1.5f) brake = MathF.Max(brake, 1f);
             else reversing = true;
         }
-        else if (c.Brake > 0.1f && ForwardSpeed < 0.8f && c.Throttle < 0.1f)
+        else if (c.Brake > 0.1f && ForwardSpeed < 0.8f && c.Throttle < 0.1f && !c.Hold)
         {
             reversing = true;
         }
@@ -161,9 +219,14 @@ public partial class Car : RigidBody3D
             float speed = MathF.Max(MathF.Abs(ForwardSpeed), 1f);
             drive = c.Throttle * MathF.Min(t.MaxDriveForce, t.EnginePower / speed);
         }
+        drive *= powerFactor;
 
         TurningAround = c.TurnAround && MathF.Abs(ForwardSpeed) < t.TurnAroundMaxSpeed
                         && (c.Throttle > 0.1f || c.Brake > 0.1f || c.Reverse);
+        // DD2 Fast Steer pivot, strongest at low speed and gone by FastSteerMaxSpeed.
+        float fastPivot = c.FastSteer && MathF.Abs(c.Steer) > 0.3f && ForwardSpeed > 2f
+            ? MathF.Abs(c.Steer) * Mathf.Clamp(1.2f - MathF.Abs(ForwardSpeed) / t.FastSteerMaxSpeed, 0f, 1f)
+            : 0f;
 
         // Pass 1: suspension raycasts.
         var space = GetWorld3D().DirectSpaceState;
@@ -171,9 +234,17 @@ public partial class Car : RigidBody3D
         int grounded = 0, drivenGrounded = 0;
         foreach (var w in _wheels)
         {
+            if (Damage != null && Damage.IsWheelLost(w.Index))
+            {
+                w.Grounded = false;
+                w.Compression = 0f;
+                w.Load = 0f;
+                continue;
+            }
             Vector3 mountWorld = xf * w.Mount;
-            var query = PhysicsRayQueryParameters3D.Create(mountWorld, mountWorld - up * rayLength, WorldLayer, _exclude);
-            var hit = space.IntersectRay(query);
+            _rayQuery.From = mountWorld;
+            _rayQuery.To = mountWorld - up * rayLength;
+            var hit = space.IntersectRay(_rayQuery);
             if (hit.Count > 0)
             {
                 w.Grounded = true;
@@ -226,6 +297,11 @@ public partial class Car : RigidBody3D
 
             float grip = t.SurfaceGrip * (w.Front ? t.FrontGrip : t.RearGrip);
             if (!w.Front && TurningAround) grip *= t.TurnAroundRearGrip;
+            if (!w.Front && fastPivot > 0f) grip *= Mathf.Lerp(1f, t.FastSteerRearGrip, fastPivot);
+            // Post-hit grip loss lets a hit car keep rotating (calibration, plan §3).
+            grip *= Mathf.Lerp(1f, w.Front ? t.PostHitFrontGrip : t.PostHitRearGrip, _gripLoss);
+            // A damaged wheel wobbles and grips less.
+            if (Damage != null) grip *= 0.6f + 0.4f * Damage.WheelHealth(w.Index) / DamageState.MaxHealth;
             float maxForce = grip * load;
             float maxLong = maxForce * t.LongitudinalGrip;
 
@@ -274,6 +350,9 @@ public partial class Car : RigidBody3D
         Vector3 flat = v - up * v.Dot(up);
         ApplyCentralForce(-flat * flat.Length() * t.DragCoefficient - flat * t.RollingResistance);
 
+        if (fastPivot > 0f && grounded >= 3)
+            ApplyTorque(up * (-MathF.Sign(c.Steer) * fastPivot * t.FastSteerYawTorque));
+
         // DD1 turn-around: yaw the car round at low speed.
         if (TurningAround && grounded >= 3)
         {
@@ -290,6 +369,38 @@ public partial class Car : RigidBody3D
     }
 
     private bool IsDriven(Wheel w) => Tuning.RearWheelDrive ? !w.Front : w.Front;
+
+    /// <summary>Zone health as 0..1 (1 when the car has no damage model).</summary>
+    public float Health(DamageZone zone) => Damage == null ? 1f : Damage.Health(zone) / DamageState.MaxHealth;
+
+    /// <summary>
+    /// Calibration on car-car hits (plan §15.3): extra yaw from the hit's angular impulse, strongest on the
+    /// rear quarter, plus a short loss of grip, so a rear-quarter tap spins the car as in DD (~0.5 s).
+    /// </summary>
+    /// <param name="point">World contact point.</param>
+    /// <param name="impulse">Estimated impulse on this car (N·s).</param>
+    public void ApplyHitReaction(Vector3 point, Vector3 impulse)
+    {
+        var t = Tuning;
+        var xf = GlobalTransform;
+        Vector3 local = xf.AffineInverse() * point;
+        float halfLength = HalfExtents.Z;
+        // Lever weighting: rear half up to 1 (from the centre to the rear axle and beyond), front quarter up to 0.25.
+        bool rearHalf = local.Z > 0f;
+        float w = rearHalf
+            ? Mathf.Clamp(local.Z / (halfLength - 0.4f), 0f, 1f)
+            : 0.25f * Mathf.Clamp((-local.Z - 0.6f) / (halfLength - 0.6f), 0f, 1f);
+        Vector3 r = point - xf * CenterOfMass;
+        float yawImpulse = r.Cross(impulse).Dot(Vector3.Up);
+        if (DebugHits)
+            GD.Print($"[HitReaction] car#{Id} local={local} w={w:0.00} |J|={impulse.Length():0} yawJ={yawImpulse:0} " +
+                     $"ω before={Mathf.RadToDeg(AngularVelocity.Y):0}°/s assist={Mathf.RadToDeg(yawImpulse / Inertia.Y * t.SpinAssist * w):0}°/s");
+        if (w <= 0f) return;
+        AngularVelocity += Vector3.Up * (yawImpulse / Inertia.Y * t.SpinAssist * w);
+        // Saturates on taps (a 12 km/h side tap is ~2.5 kN·s): DD spins cars from light contact.
+        float strength = Mathf.Clamp(impulse.Length() / 2500f, 0f, 1f);
+        _gripLoss = MathF.Max(_gripLoss, strength * (rearHalf ? 1f : 0.4f));
+    }
 
     /// <summary>Pacejka-lite lateral curve: rises to a peak, then falls off (slides stay controllable).</summary>
     private static float TyreCurve(float slip, float b, float c) => MathF.Sin(c * MathF.Atan(b * slip));
@@ -337,11 +448,14 @@ public partial class Car : RigidBody3D
         });
 
         var paint = new StandardMaterial3D { AlbedoColor = PaintColor, Metallic = 0.35f, Roughness = 0.32f, Clearcoat = 0.8f };
+        _paint = paint;
         var roof = new StandardMaterial3D { AlbedoColor = RoofColor, Roughness = 0.4f };
         var glass = new StandardMaterial3D { AlbedoColor = new Color(0.05f, 0.07f, 0.09f), Metallic = 0.6f, Roughness = 0.08f };
         var trim = new StandardMaterial3D { AlbedoColor = new Color(0.18f, 0.18f, 0.18f), Roughness = 0.6f };
         var headlight = new StandardMaterial3D { AlbedoColor = new Color(1f, 0.97f, 0.85f), EmissionEnabled = true, Emission = new Color(1f, 0.95f, 0.8f), EmissionEnergyMultiplier = 2f };
         var taillight = new StandardMaterial3D { AlbedoColor = new Color(0.6f, 0.02f, 0.02f), EmissionEnabled = true, Emission = new Color(0.9f, 0.05f, 0.03f), EmissionEnergyMultiplier = 1.5f };
+        _lights.Add(headlight);
+        _lights.Add(taillight);
 
         AddBox(new Vector3(1.8f, 0.7f, 4.6f), Vector3.Zero, paint);
         AddBox(new Vector3(1.52f, 0.5f, 2.2f), new Vector3(0f, 0.6f, 0.25f), glass);
@@ -358,6 +472,93 @@ public partial class Car : RigidBody3D
         AddNumber(new Vector3(-0.91f, 0.02f, 0.1f), new Vector3(0f, -90f, 0f));
         AddNumber(new Vector3(0.91f, 0.02f, 0.1f), new Vector3(0f, 90f, 0f));
         AddNumber(new Vector3(0f, 0.92f, 0.28f), new Vector3(-90f, 0f, 0f));
+    }
+
+    /// <summary>Grey-box damage readability (plan §6.1): steam → grey → black smoke from the bonnet, then fire.</summary>
+    private void BuildDamageEffects()
+    {
+        _smoke = new CpuParticles3D
+        {
+            Emitting = false,
+            Amount = 28,
+            Lifetime = 1.6f,
+            LocalCoords = false,
+            Position = new Vector3(0f, 0.45f, -1.7f),
+            Direction = Vector3.Up,
+            Spread = 18f,
+            Gravity = new Vector3(0f, 1.2f, 0f),
+            InitialVelocityMin = 1.2f,
+            InitialVelocityMax = 2.4f,
+            ScaleAmountMin = 0.6f,
+            ScaleAmountMax = 1.4f,
+            EmissionShape = CpuParticles3D.EmissionShapeEnum.Sphere,
+            EmissionSphereRadius = 0.3f,
+            Mesh = new SphereMesh
+            {
+                Radius = 0.35f, Height = 0.7f, RadialSegments = 8, Rings = 4,
+                Material = new StandardMaterial3D
+                {
+                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                    VertexColorUseAsAlbedo = true,
+                },
+            },
+        };
+        var curve = new Curve();
+        curve.AddPoint(new Vector2(0f, 0.4f));
+        curve.AddPoint(new Vector2(1f, 2.2f));
+        _smoke.ScaleAmountCurve = curve;
+        AddChild(_smoke);
+
+        _fire = new CpuParticles3D
+        {
+            Emitting = false,
+            Amount = 24,
+            Lifetime = 0.5f,
+            LocalCoords = false,
+            Position = new Vector3(0f, 0.4f, -1.8f),
+            Direction = Vector3.Up,
+            Spread = 25f,
+            Gravity = new Vector3(0f, 3f, 0f),
+            InitialVelocityMin = 1.5f,
+            InitialVelocityMax = 3f,
+            EmissionShape = CpuParticles3D.EmissionShapeEnum.Sphere,
+            EmissionSphereRadius = 0.35f,
+            Color = new Color(1f, 0.55f, 0.1f),
+            Mesh = new SphereMesh
+            {
+                Radius = 0.18f, Height = 0.36f, RadialSegments = 6, Rings = 3,
+                Material = new StandardMaterial3D
+                {
+                    ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+                    VertexColorUseAsAlbedo = true,
+                    EmissionEnabled = true,
+                    Emission = new Color(1f, 0.45f, 0.05f),
+                    EmissionEnergyMultiplier = 3f,
+                },
+            },
+        };
+        AddChild(_fire);
+    }
+
+    public override void _Process(double delta)
+    {
+        if (Damage == null) return;
+        float front = Health(DamageZone.Front);
+        bool wrecked = IsWrecked;
+        _smoke.Emitting = front < 0.6f || wrecked;
+        _smoke.Color = wrecked || front < 0.15f ? new Color(0.08f, 0.08f, 0.08f, 0.75f)
+            : front < 0.35f ? new Color(0.45f, 0.45f, 0.45f, 0.6f)
+            : new Color(0.95f, 0.95f, 0.95f, 0.45f);
+        _fire.Emitting = front < 0.08f;
+        if (wrecked && !_wreckShown)
+        {
+            _wreckShown = true;
+            _paint.AlbedoColor = PaintColor.Darkened(0.65f);
+            _paint.Clearcoat = 0f;
+            _paint.Roughness = 0.8f;
+            foreach (var light in _lights) light.EmissionEnabled = false;
+        }
     }
 
     private void AddBox(Vector3 size, Vector3 position, Material material) =>
@@ -409,6 +610,7 @@ public partial class Car : RigidBody3D
         var t = Tuning;
         foreach (var w in _wheels)
         {
+            w.Visual.Visible = Damage == null || !Damage.IsWheelLost(w.Index);
             float extension = t.RestLength - w.Compression;
             w.Visual.Position = w.Mount + Vector3.Down * extension;
             w.Visual.Rotation = new Vector3(0f, w.Front ? -steerRad : 0f, 0f);

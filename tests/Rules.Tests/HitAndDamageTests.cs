@@ -94,6 +94,47 @@ public class DamageTests
         Assert.Equal(0f, centre.SecondaryWeight);
     }
 
+    private static readonly Vector3 HalfExtents = new(0.9f, 0.35f, 2.3f);
+
+    [Fact]
+    public void Flat_face_hits_go_to_that_face()
+    {
+        // T-bone: the middle of the left flank, pushed from the left.
+        var flank = DamageMath.ZoneFromContact(new Vector3(-0.9f, 0f, 0.2f), new Vector3(-1f, 0f, 0f), HalfExtents);
+        Assert.Equal(DamageZone.Left, flank.Primary);
+        Assert.Equal(0f, flank.SecondaryWeight, 3);
+        // The attacker's front face.
+        var nose = DamageMath.ZoneFromContact(new Vector3(0.1f, 0f, -2.3f), new Vector3(0f, 0f, -1f), HalfExtents);
+        Assert.Equal(DamageZone.Front, nose.Primary);
+    }
+
+    [Fact]
+    public void Corner_hits_split_by_push_direction()
+    {
+        var corner = new Vector3(0.88f, 0f, -2.25f);
+        // Pushed straight back: front damage.
+        var straight = DamageMath.ZoneFromContact(corner, new Vector3(0f, 0f, -1f), HalfExtents);
+        Assert.Equal(DamageZone.Front, straight.Primary);
+        Assert.True(straight.SecondaryWeight < 0.05f);
+        // Pushed sideways: side damage.
+        var sideways = DamageMath.ZoneFromContact(corner, new Vector3(1f, 0f, 0f), HalfExtents);
+        Assert.Equal(DamageZone.Right, sideways.Primary);
+        Assert.Equal(DamageZone.Front, sideways.Secondary);
+        // Diagonal: an even split.
+        var diagonal = DamageMath.ZoneFromContact(corner, Vector3.Normalize(new Vector3(1f, 0f, -1f)), HalfExtents);
+        Assert.Equal(0.5f, diagonal.SecondaryWeight, 2);
+    }
+
+    [Theory]
+    [InlineData(-0.85f, -1.4f, Wheel.FrontLeft)]
+    [InlineData(0.85f, 1.2f, Wheel.RearRight)]
+    public void Corner_hits_reach_the_nearest_wheel(float x, float z, Wheel expected) =>
+        Assert.Equal(expected, DamageMath.NearestWheel(new Vector3(x, 0f, z), HalfExtents, -1.35f, 1.35f));
+
+    [Fact]
+    public void Middle_hits_reach_no_wheel() =>
+        Assert.Null(DamageMath.NearestWheel(new Vector3(0.88f, 0f, 0f), HalfExtents, -1.35f, 1.35f));
+
     [Fact]
     public void Rear_is_much_tougher_than_front()
     {
@@ -125,13 +166,29 @@ public class DamageTests
     }
 
     [Fact]
-    public void Destroyed_rear_alone_does_not_wreck()
+    public void Destroyed_rear_alone_does_not_wreck_but_further_hits_reach_the_engine()
     {
         var state = new DamageState();
         var rear = new ZoneSplit(DamageZone.Rear, DamageZone.Left, 0f);
-        for (int i = 0; i < 500; i++) state.ApplyHit(Std, 150_000f, rear, 1f);
+        int hits = 0;
+        while (state.Health(DamageZone.Rear) > 0f && hits++ < 500) state.ApplyHit(Std, 150_000f, rear, 1f);
         Assert.Equal(0f, state.Health(DamageZone.Rear));
         Assert.False(state.IsWrecked);
+
+        float front = state.Health(DamageZone.Front);
+        state.ApplyHit(Std, 150_000f, rear, 1f);
+        Assert.True(state.Health(DamageZone.Front) < front);
+    }
+
+    [Fact]
+    public void No_single_hit_takes_more_than_the_cap()
+    {
+        float huge = DamageMath.DamageFor(Std, 5_000_000f, DamageZone.Front, 1f);
+        Assert.True(huge <= Std.MaxDamagePerHit + 0.01f);
+        var state = new DamageState();
+        state.ApplyHit(Std, 5_000_000f, new ZoneSplit(DamageZone.Front, DamageZone.Left, 0f), 1f);
+        state.ApplyHit(Std, 5_000_000f, new ZoneSplit(DamageZone.Front, DamageZone.Left, 0f), 1f);
+        Assert.False(state.IsWrecked); // it takes at least three of the biggest crashes
     }
 
     [Fact]

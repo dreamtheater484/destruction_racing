@@ -99,7 +99,7 @@ Unity's higher rendering ceiling would not survive a much slower, less verifiabl
    - **Presentation** (always on): graphics, VFX, audio, cameras, replays, UI.
    - **Rule‑neutral quality of life** (always on): rebinding, restart, Time Trial ghost and medals, settings.
    - **Gameplay‑affecting assists** (on by default, **all off in the "Purist" preset**): keyboard counter‑steer assist, light traction control, pack‑density catch‑up for back‑markers, impact slow‑mo, optional handbrake binding.
-   - **Calibration** (always on, not an addition): `SPIN_ASSIST` and post‑hit grip loss exist only to reproduce DD's "tap the rear, watch it spin" behaviour, which raw physics under‑delivers. They are tuned to the reference feel sheet.
+   - **Calibration** (always on, not an addition): `SPIN_ASSIST` and post‑hit grip loss exist only to reproduce DD's "tap the rear, watch it spin" behaviour, which raw physics under‑delivers. They are tuned to the reference feel sheet. The opening‑crunch damage scale (A19) is calibration too.
    - **Deliberate changes that you asked for:** the mixed EU/JP/US car roster with differing stats (K5).
 4. **No copied IP.** No "Destruction Derby" name or logo, no original assets or names (tracks, drivers, sponsors), no real car brands, logos or model names. Tracks are original designs that follow the same layout *types*.
 
@@ -892,7 +892,12 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | ~~A12~~ | DD2 pit limits | **Resolved:** Wreckin' once, Stock Car as often as you like, 5 s each | DD2 PC manual |
 | A13 | DD2 flip righting | Auto‑righted after a time penalty | DD2 PC manual OCR shows "IF YOUR CAR FLIPS" plus a penalty; the exact rule is not legible |
 | A15 | Survivor bonus in the Bowl | DD1 10 / DD2 25 | Fandom only (DD1); not in either PC manual |
-| A14 | Zone hit points / damage curve | Tuned to the reference feel sheet | Not documented |
+| A14 | Zone hit points / damage curve | `k·(E−6 kJ)^0.8`, compressed above 25 and capped at 45 per hit and zone (a front survives at least 2 of the biggest crashes); tuned with the M1b derby sims (`RulesConfig`) | Not documented |
+| A16 | Spin hit threshold | 3 kJ (≈ 11 km/h closing): taps score spins, as in DD | Reference feel: a rear‑quarter tap spins the leader |
+| A17 | Grinding and scraping | Repeat contact of the same pair within 0.8 s deals 30%; sliding contact above 20 km/h grinds the touching zone; the squeezer gets the credit (DD Code T4) | Keeps pile‑ups from stripping every car, makes squeezes pay |
+| A18 | Damage on a destroyed zone | Half of it reaches the front (engine) | Without it, cars with destroyed sides and rear could never be finished off |
+| A19 | Opening crunch and first minute | Derby damage starts at ×0.6 at GO and ramps to ×1 over 60 s (calibration) | Frustration targets: player wrecked in 30 s ≤ 5%, in 60 s ≤ 15% |
+| A20 | DD2 Fast Steer at derby speeds | Loosens the rear and adds yaw torque below ~80 km/h, so sharp turns (DD Code T5) are possible | The DD2 manual only says "fast steering" |
 
 ---
 
