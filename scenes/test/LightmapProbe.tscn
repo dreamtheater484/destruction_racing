@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://btdr6s03y4yai"]
+
+[ext_resource type="LightmapGIData" uid="uid://blx0qn8mutjxc" path="res://scenes/test/LightmapProbe.lmbake" id="1_pl0aa"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.22, 0.42, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.7, 0.66, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+tonemap_mode = 4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.6, 0.55, 0.45, 1)
+roughness = 0.95
+
+[sub_resource type="PlaneMesh" id="floor"]
+lightmap_size_hint = Vector2i(202, 202)
+material = SubResource("floor_mat")
+add_uv2 = true
+size = Vector2(40, 40)
+
+[sub_resource type="StandardMaterial3D" id="wall_mat"]
+albedo_color = Color(0.85, 0.2, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="wall"]
+lightmap_size_hint = Vector2i(59, 96)
+material = SubResource("wall_mat")
+add_uv2 = true
+size = Vector3(10, 4, 1)
+
+[sub_resource type="BoxMesh" id="block"]
+lightmap_size_hint = Vector2i(24, 36)
+add_uv2 = true
+size = Vector3(2, 2, 2)
+
+[node name="LightmapProbe" type="Node3D" unique_id=1380610177]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1893200571]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1879007036]
+transform = Transform3D(0.707, -0.5, 0.5, 0, 0.707, 0.707, -0.707, -0.5, 0.5, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=1973353738]
+mesh = SubResource("floor")
+
+[node name="Wall" type="MeshInstance3D" parent="." unique_id=2036422809]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -4)
+mesh = SubResource("wall")
+
+[node name="Block" type="MeshInstance3D" parent="." unique_id=513644256]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 2, 1, 1)
+mesh = SubResource("block")
+
+[node name="LightmapGI" type="LightmapGI" parent="." unique_id=1948816266]
+quality = 0
+light_data = ExtResource("1_pl0aa")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=253715909]
+transform = Transform3D(1, 0, 0, 0, 0.906, 0.423, 0, -0.423, 0.906, 0, 7, 14)

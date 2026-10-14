@@ -1,0 +1,29 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://doy66lkyydp0a"
+path.bptc="res://.godot/imported/LightmapProbe.exr-df8e3e0f8c401d3b88a81199044316aa.bptc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://scenes/test/LightmapProbe.exr"
+dest_files=["res://.godot/imported/LightmapProbe.exr-df8e3e0f8c401d3b88a81199044316aa.bptc.ctexarray"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/channel_pack=1
+mipmaps/generate=false
+mipmaps/limit=-1
+slices/horizontal=1
+slices/vertical=2

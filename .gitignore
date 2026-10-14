@@ -1,0 +1,19 @@
+# Local engine install and downloads (not versioned)
+.engine/
+
+# Godot
+.godot/
+*.translation
+export_presets.cfg.bak
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+# Dev output
+out/
+*.tmp

@@ -1,0 +1,23 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>DestructionRacing</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- The pure rules library and the tests are separate projects. -->
+  <ItemGroup>
+    <Compile Remove="src/Rules/**" />
+    <Compile Remove="tests/**" />
+    <Compile Remove="tools/**" />
+    <Compile Remove=".engine/**" />
+    <Compile Remove="out/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="src/Rules/DestructionRacing.Rules.csproj" />
+  </ItemGroup>
+</Project>
