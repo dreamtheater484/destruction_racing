@@ -73,13 +73,20 @@ public partial class GreyBoxArena : Node3D
 
     private void BuildGround()
     {
+        // DD1's Bowl has a grey asphalt floor; outside the walls is dry grass.
         var body = new StaticBody3D { Name = "Ground" };
-        var mesh = new MeshInstance3D
+        body.AddChild(new MeshInstance3D
         {
             Mesh = new PlaneMesh { Size = new Vector2(400f, 400f) },
-            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.55f, 0.48f, 0.38f), Roughness = 0.95f },
-        };
-        body.AddChild(mesh);
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.40f, 0.45f, 0.26f), Roughness = 0.95f },
+        });
+        body.AddChild(new MeshInstance3D
+        {
+            Name = "Asphalt",
+            Mesh = new CylinderMesh { TopRadius = 1f, BottomRadius = 1f, Height = 0.02f, RadialSegments = 96, Rings = 1 },
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.34f, 0.34f, 0.35f), Roughness = 0.9f },
+            Scale = new Vector3(SemiAxisX + 1f, 1f, SemiAxisZ + 1f),
+        });
         body.AddChild(new CollisionShape3D { Shape = new WorldBoundaryShape3D() });
         AddChild(body);
     }

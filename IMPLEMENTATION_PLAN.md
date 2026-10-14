@@ -670,7 +670,7 @@ DestructionRacing/
     Modes/            # IGameMode, DerbyMode, WreckinRaceMode, StockCarMode, TimeTrialMode, PracticeMode
     AI/               # AIDriver.cs, RacingLine.cs, DerbyBrain.cs, Tactics/ (T1–T5), Personality.cs, ArenaDirector.cs
     Tracks/           # VenueDefinition, LayoutDefinition, TrackBuilder.cs, Checkpoints.cs, PitLane.cs, CrossoverZone.cs
-    Cameras/          # ChaseFar, ChaseNear, Bumper, InCar, LookBack, ArenaHigh, ReplayCams, CameraShake
+    Cameras/          # Chase (DD2), ChaseFar (DD1), Bumper, InCar, LookBack, ArenaHigh, ReplayCams, CameraShake
     Audio/            # GranularEngine, ImpactAudio, Announcer, CrowdAudio, MusicPlayer
     UI/               # Menus (focus navigation), HUD, DamageDiagram, Popups, Results, Showroom, GhostingTest
     Replay/           # Recorder, Player, HighlightPicker
@@ -700,8 +700,8 @@ DestructionRacing/
 - **Air and landing:** minimal air control; landings damage the suspension.
 
 ### 15.4 Cameras (4 in‑game views, as in DD)
-1. **Chase far:** spring‑damped follow, speed FOV, shake.
-2. **Chase near.**
+1. **Chase (default):** the DD2 PC framing, close, low and level. It stays at a fixed distance, the heading swing is smoothed, with a light speed FOV and shake.
+2. **Chase far:** the DD1 PC framing, further back and looking slightly down. Both framings are measured in `docs/reference_feel.md`.
 3. **Bumper.**
 4. **In‑car:** a stripped derby interior with roll cage, dash and steering wheel; a shared kit per template.
 

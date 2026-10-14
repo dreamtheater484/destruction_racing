@@ -9,7 +9,26 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M1 Driving feel — test build ready for your feel gate
+## M1 Driving feel — tuned to the videos, waiting for your feel gate
+- **First test build:** you drove it ("ok as a basic concept") and asked for tuning to the videos.
+- **Reference feel sheet:** `docs/reference_feel.md`, measured from DD1 and DD2 PC gameplay videos. DD2's speedometer gives absolute speeds.
+- **Tuned to it:**
+  - Acceleration is DD2-punchy: 0–100 km/h in 2.4 s (DD2 ~2.2 s), 0–160 km/h in 4.7 s (DD2 ~4.6 s), about 230 km/h after 14 s.
+  - Chase cameras are low and fixed-distance: **Chase** = DD2 framing (default), **ChaseFar** = DD1 framing (press C).
+  - The Bowl floor is grey asphalt, as in DD1.
+  - Saved tunings are versioned, so old saves don't override new defaults.
+- **Tools:** the circle scenario now holds 60 km/h at full lock; `--view=` sets the starting camera for captures.
+
+| Scenario | Result |
+|---|---|
+| 0–100 km/h | 2.36 s |
+| 0–160 km/h | 4.74 s |
+| Braking | 179→0 km/h in 103 m |
+| Full lock at 60 km/h | 0.84 g |
+| Turn‑around | ≈255° in 2 s |
+| Body roll | < 1° |
+
+## M1 Driving feel — first test build
 - **Vehicle sim:** arcade raycast vehicle on Jolt. Spring/damper/anti‑roll, Pacejka‑lite tyres with a friction circle, power‑limited drive, light traction control, DD2 brake‑to‑reverse, a dedicated reverse, DD1 turn‑around, DD2 Fast Steer, counter‑steer assist, auto‑righting.
 - **Keyboard:** the steering filter, plus 3 presets switched with F3 (Arrows, Classic DD PC, WASD).
 - **Cameras:** 4 views (chase far, chase near, bumper, in‑car) and look‑back.

@@ -4,21 +4,26 @@ using Godot;
 
 namespace DestructionRacing.Cameras;
 
-/// <summary>The 4 in-game views of DD (plan §15.4) plus look-back. The camera always stays upright.</summary>
+/// <summary>
+/// The 4 in-game views of DD (plan §15.4) plus look-back. The camera always stays upright.
+/// Chase framings are measured from DD1/DD2 PC gameplay video (docs/reference_feel.md).
+/// </summary>
 public partial class CameraRig : Camera3D
 {
     public enum View
     {
+        /// <summary>DD2 default: close, low and level.</summary>
+        Chase,
+        /// <summary>DD1 default: further back, slightly looking down.</summary>
         ChaseFar,
-        ChaseNear,
         Bumper,
         InCar,
     }
 
     public Car? Target { get; set; }
-    public View Mode { get; private set; } = View.ChaseFar;
+    public View Mode { get; set; } = View.Chase;
 
-    private Vector3 _smoothedPosition;
+    private float _smoothedHeight;
     private Vector3 _smoothedHeading = Vector3.Forward;
     private bool _initialised;
     private float _shake;
@@ -58,45 +63,44 @@ public partial class CameraRig : Camera3D
         Vector3 heading = lookBack ? -_smoothedHeading : _smoothedHeading;
         float speed = Target.LinearVelocity.Length();
 
-        Vector3 desired;
+        // Chase views stay at a fixed distance (a world-space position lag would pull the camera back at speed);
+        // only the heading swing and the height are smoothed. The car origin is ~0.6 m above the ground.
+        _smoothedHeight = _initialised ? Mathf.Lerp(_smoothedHeight, xf.Origin.Y, 1f - Mathf.Exp(-8f * dt)) : xf.Origin.Y;
+        Vector3 anchor = new(xf.Origin.X, _smoothedHeight, xf.Origin.Z);
+        _initialised = true;
+
+        Vector3 position;
         Vector3 lookAt;
         float fov;
         switch (Mode)
         {
-            case View.ChaseNear:
-                desired = xf.Origin - heading * 6.2f + Vector3.Up * 2.1f;
-                lookAt = xf.Origin + heading * 4f + Vector3.Up * 0.8f;
-                fov = 66f;
+            case View.Chase:
+                // DD2 PC: ~6.5 m behind the car centre, ~2 m above the ground, level, vfov ~55°.
+                position = anchor - heading * 6.5f + Vector3.Up * 1.45f;
+                lookAt = anchor + heading * 10f + Vector3.Up * 1.25f;
+                fov = 55f;
                 break;
             case View.Bumper:
-                desired = xf * new Vector3(0f, 0.25f, lookBack ? 2.45f : -2.45f);
-                lookAt = desired + (lookBack ? xf.Basis.Z : -xf.Basis.Z) * 10f;
+                position = xf * new Vector3(0f, 0.25f, lookBack ? 2.45f : -2.45f);
+                lookAt = position + (lookBack ? xf.Basis.Z : -xf.Basis.Z) * 10f;
                 fov = 72f;
                 break;
             case View.InCar:
-                desired = xf * new Vector3(-0.38f, 0.72f, lookBack ? 0.2f : 0.35f);
-                lookAt = desired + (lookBack ? xf.Basis.Z : -xf.Basis.Z) * 10f;
+                position = xf * new Vector3(-0.38f, 0.72f, lookBack ? 0.2f : 0.35f);
+                lookAt = position + (lookBack ? xf.Basis.Z : -xf.Basis.Z) * 10f;
                 fov = 70f;
                 break;
             default:
-                desired = xf.Origin - heading * 9.5f + Vector3.Up * 3.4f;
-                lookAt = xf.Origin + heading * 5f + Vector3.Up * 0.7f;
-                fov = 62f;
+                // DD1 PC: ~9 m behind the car centre, ~2 m above the ground, pitched ~2.5° down, vfov ~55°.
+                position = anchor - heading * 9.0f + Vector3.Up * 1.4f;
+                lookAt = anchor + heading * 6f + Vector3.Up * 0.75f;
+                fov = 55f;
                 break;
         }
 
         bool attached = Mode is View.Bumper or View.InCar;
-        if (!_initialised || attached)
-        {
-            _smoothedPosition = desired;
-            _initialised = true;
-        }
-        else
-        {
-            _smoothedPosition = _smoothedPosition.Lerp(desired, 1f - Mathf.Exp(-10f * dt));
-        }
 
-        Fov = Mathf.Lerp(Fov, fov + Mathf.Min(speed * 0.35f, 14f), 1f - Mathf.Exp(-4f * dt));
+        Fov = Mathf.Lerp(Fov, fov + Mathf.Min(speed * 0.15f, 6f), 1f - Mathf.Exp(-4f * dt));
         Vector3 shake = Vector3.Zero;
         if (_shake > 0.001f)
         {
@@ -105,6 +109,6 @@ public partial class CameraRig : Camera3D
         }
 
         Vector3 up = attached ? xf.Basis.Y.Lerp(Vector3.Up, 0.6f).Normalized() : Vector3.Up;
-        GlobalTransform = new Transform3D(Basis.Identity, _smoothedPosition + shake).LookingAt(lookAt, up);
+        GlobalTransform = new Transform3D(Basis.Identity, position + shake).LookingAt(lookAt, up);
     }
 }

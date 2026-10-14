@@ -51,6 +51,8 @@ public partial class DriveTest : Node3D
         }
 
         var rig = new CameraRig { Target = _player };
+        // --view=ChaseFar etc. picks the starting camera (for comparison screenshots).
+        if (Enum.TryParse(DevTools.Instance?.Arg("view") ?? "", out CameraRig.View view)) rig.Mode = view;
         AddChild(rig);
         AddChild(new DriveHud { Target = _player, ViewName = () => rig.Mode.ToString() });
         AddChild(new TuningPanel { Target = _player, PlayerControls = input });
@@ -106,7 +108,8 @@ public partial class DriveTest : Node3D
         {
             "accel" => _ => new CarControls { Throttle = 1f },
             "brake" => t => t < 6f ? new CarControls { Throttle = 1f } : new CarControls { Brake = 1f },
-            "circle" => t => new CarControls { Throttle = t < 3f ? 1f : 0.55f, Steer = t < 3f ? 0f : 1f },
+            // Full lock while a speed controller holds 60 km/h: steady-state cornering grip.
+            "circle" => t => new CarControls { Throttle = Mathf.Clamp((16.7f - _player.ForwardSpeed) * 0.4f, 0f, 1f), Steer = t < 2f ? 0f : 1f },
             "slalom" => t => new CarControls { Throttle = 1f, Steer = t < 3f ? 0f : (((int)((t - 3f) / 1.2f)) % 2 == 0 ? 1f : -1f) },
             "turnaround" => t => t < 0.5f ? CarControls.Idle : new CarControls { Throttle = 1f, TurnAround = true, Steer = -1f },
             "keys" => _ => CarControls.Idle,
@@ -145,6 +148,7 @@ public partial class DriveTest : Node3D
                              $"loads={_player.WheelLoad(0):0},{_player.WheelLoad(1):0},{_player.WheelLoad(2):0},{_player.WheelLoad(3):0} slipR={_player.RearSlipDeg:0.0}");
                 if (!_metrics.ContainsKey("t_0_100") && speed * 3.6f >= 100f) _metrics["t_0_100"] = t;
                 if (!_metrics.ContainsKey("t_0_60") && speed * 3.6f >= 60f) _metrics["t_0_60"] = t;
+                if (!_metrics.ContainsKey("t_0_160") && speed * 3.6f >= 160f) _metrics["t_0_160"] = t;
                 if (t >= 14f) Finish(("speed_14s_kmh", speed * 3.6f));
                 break;
             case "brake":
@@ -158,6 +162,9 @@ public partial class DriveTest : Node3D
                 if (t > 14f) Finish(("did_not_stop", 1f));
                 break;
             case "circle":
+                if (Mathf.PosMod(t, 1f) < (float)delta)
+                    GD.Print($"[Scenario] t={t:0.0} v={speed * 3.6f:0.0} yaw={Mathf.RadToDeg(_player.AngularVelocity.Y):0} slip={_player.BodySlipDeg:0.0} " +
+                             $"slipF={_player.FrontSlipDeg:0.0} slipR={_player.RearSlipDeg:0.0} drive={_player.DriveForceApplied:0} up={up.Dot(Vector3.Up):0.00}");
                 if (t >= 10f)
                 {
                     float yawRate = Mathf.RadToDeg(_player.AngularVelocity.Y);

@@ -36,7 +36,7 @@ public partial class Car : RigidBody3D
     public float RearSlipDeg => Mathf.RadToDeg(0.5f * (_wheels[2].SlipAngle + _wheels[3].SlipAngle));
     public float FrontSlipDeg => Mathf.RadToDeg(0.5f * (_wheels[0].SlipAngle + _wheels[1].SlipAngle));
 
-    private static readonly float[] GearTopSpeed = { 0f, 11f, 19f, 27f, 36f, 48f };
+    private static readonly float[] GearTopSpeed = { 0f, 16f, 28f, 40f, 54f, 72f };
 
     private readonly Wheel[] _wheels = new Wheel[4];
     private Godot.Collections.Array<Rid> _exclude = new();
@@ -227,6 +227,7 @@ public partial class Car : RigidBody3D
             float grip = t.SurfaceGrip * (w.Front ? t.FrontGrip : t.RearGrip);
             if (!w.Front && TurningAround) grip *= t.TurnAroundRearGrip;
             float maxForce = grip * load;
+            float maxLong = maxForce * t.LongitudinalGrip;
 
             float fy = -maxForce * TyreCurve(slip, t.TyreStiffness, t.TyreShape);
             if (v.Length() < 1.5f)
@@ -235,7 +236,8 @@ public partial class Car : RigidBody3D
             float fx = 0f;
             if (IsDriven(w) && drivenGrounded > 0)
             {
-                float available = MathF.Sqrt(MathF.Max(0f, maxForce * maxForce - fy * fy));
+                float lateralUse = maxForce > 0f ? fy / maxForce : 0f;
+                float available = maxLong * MathF.Sqrt(MathF.Max(0f, 1f - lateralUse * lateralUse));
                 float wheelDrive = drive / drivenGrounded;
                 fx += Mathf.Clamp(wheelDrive, -available * t.TractionControl, available * t.TractionControl);
                 DriveForceApplied += fx;
@@ -248,12 +250,16 @@ public partial class Car : RigidBody3D
                 fx -= MathF.Sign(vLong) * MathF.Min(brakeForce, stopForce);
             }
 
-            float total = MathF.Sqrt(fx * fx + fy * fy);
-            if (total > maxForce && total > 0f)
+            // Friction ellipse: drive/brake may use LongitudinalGrip times the cornering grip.
+            if (maxForce > 0f)
             {
-                float s = maxForce / total;
-                fx *= s;
-                fy *= s;
+                float ex = fx / maxLong, ey = fy / maxForce;
+                float use = MathF.Sqrt(ex * ex + ey * ey);
+                if (use > 1f)
+                {
+                    fx /= use;
+                    fy /= use;
+                }
             }
 
             // Lateral forces act partly above the contact patch to tame body roll (arcade).

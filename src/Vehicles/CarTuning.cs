@@ -10,6 +10,10 @@ namespace DestructionRacing.Vehicles;
 /// </summary>
 public sealed class CarTuning
 {
+    /// <summary>Bumped when the defaults are retuned; saved files from an older version are ignored.</summary>
+    public const int CurrentVersion = 2;
+    public int Version = CurrentVersion;
+
     // Body
     public float Mass = 1400f;
     public float CenterOfMassHeight = -0.28f;   // relative to the chassis centre
@@ -36,6 +40,8 @@ public sealed class CarTuning
     public float SurfaceGrip = 1.0f;
     public float TyreStiffness = 9.0f;          // Pacejka-lite B
     public float TyreShape = 1.45f;             // Pacejka-lite C
+    /// <summary>Arcade: drive and brake grip relative to cornering grip (friction ellipse). DD2 launches at ~1.2 g.</summary>
+    public float LongitudinalGrip = 3.0f;
     /// <summary>0 = lateral forces at the contact patch, 1 = at the centre of mass (less body roll).</summary>
     public float LateralForceHeight = 0.55f;
 
@@ -43,13 +49,14 @@ public sealed class CarTuning
     public bool RearWheelDrive = true;
     /// <summary>Light traction control: drive force never uses more than this share of the grip left after cornering (Purist: 1.2 = off).</summary>
     public float TractionControl = 0.9f;
-    public float EnginePower = 115_000f;        // W
-    public float MaxDriveForce = 9_500f;        // N, traction-limited launch
+    // DD2 PC speedometer (docs/reference_feel.md): 0-100 km/h ~2.2 s, 0-160 ~4.6 s, ~240 km/h on long straights.
+    public float EnginePower = 440_000f;        // W
+    public float MaxDriveForce = 19_500f;       // N, launch
     public float ReverseForce = 6_000f;
     public float ReverseMaxSpeed = 11f;         // m/s
     public float BrakeForce = 15_000f;          // N total
     public float BrakeFrontBias = 0.62f;
-    public float DragCoefficient = 1.05f;       // N per (m/s)^2
+    public float DragCoefficient = 1.2f;        // N per (m/s)^2
     public float RollingResistance = 14f;       // N per m/s
 
     // Steering
@@ -85,7 +92,10 @@ public sealed class CarTuning
         try
         {
             using var f = FileAccess.Open(userPath, FileAccess.ModeFlags.Read);
-            return FromJson(f.GetAsText());
+            var saved = FromJson(f.GetAsText());
+            if (saved.Version == CurrentVersion) return saved;
+            GD.Print($"[Tuning] ignoring {userPath}: saved for tuning version {saved.Version}, current is {CurrentVersion}");
+            return new CarTuning();
         }
         catch (Exception e)
         {

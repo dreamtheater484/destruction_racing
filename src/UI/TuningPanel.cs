@@ -66,7 +66,9 @@ public partial class TuningPanel : CanvasLayer
     {
         CarTuning T() => Target!.Tuning;
         void Reapply() => Target!.ApplyTuning(Target.Tuning);
-        yield return new("Engine power (kW)", 40, 250, 5, () => T().EnginePower / 1000f, v => T().EnginePower = v * 1000f);
+        yield return new("Engine power (kW)", 60, 600, 5, () => T().EnginePower / 1000f, v => T().EnginePower = v * 1000f);
+        yield return new("Launch force (kN)", 5, 25, 0.5f, () => T().MaxDriveForce / 1000f, v => T().MaxDriveForce = v * 1000f);
+        yield return new("Drive grip ×", 1, 4, 0.05f, () => T().LongitudinalGrip, v => T().LongitudinalGrip = v);
         yield return new("Front grip", 0.5f, 1.6f, 0.01f, () => T().FrontGrip, v => T().FrontGrip = v);
         yield return new("Rear grip", 0.5f, 1.6f, 0.01f, () => T().RearGrip, v => T().RearGrip = v);
         yield return new("Tyre stiffness", 3, 16, 0.1f, () => T().TyreStiffness, v => T().TyreStiffness = v);
