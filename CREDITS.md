@@ -1,7 +1,7 @@
 # Credits and third-party files
 
 Every external file in this repository is listed here with its source and licence (plan §8.6, licence hygiene).
-Only CC0, OFL, MIT/BSD or licences you have approved are allowed.
+Only CC0, OFL, MIT/BSD or licences you have approved (CC BY for the music, 2026-10-15) are allowed.
 
 ## Engine
 - **Godot Engine 4.7.2** (.NET), MIT licence — <https://godotengine.org/license>. Installed locally in `.engine/` (not versioned).
@@ -10,6 +10,24 @@ Only CC0, OFL, MIT/BSD or licences you have approved are allowed.
 
 ## Fonts — `assets/fonts/`
 - **Barlow Condensed** (Medium, SemiBold, Bold, ExtraBold) by Jeremy Tribby, © 2017 The Barlow Project Authors, SIL Open Font Licence 1.1 (`assets/fonts/barlow_condensed/OFL.txt`). Downloaded on 2026-10-15 from <https://github.com/google/fonts/tree/main/ofl/barlowcondensed> with your approval. Used for the HUD, banners and menus.
+
+## Music — `assets/audio/music/`
+Downloaded on 2026-10-15 with your approval. **Changes to every track except Final Hour:** converted to Ogg Vorbis (quality 5) and turned down to the same loudness (about −15.5 LUFS) by a plain volume change; nothing else was edited. Final Hour is the original Ogg file (tags removed).
+
+| Track | Artist | Licence | Source |
+|---|---|---|---|
+| Final Hour | isaiah658 | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (no attribution required; credited anyway) | <https://opengameart.org/content/final-hour> |
+| Warriors Fall (Original RumbleStep Mix) | cdk, featuring Darryl J | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | <https://ccmixter.org/files/cdk/50691> |
+| Drive | Alex Beroza, featuring cdk & Darryl J (uses samples from "Drive" by cdk) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | <https://ccmixter.org/files/AlexBeroza/43098> |
+| Harmful or Fatal | Kevin MacLeod (incompetech.com) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | <https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100210> |
+| Metalmania | Kevin MacLeod (incompetech.com) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | <https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1700023> |
+| Ready Aim Fire | Kevin MacLeod (incompetech.com) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | <https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500002> |
+| Dragged Through Hellfire | Zander Noriega | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | <https://opengameart.org/content/dragged-through-hellfire> |
+| Gretsch Thrash Gretsch | TeknoAXE | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | <https://teknoaxe.com/Link_Code_3.php?q=2125&genre=Metal> |
+
+Kevin MacLeod's requested credit, for each of his three tracks: "*Title*" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution 4.0 License, http://creativecommons.org/licenses/by/4.0/
+
+These tracks keep their own licences; the project's CC BY-NC 4.0 asset licence does not apply to them. Game builds ship this file (the in-game credits screen comes with the menus, M8).
 
 ## Poly Haven (CC0 1.0, public domain) — `assets/third_party/polyhaven/`
 Downloaded on 2026-10-14 from <https://polyhaven.com> with your approval. Each file's MD5 was checked against the Poly Haven API.

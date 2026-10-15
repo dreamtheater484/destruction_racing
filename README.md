@@ -12,7 +12,7 @@ Work in progress, built milestone by milestone (`IMPLEMENTATION_PLAN.md` §18):
 | M0 Foundation, M1 driving feel, M1b grey-box derby, M1c grey-box Wreckin' Racing | done |
 | M2 Art and audio spike (generated cars, layered damage, the Bowl's look, engine sound) | approved |
 | M3 Full damage and VFX (parts that come off, glass, lights, smoke, fire, sparks, debris) | approved |
-| M4 Vertical slice: the Destruction Derby (the final Bowl in three lights, crowd, derby AI, broadcast HUD, announcer, sound, replays) | in review |
+| M4 Vertical slice: the Destruction Derby (the final Bowl in three lights, crowd, derby AI, broadcast HUD, announcer, sound, music, replays) | approved |
 | M5 Car roster | next |
 
 Progress notes and test results: [`docs/PROGRESS.md`](docs/PROGRESS.md).
@@ -31,5 +31,11 @@ The keys are shown on screen. Driving: arrow keys, plus the keys in the on-scree
 ## Layout and tooling
 See [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md): source layout, the dev scripts (build, unit tests, headless scenario tests, sim harnesses, captures) and the command-line hooks.
 
+## Licence
+Free to download, play and mod; **no commercial use** without asking first (contact [dreamtheater484](https://github.com/dreamtheater484)).
+- **Code** (C#, GDScript, shaders, tools, scripts): [PolyForm Noncommercial 1.0.0](LICENSE).
+- **The project's own art, sound and text** (cars, the Bowl, sound effects, the announcer, docs): [CC BY-NC 4.0](LICENSE-ASSETS.txt).
+- **Third-party files** keep their own licences (CC0, OFL, CC BY music, MIT): see [`CREDITS.md`](CREDITS.md).
+
 ## Credits
-Third-party files (Poly Haven CC0 HDRIs and textures, the Godot engine) are listed in [`CREDITS.md`](CREDITS.md). *Destruction Derby* is a trademark of its owners; this is an unaffiliated fan project.
+Third-party files (Poly Haven CC0 HDRIs and textures, the Barlow Condensed font, the music, the Godot engine) are listed with their licences in [`CREDITS.md`](CREDITS.md). *Destruction Derby* is a trademark of its owners; this is an unaffiliated fan project.

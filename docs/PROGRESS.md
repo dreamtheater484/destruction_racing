@@ -9,7 +9,7 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M4 Vertical slice: Destruction Derby — ready for you to play
+## M4 Vertical slice: Destruction Derby — approved (2026‑10‑15: "And it's good!")
 - **Play it yourself:** double-click **Play Derby.cmd**.
   - **Set-up screen:** pick the light (afternoon, golden hour, night), your car (Kitsune, Brougham, Nordvik) and the division (4 = rookies … 1 = the best). ↑/↓ choose, ←/→ change, Enter start.
   - **The derby:** 20 cars, last car running wins. Tab = standings, Esc/P = pause. When you are wrecked: ←/→ watch another car, T = TV or chase camera, Space = ×2 speed, Enter = skip to the results.
@@ -36,7 +36,7 @@
 - **Announcer v1:** 345 lines in 40 categories: intro, start, opening crunch, big hits, spins, wrecks (with the car number: "number 23 is out!"), the leader, cars left, the final duel, your damage (smoke, fire, lost wheel, hood, glass), lulls, the winner, the results. No line repeats within 3 minutes; important calls wait for a gap or cut in.
   - Voiced offline with Kokoro-82M (Apache 2.0, voice `am_fenrir`) through a stadium PA chain. The model is not shipped.
   - **Your own voice:** any line can be replaced by a recording with the same name in an `Announcer` folder next to the game or in `user://announcer` (`docs/announcer_recording_guide.md`).
-- **Music:** the player is ready (tracks come up as the field shrinks) but ships no tracks yet: the shortlist is waiting for your OK. Until then, put your own OGG or MP3 files in a `Music` folder in the project (git ignores it).
+- **Music:** eight royalty-free tracks, shuffled: jungle and drum & bass (Final Hour, Warriors Fall, Drive) and metal (Harmful or Fatal, Metalmania, Ready Aim Fire, Dragged Through Hellfire, Gretsch Thrash Gretsch), all matched to the same loudness. The music comes up as the field shrinks and fades out for the results and replays. Your own OGG or MP3 files in a `Music` folder in the project join the playlist (git ignores that folder). Sources and licences: `CREDITS.md`.
 - **Replays (basic):** every car's pose, wheels and zone health at 30 Hz plus the hits. Crush, smoke and fire replay; dents and parts that came off show as they ended (full damage replay is M8).
 - **Checks** (plan §17, all headless and reproducible):
   - **Derby sims**, 80 derbies with the PlayerProxy "average fan": **every plan §17.4 target is met.**
@@ -81,11 +81,9 @@
   - **Deliberate points:** points from aimed attacking hits (throttle on, heading within 45° of the contact), from cars that hit your side just after a last-second turn (T5), and from grinding a car against the wall or a wreck on the throttle (T4). The strict reading (aimed hits only) is reported next to it.
   - **Stuck:** trying to move at under 1 m/s, except while shoving a running car in front of you.
   - **Idle stretch:** no hit of 9 kJ or more anywhere while 5 or more cars run.
-- **Your turn** (the M4 acceptance, plan §18):
-  - **Playtest:** a few derbies, ideally in all three lights. Do the first minute and the endgame feel fair? Is reverse-ramming too strong?
-  - **Audio gate:** the crash sounds, the crowd, the announcer's voice and how often it talks, the mix.
-  - **Music:** OK the shortlist (or pick tracks) and they go in.
-  - **Licence:** pick CC BY-NC 4.0 or BY-NC-SA 4.0 for the assets, then the licence files go in.
+- **Acceptance** (plan §18): you played it and approved it on 2026‑10‑15, then approved all eight music tracks and picked the licence.
+- **Licence:** the code is under PolyForm Noncommercial 1.0.0 (`LICENSE`), the project's own art, sound and text under CC BY-NC 4.0 (`LICENSE-ASSETS.txt`); third-party files keep theirs (`CREDITS.md`).
+- **Still open for later:** the reverse-only bot (48% wins, see the checks above). Revisit if reverse-ramming feels too strong in play.
 
 ## M3 Full damage and VFX — approved (2026‑10‑15: "Yes, it looks bloody good!")
 - **Look at it yourself:**
