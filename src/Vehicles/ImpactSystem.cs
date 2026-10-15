@@ -257,7 +257,7 @@ public partial class ImpactSystem : Node
                 if (other != null && !other.IsWrecked) squeezer = other;
             }
             Referee!.OnScrape(time, car.Id, SideOf(car, point, normal).Zone, slide, dt, squeezer?.Id, "wall scrape");
-            car.OnVisualScrape(point, -normal, v - normal * v.Dot(normal), dt);
+            car.OnVisualScrape(point, -normal, v - normal * v.Dot(normal), dt, wall: true);
         }
         foreach (var c in _pairs.Values)
         {

@@ -13,10 +13,11 @@ using Godot;
 namespace DestructionRacing.Modes;
 
 /// <summary>
-/// Destruction Derby in the Bowl (plan §4.1), grey-box M1b: 20 cars in a ring facing the centre, a 3-2-1
-/// countdown, everyone meets in the middle, spins and wrecks score, the last car running wins (+ survivor
-/// bonus). When the player is wrecked they can watch another car or skip to the results.
-/// Also runs headless with the PlayerProxy bot for the sim harness.
+/// Destruction Derby in the Bowl (plan §4.1): 20 cars in a ring facing the centre, a 3-2-1 countdown, everyone
+/// meets in the middle, spins and wrecks score, the last car running wins (+ survivor bonus). When the player is
+/// wrecked they can watch another car or skip to the results. Since M4 it runs in the final Bowl
+/// (<see cref="Bowl"/>, three lighting presets); presentation (crowd, audio, announcer, banners) listens to the
+/// events below. Also runs headless with the PlayerProxy bot for the sim harness.
 /// </summary>
 public partial class DerbyMode : Node3D, IArenaView, IHudMode
 {
@@ -44,6 +45,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     /// <summary>Drive the player's car with the PlayerProxy bot (sims).</summary>
     public bool ProxyPlayer { get; set; }
     public Personality ProxyProfile { get; set; } = Personality.AverageFan;
+    /// <summary>The PlayerProxy's strategy: Normal, or one of the dominant-strategy test bots (plan §17.4).</summary>
+    public DerbyBrain.Strategy ProxyStrategy { get; set; } = DerbyBrain.Strategy.Normal;
     public int Seed { get; set; } = 1;
     public RulesConfig Rules { get; set; } = RulesConfig.Standard;
     /// <summary>Safety stop for sims; the Bowl itself has no time limit (✱ A8).</summary>
@@ -51,8 +54,22 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     public float CountdownTime { get; set; } = 3f;
     /// <summary>Debug: print every running car's state every N seconds (0 = off).</summary>
     public double DumpEvery { get; set; }
+    /// <summary>The Bowl's lighting (--preset=afternoon|golden|night).</summary>
+    public BowlPreset Preset { get; set; } = BowlPreset.Afternoon;
+    /// <summary>The championship division of the event (4 = lowest); scales the player-attention budget.</summary>
+    public int Division { get; set; } = 4;
 
     public event Action<DerbyMode>? Finished;
+    /// <summary>Every measured hit (car-car and car-wall), after the referee saw it.</summary>
+    public event Action<Impact>? ImpactHappened;
+    /// <summary>Every referee event (hits, spins, damage, wheels lost, wrecks, bonuses).</summary>
+    public event Action<RefereeEvent>? RefereeEventRaised;
+    /// <summary>The number of cars still running changed (wrecks).</summary>
+    public event Action<int>? RemainingChanged;
+    /// <summary>GO: the countdown ended.</summary>
+    public event Action? Started;
+    /// <summary>The countdown ticks: 3, 2, 1.</summary>
+    public event Action<int>? CountdownTick;
 
     private enum Phase { Countdown, Running, Over }
 
@@ -62,11 +79,13 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     private readonly Dictionary<int, (Car? Attacker, double Time)> _lastHitBy = new();
     private readonly Dictionary<int, (float Boost, double Until)> _boost = new();
     private readonly Dictionary<int, double> _lastAttackTime = new();
+    private readonly Dictionary<int, List<(double Time, bool Tail)>> _attacks = new();
     private readonly Dictionary<int, CarSample> _samples = new();
     private readonly List<(int Car, int Points)> _wreckBatch = new();
 
     private Phase _phase = Phase.Countdown;
     private float _countdown;
+    private int _lastTick = int.MaxValue;
     private double _time;
     private double _lastHitTime;
     private int? _leader;
@@ -75,19 +94,33 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     private ImpactSystem _impacts = null!;
     private DerbyMetrics _metrics = null!;
     private Car _player = null!;
-    private GreyBoxArena _arena = null!;
+    private Bowl _arena = null!;
     private CameraRig? _rig;
     private EventHud? _hud;
     private Node3D? _beacon;
     private Random _rng = null!;
     private bool _skipping;
     private int _spectateIndex;
+    private Replay.ReplayRecorder? _recorder;
+    private Replay.ReplayPlayer? _replay;
+    private TvDirector? _tvLive;
+    private bool _spectateTv = true;
+    private double _playerWreckTime = -1;
 
     public Referee Referee => _referee;
     public DerbyStandings Standings => _standings;
     public DerbyMetricsResult MetricsResult => _metrics.Result;
     public bool IsOver => _phase == Phase.Over;
     public bool PlayerOut => _referee.IsWrecked(_player.Id);
+    public Bowl Arena => _arena;
+    public CameraRig? Rig => _rig;
+    public EventHud? Hud => _hud;
+    public Car PlayerCar => _player;
+    public int Remaining => _standings.Remaining;
+    public bool Skipping => _skipping;
+    public DerbyPresenter? Presenter { get; private set; }
+    public Audio.DerbyAudio? Sound { get; private set; }
+    public Car? CarById(int id) => _byId.GetValueOrDefault(id);
     public double CountdownLeft => _countdown;
     public string DriverName(Car car) => car == _player ? "You" : _brains.TryGetValue(car.Id, out var b) ? b.Personality.Archetype : "?";
 
@@ -102,7 +135,18 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         }
     }
     public string HudStatus => $"{_standings.Remaining}  Still Running";
+    public string HudRankLabel => "POSITION";
+    public string HudStatusLabel => "STILL RUNNING";
+    public string HudStatusValue => $"{_standings.Remaining}";
     public string? HudWarning => null;
+
+    public IReadOnlyList<EventHud.ResultRow> StandingsRows() =>
+        _cars.OrderByDescending(c => _referee.Score(c.Id).Total)
+            .Select((c, i) => new EventHud.ResultRow(i + 1, c.Number, DriverName(c), c.RoofColor,
+                _referee.Score(c.Id).Get(ScoreCategory.Spin), _referee.Score(c.Id).Get(ScoreCategory.Wreck),
+                _referee.Score(c.Id).Get(ScoreCategory.Survivor), _referee.Score(c.Id).Total, c == _player,
+                _referee.IsWrecked(c.Id) ? "wrecked" : ""))
+            .ToList();
 
     public string StandingsText()
     {
@@ -120,10 +164,21 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     public bool IsRunning(Car car) => _phase != Phase.Over && !_referee.IsWrecked(car.Id);
     public int? LeaderId => _leader;
     public double Time => _time;
-    public Vector2 ArenaSemiAxes => new(_arena.SemiAxisX - 0.5f, _arena.SemiAxisZ - 0.5f);
+    public Vector2 ArenaSemiAxes => new(Bowl.SemiAxisX - Bowl.BarrierInset, Bowl.SemiAxisZ - Bowl.BarrierInset);
     public Car? Player => _player;
-    /// <summary>At most 2 AI hunt the player in the first minute (no early gang-ups), then 3 (plan §10.4).</summary>
-    public int PlayerAttentionBudget => _time < 60.0 ? 2 : 3;
+    /// <summary>
+    /// At most N AI hunt the player at once (plan §10.4): N = 2 in Division 4, 3 in Divisions 3 and 2, 4 in Division 1,
+    /// and never more than 2 in the first minute (no early gang-ups).
+    /// </summary>
+    public int PlayerAttentionBudget => _time < 60.0 ? 2 : Division switch { 4 => 2, 1 => 4, _ => 3 };
+    public double LastAttackTime(Car car) => _lastAttackTime.GetValueOrDefault(car.Id, -100);
+
+    public float TailRamShare(Car car)
+    {
+        if (!_attacks.TryGetValue(car.Id, out var list)) return 0f;
+        list.RemoveAll(a => _time - a.Time > 45.0);
+        return list.Count < 3 ? 0f : (float)list.Count(a => a.Tail) / list.Count;
+    }
     public int CountTargeting(Car target, Car asker) => _brains.Count(kv => kv.Key != asker.Id && kv.Value.Target == target);
     public (Car? Attacker, double Time) LastHitBy(Car victim) => _lastHitBy.TryGetValue(victim.Id, out var h) ? h : (null, -100);
     public float AggressionBoost(Car car) => _boost.TryGetValue(car.Id, out var b) && b.Until > _time ? b.Boost : 0f;
@@ -135,18 +190,36 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         // As the main scene: --proxy lets the PlayerProxy bot drive (demos, captures), --seed=N picks the field.
         if (GetParent() == GetTree().Root && DevTools.Instance is { } dev)
         {
+            if (DerbySetup.Chosen is { } chosen)
+            {
+                Preset = chosen.Preset;
+                PlayerModel = chosen.Car;
+                Division = chosen.Division;
+            }
             if (dev.Arg("proxy") != null) ProxyPlayer = true;
             if (int.TryParse(dev.Arg("seed"), out int seed)) Seed = seed;
             if (dev.Arg("car") is { } car) PlayerModel = car;
+            if (dev.Arg("preset") is { } preset) Preset = Bowl.Parse(preset);
+            if (int.TryParse(dev.Arg("division"), out int division)) Division = Math.Clamp(division, 1, 4);
         }
         // --pinned=S (experiments): how long a car may rock in place before it counts as immobilised.
         if (float.TryParse(DevTools.Instance?.Arg("pinned"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float pinned))
             Rules = Rules with { PinnedWreckTime = pinned };
+        // Experiments: --reartough=X (rear toughness), --opening=SCALE,SECONDS (the opening damage ramp),
+        // --attackshare=X (the attacker's share of contact damage).
+        if (float.TryParse(DevTools.Instance?.Arg("reartough"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float rear))
+            Rules = Rules with { RearToughness = rear };
+        if (float.TryParse(DevTools.Instance?.Arg("attackshare"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float share))
+            Rules = Rules with { AttackerDamageShare = share };
+        if (DevTools.Instance?.Arg("opening")?.Split(',') is [var os, var ot]
+            && float.TryParse(os, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float openScale)
+            && float.TryParse(ot, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float openTime))
+            Rules = Rules with { OpeningCrunchDamageScale = openScale, OpeningCrunchTime = openTime };
         _rng = new Random(Seed);
         _countdown = CountdownTime;
         if (!Headless) Controls.Apply(Controls.Current);
 
-        _arena = new GreyBoxArena { StartCars = 0, WithOverviewCamera = false };
+        _arena = new Bowl { Preset = Preset, Visuals = !Headless };
         AddChild(_arena);
 
         _impacts = new ImpactSystem { Clock = () => _time };
@@ -173,6 +246,26 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
             AddChild(_hud);
             _beacon = BuildBeacon();
             AddChild(_beacon);
+            AddChild(new Fx.GroundMarks { Cars = _cars, Floor = _arena.Floor });
+            // Lamps on at dusk; at night real headlight spots and beams on the cars near the camera.
+            if (_arena.FloodlightsOn)
+                AddChild(new HeadlightRig { Cars = _cars, Beams = _arena.IsNight, Focus = () => _rig.Target });
+            Presenter = new DerbyPresenter { Mode = this };
+            AddChild(Presenter);
+            Sound = new Audio.DerbyAudio { Mode = this };
+            AddChild(Sound);
+            _recorder = new Replay.ReplayRecorder { Cars = _cars, Clock = () => _time };
+            AddChild(_recorder);
+            _hud.ResultsHint = DerbySetup.Chosen != null
+                ? "V  watch the replay   ·   R  race again   ·   M  menu   ·   Q  quit"
+                : "V  watch the replay   ·   R  race again   ·   Q  quit";
+            if (DerbySetup.Chosen != null) _hud.MenuScene = "res://scenes/derby/DerbySetup.tscn";
+            _hud.ResultsKey = key =>
+            {
+                if (key != Key.V || _replay != null) return false;
+                StartReplay();
+                return true;
+            };
         }
     }
 
@@ -180,7 +273,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     {
         var numbers = Enumerable.Range(2, 60).Where(n => n != 7).OrderBy(_ => _rng.Next()).ToList();
         var mix = Personality.FieldMix().OrderBy(_ => _rng.Next()).ToList();
-        float ringX = _arena.SemiAxisX * 0.78f, ringZ = _arena.SemiAxisZ * 0.78f;
+        float ringX = Bowl.SemiAxisX * 0.78f, ringZ = Bowl.SemiAxisZ * 0.78f;
 
         for (int i = 0; i < CarCount; i++)
         {
@@ -208,7 +301,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
                 _player = car;
                 if (ProxyPlayer)
                 {
-                    var brain = new DerbyBrain(ProxyProfile, Seed * 1000 + 1);
+                    var brain = new DerbyBrain(ProxyProfile, Seed * 1000 + 1, ProxyStrategy);
                     car.Driver = new PlayerProxyInput(brain, this, Seed * 7919 + 3);
                 }
                 else
@@ -262,12 +355,21 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         switch (_phase)
         {
             case Phase.Countdown:
+                int tick = (int)Mathf.Ceil(_countdown);
+                if (tick < _lastTick && tick >= 1)
+                {
+                    _lastTick = tick;
+                    CountdownTick?.Invoke(tick);
+                }
                 _countdown -= dt;
                 if (_countdown <= 0f)
                 {
                     foreach (var c in _cars) c.InputLocked = false;
                     _phase = Phase.Running;
                     _hud?.Popup("GO!", new Color(0.3f, 1f, 0.3f), big: true);
+                    Started?.Invoke();
+                    // Tests (--autoskip): fast-simulate the whole derby to the results.
+                    if (!Headless && DevTools.Instance?.Arg("autoskip") != null) SkipToResults();
                 }
                 break;
             case Phase.Running:
@@ -298,13 +400,20 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         {
             _metrics.OnRefereeEvent(e);
             HandleEvent(e);
+            RefereeEventRaised?.Invoke(e);
             if (e.Kind == RefereeEventKind.Wrecked) _wreckBatch.Add((e.Car, _referee.Score(e.Car).Total));
         }
-        if (_wreckBatch.Count > 0) _standings.Eliminate(_time, _wreckBatch);
+        if (_wreckBatch.Count > 0)
+        {
+            _standings.Eliminate(_time, _wreckBatch);
+            _arena.SetScoreboard($"THE BOWL   CARS LEFT {_standings.Remaining}");
+            RemainingChanged?.Invoke(_standings.Remaining);
+        }
 
         _metrics.Step(_time, dt, _standings.Remaining, !_referee.IsWrecked(_player.Id));
         Director();
         UpdateBeacon();
+        if (_hud != null) _hud.Hunters = _brains.Count(kv => kv.Value.Target == _player && IsRunning(_byId[kv.Key]));
 
         if (DumpEvery > 0 && (int)(_time / DumpEvery) != (int)((_time - dt) / DumpEvery)) DumpState();
         if (_standings.IsOver) EndEvent(timedOut: false);
@@ -325,6 +434,11 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
                 {
                     _lastAttackTime[e.Other] = e.Time;
                     _lastHitTime = e.Time;
+                    if (_byId.TryGetValue(e.Other, out var attacker))
+                    {
+                        if (!_attacks.TryGetValue(e.Other, out var list)) _attacks[e.Other] = list = new();
+                        list.Add((e.Time, attacker.LastControls.Reverse || attacker.ForwardSpeed < -1f));
+                    }
                 }
                 break;
             case RefereeEventKind.SpinTier when e.Other == _player.Id:
@@ -357,6 +471,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     private void OnImpact(Impact i)
     {
         _metrics.OnImpact(i);
+        ImpactHappened?.Invoke(i);
+        if (_phase == Phase.Running) _recorder?.OnImpact(i);
         if (Headless) return;
         if (i.Energy > 6_000f && i.A.Visual == null) SpawnSparks(i.Point, i.Energy);
         if (_rig != null && (i.A == _rig.Target || i.B == _rig.Target))
@@ -365,13 +481,14 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
 
     /// <summary>
     /// Anti-stall director (plan §10.4): while 5+ cars run and nobody has hit anyone for 6 s, wake the passive ones.
-    /// In the final cars, after 12 s without a real hit, every AI is nudged to attack forwards for a while.
+    /// In the final cars, after 12 s without a real hit (7 s in the final duel), every AI is nudged to attack
+    /// forwards for a while — towards the other car, never steered for it.
     /// </summary>
     private void Director()
     {
         if (_standings.Remaining <= 4)
         {
-            if (_time - _lastHitTime < 12.0) return;
+            if (_time - _lastHitTime < (_standings.Remaining == 2 ? 7.0 : 12.0)) return;
             _lastHitTime = _time;
             foreach (var c in _cars.Where(c => c != _player && IsRunning(c))) _boost[c.Id] = (0.8f, _time + 8.0);
             return;
@@ -410,8 +527,57 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
 
     private void OnPlayerWrecked()
     {
+        _playerWreckTime = _time;
         _hud?.ShowWrecked();
         SpectateNext(0);
+        // Spectating is on the TV cameras (DD2); T switches to the chase camera and back.
+        if (_rig != null && _tvLive == null)
+        {
+            _tvLive = new TvDirector();
+            AddChild(_tvLive);
+        }
+        SetSpectateCamera(_spectateTv);
+    }
+
+    private void SetSpectateCamera(bool tv)
+    {
+        _spectateTv = tv;
+        if (_tvLive == null || _rig == null) return;
+        if (tv)
+        {
+            _tvLive.Focus = _rig.Target;
+            _tvLive.Current = true;
+            _tvLive.Snap();
+        }
+        else _rig.Current = true;
+    }
+
+    public void ToggleSpectateCamera() => SetSpectateCamera(!_spectateTv);
+
+    /// <summary>The replay (results screen, V): from just before the player's wreck, or the last 30 seconds.</summary>
+    private void StartReplay()
+    {
+        if (_recorder == null || _recorder.Times.Count == 0) return;
+        double start = _playerWreckTime >= 0 ? _playerWreckTime - 8.0 : _recorder.Duration - 30.0;
+        _replay = new Replay.ReplayPlayer
+        {
+            Recording = _recorder,
+            Cars = _cars,
+            StartFocus = _player,
+            StartTime = Math.Max(0.0, start),
+            Rig = _rig,
+        };
+        if (Sound != null) _replay.ImpactPlayed += Sound.PlayReplayImpact;
+        _replay.Closed += () =>
+        {
+            _replay = null;
+            if (_hud != null) _hud.InEventVisible = true;
+            if (_rig != null) { _rig.Target = _player; _rig.Current = true; }
+            if (Sound != null) Sound.Music.Muted = false;
+        };
+        if (_hud != null) _hud.InEventVisible = false;
+        if (Sound != null) Sound.Music.Muted = true;
+        AddChild(_replay);
     }
 
     private void EndEvent(bool timedOut)
@@ -429,9 +595,18 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         foreach (var c in _cars) c.InputLocked = true;
         Engine.TimeScale = 1.0;
         _skipping = false;
-        _hud?.ShowResults("DESTRUCTION DERBY  –  RESULTS", "Survivor", BuildResults());
+        if (_recorder != null) _recorder.Recording = false;
+        var results = BuildResults();
+        var mine = results.FirstOrDefault(r => r.IsPlayer);
+        string summary = mine.Place == 1 ? $"LAST CAR RUNNING!   ·   {mine.Total} POINTS" : $"YOU FINISHED {Ordinal(mine.Place)}   ·   {mine.Total} POINTS";
+        _hud?.ShowResults("Destruction Derby  –  Results", "Survivor", results, summary);
+        // Tests (--autoreplay): open the replay a moment after the results.
+        if (!Headless && DevTools.Instance?.Arg("autoreplay") != null)
+            GetTree().CreateTimer(1.5, true, false, true).Timeout += () => { if (_replay == null) StartReplay(); };
         Finished?.Invoke(this);
     }
+
+    private static string Ordinal(int n) => n + (n % 100 is 11 or 12 or 13 ? "TH" : (n % 10) switch { 1 => "ST", 2 => "ND", 3 => "RD", _ => "TH" });
 
     public IReadOnlyList<EventHud.ResultRow> BuildResults() =>
         _standings.FinishingOrder()
@@ -487,6 +662,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     {
         // Keep following a running car while spectating.
         if (_rig != null && PlayerOut && _phase != Phase.Over && _rig.Target is Car t && !IsRunning(t)) SpectateNext(0);
+        if (_tvLive != null && _rig != null && _replay == null) _tvLive.Focus = _rig.Target;
     }
 
     public override void _ExitTree()

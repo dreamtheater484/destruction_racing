@@ -1,0 +1,3148 @@
+{
+ "voice": "am_fenrir",
+ "speed": 0.88,
+ "sample_rate": 24000,
+ "chain": {
+  "version": 1,
+  "gate_db": -45.0,
+  "head_ms": 30.0,
+  "tail_ms": 80.0,
+  "hp_hz": 250.0,
+  "lp_hz": 5000.0,
+  "fir_taps": 1023,
+  "presence_hz": 2500.0,
+  "presence_db": 4.0,
+  "presence_sigma_oct": 0.55,
+  "drive_rms_db": -14.0,
+  "drive": 1.5,
+  "horn_rolloff_hz": 6500.0,
+  "comp_threshold_db": -20.0,
+  "comp_ratio": 4.0,
+  "comp_knee_db": 6.0,
+  "comp_attack_ms": 3.0,
+  "comp_release_ms": 80.0,
+  "slap_ms": 110.0,
+  "slap_db": -12.0,
+  "slap_lp_hz": 2500.0,
+  "rev_predelay_ms": 40.0,
+  "rev_rt60_s": 2.0,
+  "rev_rt60_5k_s": 0.9,
+  "rev_hf_knee_hz": 1000.0,
+  "rev_wet": 0.22,
+  "rev_seed": 1995,
+  "target_rms_db": -16.0,
+  "ceiling_db": -1.0,
+  "limiter_look_ms": 2.0,
+  "limiter_release_ms": 60.0,
+  "tail_floor_db": -54.0,
+  "max_tail_s": 1.1,
+  "fade_ms": 120.0
+ },
+ "lines": [
+  {
+   "id": "intro_01",
+   "category": "intro",
+   "text": "Ladies and gentlemen, welcome to the Bowl!",
+   "file": "intro_01.ogg",
+   "duration": 3.34,
+   "speech_end": 2.37,
+   "hash": "ad38adf1720a2875"
+  },
+  {
+   "id": "intro_02",
+   "category": "intro",
+   "text": "Twenty cars! One survivor! Let's make some noise!",
+   "file": "intro_02.ogg",
+   "duration": 3.59,
+   "speech_end": 2.715,
+   "hash": "33f469c6ce4c5cfb"
+  },
+  {
+   "id": "intro_03",
+   "category": "intro",
+   "text": "Welcome, derby fans! Only the toughest car drives home!",
+   "file": "intro_03.ogg",
+   "duration": 4.26,
+   "speech_end": 3.405,
+   "hash": "7148c9cbceda0cac"
+  },
+  {
+   "id": "intro_04",
+   "category": "intro",
+   "text": "Twenty cars in the Bowl, and none of them leave pretty!",
+   "file": "intro_04.ogg",
+   "duration": 3.51,
+   "speech_end": 2.75,
+   "hash": "09799f3a9d0e1a78"
+  },
+  {
+   "id": "intro_05",
+   "category": "intro",
+   "text": "Good evening, and welcome to the derby! Hold on to your hats!",
+   "file": "intro_05.ogg",
+   "duration": 4.15,
+   "speech_end": 3.505,
+   "hash": "c46d9da1a793b119"
+  },
+  {
+   "id": "intro_06",
+   "category": "intro",
+   "text": "Simple rules, folks! Hit hard, spin them, stay alive!",
+   "file": "intro_06.ogg",
+   "duration": 3.91,
+   "speech_end": 3.105,
+   "hash": "3f5382ddf9a3106a"
+  },
+  {
+   "id": "start_01",
+   "category": "start",
+   "text": "Let's get it on!",
+   "file": "start_01.ogg",
+   "duration": 1.89,
+   "speech_end": 0.97,
+   "hash": "e7a9df75ae1e13e9"
+  },
+  {
+   "id": "start_02",
+   "category": "start",
+   "text": "Go, go, go!",
+   "file": "start_02.ogg",
+   "duration": 1.81,
+   "speech_end": 0.94,
+   "hash": "671fabe2f1c0de6b"
+  },
+  {
+   "id": "start_03",
+   "category": "start",
+   "text": "And they're off! Here comes the carnage!",
+   "file": "start_03.ogg",
+   "duration": 2.6,
+   "speech_end": 1.87,
+   "hash": "35f0e8d6dc436135"
+  },
+  {
+   "id": "start_04",
+   "category": "start",
+   "text": "Floor it! Let the demolition begin!",
+   "file": "start_04.ogg",
+   "duration": 2.69,
+   "speech_end": 1.895,
+   "hash": "954783b62ddcae88"
+  },
+  {
+   "id": "start_05",
+   "category": "start",
+   "text": "Here we go! Pedal to the metal!",
+   "file": "start_05.ogg",
+   "duration": 2.6,
+   "speech_end": 1.77,
+   "hash": "9861a20af36f6fa2"
+  },
+  {
+   "id": "opening_crunch_01",
+   "category": "opening_crunch",
+   "text": "What a crunch in the middle! Nobody got out clean!",
+   "file": "opening_crunch_01.ogg",
+   "duration": 3.52,
+   "speech_end": 2.665,
+   "hash": "bf3bb939cb20343d"
+  },
+  {
+   "id": "opening_crunch_02",
+   "category": "opening_crunch",
+   "text": "The big pile-up in the centre! Metal everywhere!",
+   "file": "opening_crunch_02.ogg",
+   "duration": 3.52,
+   "speech_end": 2.635,
+   "hash": "46d1064ddae20e5a"
+  },
+  {
+   "id": "opening_crunch_03",
+   "category": "opening_crunch",
+   "text": "And there's the first big smash! The crowd loves it!",
+   "file": "opening_crunch_03.ogg",
+   "duration": 3.86,
+   "speech_end": 2.835,
+   "hash": "1b4928ef49382dd2"
+  },
+  {
+   "id": "opening_crunch_04",
+   "category": "opening_crunch",
+   "text": "Wow! A wall of wreckage right in the middle of the Bowl!",
+   "file": "opening_crunch_04.ogg",
+   "duration": 3.57,
+   "speech_end": 2.57,
+   "hash": "96cbe81f573844e3"
+  },
+  {
+   "id": "big_hit_01",
+   "category": "big_hit",
+   "text": "Ooh, what a hit!",
+   "file": "big_hit_01.ogg",
+   "duration": 1.69,
+   "speech_end": 0.86,
+   "hash": "ec42e07cf1c3e53a"
+  },
+  {
+   "id": "big_hit_02",
+   "category": "big_hit",
+   "text": "That's gonna leave a mark!",
+   "file": "big_hit_02.ogg",
+   "duration": 2.16,
+   "speech_end": 1.255,
+   "hash": "a32c5e77c056a841"
+  },
+  {
+   "id": "big_hit_03",
+   "category": "big_hit",
+   "text": "Bang! Right in the door!",
+   "file": "big_hit_03.ogg",
+   "duration": 2.06,
+   "speech_end": 1.15,
+   "hash": "e87bc1940ada4d65"
+  },
+  {
+   "id": "big_hit_04",
+   "category": "big_hit",
+   "text": "Massive hit!",
+   "file": "big_hit_04.ogg",
+   "duration": 1.78,
+   "speech_end": 0.88,
+   "hash": "5516d93a5b6b002b"
+  },
+  {
+   "id": "big_hit_05",
+   "category": "big_hit",
+   "text": "Crunch! Somebody felt that one!",
+   "file": "big_hit_05.ogg",
+   "duration": 2.5,
+   "speech_end": 1.575,
+   "hash": "598fc7d3c7a4a531"
+  },
+  {
+   "id": "big_hit_06",
+   "category": "big_hit",
+   "text": "What a wallop!",
+   "file": "big_hit_06.ogg",
+   "duration": 1.66,
+   "speech_end": 0.835,
+   "hash": "505d61cc43919845"
+  },
+  {
+   "id": "big_hit_07",
+   "category": "big_hit",
+   "text": "Ouch! Did you hear that?",
+   "file": "big_hit_07.ogg",
+   "duration": 1.98,
+   "speech_end": 1.16,
+   "hash": "e51cde9db6e959f1"
+  },
+  {
+   "id": "big_hit_08",
+   "category": "big_hit",
+   "text": "Smash! The crowd is on its feet!",
+   "file": "big_hit_08.ogg",
+   "duration": 2.5,
+   "speech_end": 1.73,
+   "hash": "53a82511be82942c"
+  },
+  {
+   "id": "big_hit_09",
+   "category": "big_hit",
+   "text": "Sheet metal is flying!",
+   "file": "big_hit_09.ogg",
+   "duration": 2.03,
+   "speech_end": 1.19,
+   "hash": "f80350ab45b5b090"
+  },
+  {
+   "id": "big_hit_10",
+   "category": "big_hit",
+   "text": "That one rattled the grandstand!",
+   "file": "big_hit_10.ogg",
+   "duration": 2.48,
+   "speech_end": 1.685,
+   "hash": "e43f29e5b8508abb"
+  },
+  {
+   "id": "big_hit_11",
+   "category": "big_hit",
+   "text": "Oh my, that's a big one!",
+   "file": "big_hit_11.ogg",
+   "duration": 2.1,
+   "speech_end": 1.255,
+   "hash": "00e1882e1fc13328"
+  },
+  {
+   "id": "big_hit_12",
+   "category": "big_hit",
+   "text": "Talk about a body blow!",
+   "file": "big_hit_12.ogg",
+   "duration": 2.28,
+   "speech_end": 1.295,
+   "hash": "31d5b3cbaf562bd3"
+  },
+  {
+   "id": "big_hit_13",
+   "category": "big_hit",
+   "text": "Boom! Right on target!",
+   "file": "big_hit_13.ogg",
+   "duration": 2.04,
+   "speech_end": 1.205,
+   "hash": "5c2ac8fc7f3af6da"
+  },
+  {
+   "id": "big_hit_14",
+   "category": "big_hit",
+   "text": "Now that's how you hit a car!",
+   "file": "big_hit_14.ogg",
+   "duration": 2.26,
+   "speech_end": 1.375,
+   "hash": "7cb42aedb534eaab"
+  },
+  {
+   "id": "big_hit_15",
+   "category": "big_hit",
+   "text": "Somebody's going to need a new paint job!",
+   "file": "big_hit_15.ogg",
+   "duration": 2.86,
+   "speech_end": 1.985,
+   "hash": "f506e86a9a62012e"
+  },
+  {
+   "id": "player_big_hit_01",
+   "category": "player_big_hit",
+   "text": "Great hit, number seven!",
+   "file": "player_big_hit_01.ogg",
+   "duration": 2.19,
+   "speech_end": 1.275,
+   "hash": "e4a36f25e4a9ebb3"
+  },
+  {
+   "id": "player_big_hit_02",
+   "category": "player_big_hit",
+   "text": "You really nailed that one!",
+   "file": "player_big_hit_02.ogg",
+   "duration": 2.18,
+   "speech_end": 1.33,
+   "hash": "e5da76814d6fcd8e"
+  },
+  {
+   "id": "player_big_hit_03",
+   "category": "player_big_hit",
+   "text": "Wham! Number seven means business!",
+   "file": "player_big_hit_03.ogg",
+   "duration": 2.68,
+   "speech_end": 1.78,
+   "hash": "b7eb51ddce8dcdfa"
+  },
+  {
+   "id": "player_big_hit_04",
+   "category": "player_big_hit",
+   "text": "Beautiful shot! Right in the side!",
+   "file": "player_big_hit_04.ogg",
+   "duration": 2.64,
+   "speech_end": 1.755,
+   "hash": "f21f06305ba722d7"
+  },
+  {
+   "id": "player_big_hit_05",
+   "category": "player_big_hit",
+   "text": "Ooh, you made them pay for that!",
+   "file": "player_big_hit_05.ogg",
+   "duration": 2.31,
+   "speech_end": 1.41,
+   "hash": "047136ea497ed8ca"
+  },
+  {
+   "id": "player_big_hit_06",
+   "category": "player_big_hit",
+   "text": "Now that's a hit! Keep it up!",
+   "file": "player_big_hit_06.ogg",
+   "duration": 2.53,
+   "speech_end": 1.615,
+   "hash": "ff5d5b293555d4b0"
+  },
+  {
+   "id": "player_big_hit_07",
+   "category": "player_big_hit",
+   "text": "You folded that car like a deck chair!",
+   "file": "player_big_hit_07.ogg",
+   "duration": 2.86,
+   "speech_end": 2.025,
+   "hash": "928901825ba24360"
+  },
+  {
+   "id": "player_big_hit_08",
+   "category": "player_big_hit",
+   "text": "Number seven, delivering the goods!",
+   "file": "player_big_hit_08.ogg",
+   "duration": 2.75,
+   "speech_end": 1.845,
+   "hash": "b4b25a6d474b9da4"
+  },
+  {
+   "id": "player_big_hit_09",
+   "category": "player_big_hit",
+   "text": "Textbook hit! The crowd loves you!",
+   "file": "player_big_hit_09.ogg",
+   "duration": 2.77,
+   "speech_end": 1.87,
+   "hash": "5afb7db2ede8697a"
+  },
+  {
+   "id": "player_big_hit_10",
+   "category": "player_big_hit",
+   "text": "Bullseye! What a hit from number seven!",
+   "file": "player_big_hit_10.ogg",
+   "duration": 2.68,
+   "speech_end": 1.88,
+   "hash": "da7f468eb2dccca7"
+  },
+  {
+   "id": "huge_hit_01",
+   "category": "huge_hit",
+   "text": "Head-on! Oh, that was enormous!",
+   "file": "huge_hit_01.ogg",
+   "duration": 2.46,
+   "speech_end": 1.6,
+   "hash": "947ad374ba607193"
+  },
+  {
+   "id": "huge_hit_02",
+   "category": "huge_hit",
+   "text": "Oh my word! Nose to nose at full speed!",
+   "file": "huge_hit_02.ogg",
+   "duration": 3.05,
+   "speech_end": 2.285,
+   "hash": "45abebd1bab214bb"
+  },
+  {
+   "id": "huge_hit_03",
+   "category": "huge_hit",
+   "text": "What a collision! I felt that one up here in the booth!",
+   "file": "huge_hit_03.ogg",
+   "duration": 3.61,
+   "speech_end": 2.785,
+   "hash": "26d2237a5ba43d47"
+  },
+  {
+   "id": "huge_hit_04",
+   "category": "huge_hit",
+   "text": "Unbelievable! Two cars, one almighty bang!",
+   "file": "huge_hit_04.ogg",
+   "duration": 3.18,
+   "speech_end": 2.4,
+   "hash": "23bd2ed6215862a6"
+  },
+  {
+   "id": "huge_hit_05",
+   "category": "huge_hit",
+   "text": "That's the hit of the night, folks!",
+   "file": "huge_hit_05.ogg",
+   "duration": 2.37,
+   "speech_end": 1.495,
+   "hash": "68915fcf92b9b829"
+  },
+  {
+   "id": "player_spin_01",
+   "category": "player_spin",
+   "text": "You spun them round! Nice!",
+   "file": "player_spin_01.ogg",
+   "duration": 2.28,
+   "speech_end": 1.58,
+   "hash": "1e638df96ca77c08"
+  },
+  {
+   "id": "player_spin_02",
+   "category": "player_spin",
+   "text": "Spin! Points for number seven!",
+   "file": "player_spin_02.ogg",
+   "duration": 2.49,
+   "speech_end": 1.57,
+   "hash": "36bacaad3612c642"
+  },
+  {
+   "id": "player_spin_03",
+   "category": "player_spin",
+   "text": "Round they go! Lovely work!",
+   "file": "player_spin_03.ogg",
+   "duration": 2.25,
+   "speech_end": 1.415,
+   "hash": "2ca1188f90d96ebb"
+  },
+  {
+   "id": "player_spin_04",
+   "category": "player_spin",
+   "text": "Nice spin! The points are rolling in!",
+   "file": "player_spin_04.ogg",
+   "duration": 2.79,
+   "speech_end": 1.945,
+   "hash": "c7b672df48fb5001"
+  },
+  {
+   "id": "player_spin_05",
+   "category": "player_spin",
+   "text": "You sent that car twirling!",
+   "file": "player_spin_05.ogg",
+   "duration": 2.32,
+   "speech_end": 1.415,
+   "hash": "c2c55aef20be42fd"
+  },
+  {
+   "id": "player_spin_06",
+   "category": "player_spin",
+   "text": "Look at that one spin! Great driving!",
+   "file": "player_spin_06.ogg",
+   "duration": 3.08,
+   "speech_end": 2.215,
+   "hash": "5c48a282829655b5"
+  },
+  {
+   "id": "player_spin_07",
+   "category": "player_spin",
+   "text": "A perfect tap, and away they spin!",
+   "file": "player_spin_07.ogg",
+   "duration": 2.72,
+   "speech_end": 1.84,
+   "hash": "ec69eecdaa470a79"
+  },
+  {
+   "id": "player_spin_08",
+   "category": "player_spin",
+   "text": "That's a spinner! Well done, seven!",
+   "file": "player_spin_08.ogg",
+   "duration": 2.72,
+   "speech_end": 1.815,
+   "hash": "f9efac6bff5702f5"
+  },
+  {
+   "id": "player_spin_09",
+   "category": "player_spin",
+   "text": "Spun right round! The judges like that!",
+   "file": "player_spin_09.ogg",
+   "duration": 2.99,
+   "speech_end": 2.135,
+   "hash": "46b4c10d6e8780c5"
+  },
+  {
+   "id": "player_spin_10",
+   "category": "player_spin",
+   "text": "Clip the back, watch them spin! Beautiful!",
+   "file": "player_spin_10.ogg",
+   "duration": 3.14,
+   "speech_end": 2.185,
+   "hash": "8384160c6421270c"
+  },
+  {
+   "id": "spin_360_01",
+   "category": "spin_360",
+   "text": "All the way round!",
+   "file": "spin_360_01.ogg",
+   "duration": 1.69,
+   "speech_end": 0.95,
+   "hash": "356d3b90ba7b8fc1"
+  },
+  {
+   "id": "spin_360_02",
+   "category": "spin_360",
+   "text": "A full three-sixty! Incredible!",
+   "file": "spin_360_02.ogg",
+   "duration": 2.98,
+   "speech_end": 2.0,
+   "hash": "b8ff478f417a14aa"
+  },
+  {
+   "id": "spin_360_03",
+   "category": "spin_360",
+   "text": "Round, and round, and round! What a spin!",
+   "file": "spin_360_03.ogg",
+   "duration": 2.89,
+   "speech_end": 2.1,
+   "hash": "be04de43be50eb1a"
+  },
+  {
+   "id": "spin_360_04",
+   "category": "spin_360",
+   "text": "They went all the way round! Spectacular!",
+   "file": "spin_360_04.ogg",
+   "duration": 3.03,
+   "speech_end": 2.19,
+   "hash": "989bc0edf1e40fbb"
+  },
+  {
+   "id": "player_wrecks_car_01",
+   "category": "player_wrecks_car",
+   "text": "You wrecked them! What a finish!",
+   "file": "player_wrecks_car_01.ogg",
+   "duration": 2.2,
+   "speech_end": 1.425,
+   "hash": "7ae9481e5706e9b0"
+  },
+  {
+   "id": "player_wrecks_car_02",
+   "category": "player_wrecks_car",
+   "text": "That car is going nowhere, thanks to you!",
+   "file": "player_wrecks_car_02.ogg",
+   "duration": 3.08,
+   "speech_end": 2.115,
+   "hash": "569f04a4abc72edc"
+  },
+  {
+   "id": "player_wrecks_car_03",
+   "category": "player_wrecks_car",
+   "text": "Number seven claims another victim!",
+   "file": "player_wrecks_car_03.ogg",
+   "duration": 2.85,
+   "speech_end": 1.95,
+   "hash": "cfce1201892b1b3a"
+  },
+  {
+   "id": "player_wrecks_car_04",
+   "category": "player_wrecks_car",
+   "text": "Lights out! You finished them off!",
+   "file": "player_wrecks_car_04.ogg",
+   "duration": 2.41,
+   "speech_end": 1.525,
+   "hash": "469303d001966a8d"
+  },
+  {
+   "id": "player_wrecks_car_05",
+   "category": "player_wrecks_car",
+   "text": "One less car in the Bowl, courtesy of number seven!",
+   "file": "player_wrecks_car_05.ogg",
+   "duration": 3.64,
+   "speech_end": 2.735,
+   "hash": "aa2a952362000d95"
+  },
+  {
+   "id": "player_wrecks_car_06",
+   "category": "player_wrecks_car",
+   "text": "You put that one out of its misery!",
+   "file": "player_wrecks_car_06.ogg",
+   "duration": 2.72,
+   "speech_end": 1.855,
+   "hash": "6be3caae8215b3f0"
+  },
+  {
+   "id": "player_wrecks_car_07",
+   "category": "player_wrecks_car",
+   "text": "Another wreck! Number seven is on a rampage!",
+   "file": "player_wrecks_car_07.ogg",
+   "duration": 3.23,
+   "speech_end": 2.41,
+   "hash": "8bd1f6f4f1f1cd66"
+  },
+  {
+   "id": "player_wrecks_car_08",
+   "category": "player_wrecks_car",
+   "text": "That's scrap metal now! Great work!",
+   "file": "player_wrecks_car_08.ogg",
+   "duration": 2.85,
+   "speech_end": 1.965,
+   "hash": "c50e37dc8e85abd7"
+  },
+  {
+   "id": "wreck_generic_01",
+   "category": "wreck_generic",
+   "text": "That car is done for!",
+   "file": "wreck_generic_01.ogg",
+   "duration": 2.18,
+   "speech_end": 1.225,
+   "hash": "4d2b6daec6713789"
+  },
+  {
+   "id": "wreck_generic_02",
+   "category": "wreck_generic",
+   "text": "And that's the end of that one!",
+   "file": "wreck_generic_02.ogg",
+   "duration": 2.43,
+   "speech_end": 1.57,
+   "hash": "fd5ee912b1a3789f"
+  },
+  {
+   "id": "wreck_generic_03",
+   "category": "wreck_generic",
+   "text": "Totally wrecked! Off to the scrap yard!",
+   "file": "wreck_generic_03.ogg",
+   "duration": 2.85,
+   "speech_end": 1.98,
+   "hash": "81ac7019d8fd7c9e"
+  },
+  {
+   "id": "wreck_generic_04",
+   "category": "wreck_generic",
+   "text": "Out of the derby! That car is finished!",
+   "file": "wreck_generic_04.ogg",
+   "duration": 2.83,
+   "speech_end": 1.975,
+   "hash": "650093ebbecd456d"
+  },
+  {
+   "id": "wreck_generic_05",
+   "category": "wreck_generic",
+   "text": "Steam, smoke, and silence! That one's out!",
+   "file": "wreck_generic_05.ogg",
+   "duration": 3.22,
+   "speech_end": 2.315,
+   "hash": "a6004341e04b11fc"
+  },
+  {
+   "id": "wreck_generic_06",
+   "category": "wreck_generic",
+   "text": "Another one for the scrap heap!",
+   "file": "wreck_generic_06.ogg",
+   "duration": 2.29,
+   "speech_end": 1.6,
+   "hash": "636a08483776dee8"
+  },
+  {
+   "id": "wreck_generic_07",
+   "category": "wreck_generic",
+   "text": "Game over for that car!",
+   "file": "wreck_generic_07.ogg",
+   "duration": 2.2,
+   "speech_end": 1.275,
+   "hash": "cab952f78c99c27a"
+  },
+  {
+   "id": "wreck_generic_08",
+   "category": "wreck_generic",
+   "text": "They're out! Somebody fetch the tow truck!",
+   "file": "wreck_generic_08.ogg",
+   "duration": 2.65,
+   "speech_end": 1.805,
+   "hash": "46fcf22134c1645e"
+  },
+  {
+   "id": "wreck_generic_09",
+   "category": "wreck_generic",
+   "text": "That one won't be driving home tonight!",
+   "file": "wreck_generic_09.ogg",
+   "duration": 2.66,
+   "speech_end": 1.885,
+   "hash": "169ce304315069ef"
+  },
+  {
+   "id": "wreck_generic_10",
+   "category": "wreck_generic",
+   "text": "Down goes another one!",
+   "file": "wreck_generic_10.ogg",
+   "duration": 2.12,
+   "speech_end": 1.245,
+   "hash": "2229ed7f455f6829"
+  },
+  {
+   "id": "player_spun_01",
+   "category": "player_spun",
+   "text": "Whoa, you got spun round!",
+   "file": "player_spun_01.ogg",
+   "duration": 2.08,
+   "speech_end": 1.24,
+   "hash": "fff2e119131c7512"
+  },
+  {
+   "id": "player_spun_02",
+   "category": "player_spun",
+   "text": "Round you go! Shake it off, seven!",
+   "file": "player_spun_02.ogg",
+   "duration": 2.52,
+   "speech_end": 1.635,
+   "hash": "afa8a027dc7a685b"
+  },
+  {
+   "id": "player_spun_03",
+   "category": "player_spun",
+   "text": "They spun you! Get back in it!",
+   "file": "player_spun_03.ogg",
+   "duration": 2.42,
+   "speech_end": 1.6,
+   "hash": "3bcd266226ed0acf"
+  },
+  {
+   "id": "player_spun_04",
+   "category": "player_spun",
+   "text": "Uh oh, number seven is facing the wrong way!",
+   "file": "player_spun_04.ogg",
+   "duration": 3.14,
+   "speech_end": 2.28,
+   "hash": "e3de8904913022ca"
+  },
+  {
+   "id": "player_lost_hood_01",
+   "category": "player_lost_hood",
+   "text": "You've lost your hood!",
+   "file": "player_lost_hood_01.ogg",
+   "duration": 2.02,
+   "speech_end": 1.055,
+   "hash": "58079a4d72560283"
+  },
+  {
+   "id": "player_lost_hood_02",
+   "category": "player_lost_hood",
+   "text": "There goes your hood!",
+   "file": "player_lost_hood_02.ogg",
+   "duration": 1.92,
+   "speech_end": 0.985,
+   "hash": "d6a239f7cdbd8191"
+  },
+  {
+   "id": "player_lost_hood_03",
+   "category": "player_lost_hood",
+   "text": "Your bonnet's gone flying!",
+   "file": "player_lost_hood_03.ogg",
+   "duration": 2.22,
+   "speech_end": 1.38,
+   "hash": "d261dea7c3b53fd3"
+  },
+  {
+   "id": "player_lost_bumper_01",
+   "category": "player_lost_bumper",
+   "text": "You've lost your bumper!",
+   "file": "player_lost_bumper_01.ogg",
+   "duration": 2.16,
+   "speech_end": 1.18,
+   "hash": "13039c5b81ba8182"
+  },
+  {
+   "id": "player_lost_bumper_02",
+   "category": "player_lost_bumper",
+   "text": "There goes the bumper! Never mind, it's only trim!",
+   "file": "player_lost_bumper_02.ogg",
+   "duration": 3.62,
+   "speech_end": 2.81,
+   "hash": "208a86299dde73ff"
+  },
+  {
+   "id": "player_lost_bumper_03",
+   "category": "player_lost_bumper",
+   "text": "Bumper's gone! Not that you needed it!",
+   "file": "player_lost_bumper_03.ogg",
+   "duration": 2.76,
+   "speech_end": 1.875,
+   "hash": "2df57d7d2ddae0e7"
+  },
+  {
+   "id": "player_lost_wheel_01",
+   "category": "player_lost_wheel",
+   "text": "You've lost a wheel!",
+   "file": "player_lost_wheel_01.ogg",
+   "duration": 1.99,
+   "speech_end": 1.05,
+   "hash": "263d07c124b11dc3"
+  },
+  {
+   "id": "player_lost_wheel_02",
+   "category": "player_lost_wheel",
+   "text": "There goes a wheel! Hang on to that steering!",
+   "file": "player_lost_wheel_02.ogg",
+   "duration": 3.12,
+   "speech_end": 2.255,
+   "hash": "b11e02841c1d6e00"
+  },
+  {
+   "id": "player_lost_wheel_03",
+   "category": "player_lost_wheel",
+   "text": "Your wheel is rolling away without you!",
+   "file": "player_lost_wheel_03.ogg",
+   "duration": 2.52,
+   "speech_end": 1.79,
+   "hash": "c087afd444d2f48f"
+  },
+  {
+   "id": "player_lost_wheel_04",
+   "category": "player_lost_wheel",
+   "text": "Three wheels and a prayer, number seven!",
+   "file": "player_lost_wheel_04.ogg",
+   "duration": 2.78,
+   "speech_end": 1.92,
+   "hash": "c3fe46e86d94ed76"
+  },
+  {
+   "id": "player_on_fire_01",
+   "category": "player_on_fire",
+   "text": "You're on fire!",
+   "file": "player_on_fire_01.ogg",
+   "duration": 1.75,
+   "speech_end": 0.905,
+   "hash": "e2ecaefc58851877"
+  },
+  {
+   "id": "player_on_fire_02",
+   "category": "player_on_fire",
+   "text": "Number seven is on fire! Keep moving!",
+   "file": "player_on_fire_02.ogg",
+   "duration": 3.2,
+   "speech_end": 2.3,
+   "hash": "052e9e1c179a4d00"
+  },
+  {
+   "id": "player_on_fire_03",
+   "category": "player_on_fire",
+   "text": "Flames! Your car is on fire!",
+   "file": "player_on_fire_03.ogg",
+   "duration": 2.53,
+   "speech_end": 1.61,
+   "hash": "78ed5af3ed80fae1"
+  },
+  {
+   "id": "player_on_fire_04",
+   "category": "player_on_fire",
+   "text": "Fire! Better make this count, seven!",
+   "file": "player_on_fire_04.ogg",
+   "duration": 2.75,
+   "speech_end": 1.84,
+   "hash": "2770fb58b98779ad"
+  },
+  {
+   "id": "player_smoking_01",
+   "category": "player_smoking",
+   "text": "You're smoking, number seven!",
+   "file": "player_smoking_01.ogg",
+   "duration": 2.25,
+   "speech_end": 1.365,
+   "hash": "37e345ba8d0f82fa"
+  },
+  {
+   "id": "player_smoking_02",
+   "category": "player_smoking",
+   "text": "Smoke pouring out of number seven! Careful now!",
+   "file": "player_smoking_02.ogg",
+   "duration": 3.42,
+   "speech_end": 2.55,
+   "hash": "00c3d70fda615810"
+  },
+  {
+   "id": "player_smoking_03",
+   "category": "player_smoking",
+   "text": "That engine's smoking! Not long left!",
+   "file": "player_smoking_03.ogg",
+   "duration": 3.09,
+   "speech_end": 2.175,
+   "hash": "260f44f4494d59e1"
+  },
+  {
+   "id": "player_glass_01",
+   "category": "player_glass",
+   "text": "There goes your windscreen!",
+   "file": "player_glass_01.ogg",
+   "duration": 2.1,
+   "speech_end": 1.295,
+   "hash": "4a0f076fcd32fc44"
+  },
+  {
+   "id": "player_glass_02",
+   "category": "player_glass",
+   "text": "Glass everywhere! Can you still see out of that thing?",
+   "file": "player_glass_02.ogg",
+   "duration": 3.54,
+   "speech_end": 2.68,
+   "hash": "b3352cb9d535ffbc"
+  },
+  {
+   "id": "player_glass_03",
+   "category": "player_glass",
+   "text": "Your windows are history!",
+   "file": "player_glass_03.ogg",
+   "duration": 2.18,
+   "speech_end": 1.32,
+   "hash": "832b4e9b9f02637c"
+  },
+  {
+   "id": "player_front_critical_01",
+   "category": "player_front_critical",
+   "text": "Your front end is history! Turn round and use your rear!",
+   "file": "player_front_critical_01.ogg",
+   "duration": 4.2,
+   "speech_end": 3.21,
+   "hash": "c3844d55950c33df"
+  },
+  {
+   "id": "player_front_critical_02",
+   "category": "player_front_critical",
+   "text": "Front's gone, seven! Go backwards, save that engine!",
+   "file": "player_front_critical_02.ogg",
+   "duration": 3.6,
+   "speech_end": 2.79,
+   "hash": "af15f8b0e49c9c54"
+  },
+  {
+   "id": "player_front_critical_03",
+   "category": "player_front_critical",
+   "text": "Front end in pieces! Reverse into them!",
+   "file": "player_front_critical_03.ogg",
+   "duration": 3.14,
+   "speech_end": 2.23,
+   "hash": "96f5512956eb1a05"
+  },
+  {
+   "id": "player_rear_critical_01",
+   "category": "player_rear_critical",
+   "text": "Your rear end is hanging by a thread!",
+   "file": "player_rear_critical_01.ogg",
+   "duration": 2.6,
+   "speech_end": 1.735,
+   "hash": "46c46d4f3c0dea71"
+  },
+  {
+   "id": "player_rear_critical_02",
+   "category": "player_rear_critical",
+   "text": "The back end can't take much more! Mind your rear!",
+   "file": "player_rear_critical_02.ogg",
+   "duration": 3.41,
+   "speech_end": 2.535,
+   "hash": "1749b41e29519bb9"
+  },
+  {
+   "id": "player_side_critical_01",
+   "category": "player_side_critical",
+   "text": "Your side's caved in! Protect those doors!",
+   "file": "player_side_critical_01.ogg",
+   "duration": 3.4,
+   "speech_end": 2.45,
+   "hash": "178b410cd7740f24"
+  },
+  {
+   "id": "player_side_critical_02",
+   "category": "player_side_critical",
+   "text": "That door can't take another hit, seven!",
+   "file": "player_side_critical_02.ogg",
+   "duration": 2.89,
+   "speech_end": 1.965,
+   "hash": "e0b0523a9669a580"
+  },
+  {
+   "id": "player_lights_01",
+   "category": "player_lights",
+   "text": "There go your headlights!",
+   "file": "player_lights_01.ogg",
+   "duration": 1.99,
+   "speech_end": 1.115,
+   "hash": "53cf0447858e965a"
+  },
+  {
+   "id": "player_lights_02",
+   "category": "player_lights",
+   "text": "Lights out up front, seven! Drive by feel!",
+   "file": "player_lights_02.ogg",
+   "duration": 3.39,
+   "speech_end": 2.425,
+   "hash": "d45be40f00d6dae7"
+  },
+  {
+   "id": "player_wrecked_01",
+   "category": "player_wrecked",
+   "text": "Oh no! Number seven is out!",
+   "file": "player_wrecked_01.ogg",
+   "duration": 2.32,
+   "speech_end": 1.525,
+   "hash": "bd880050a74641d1"
+  },
+  {
+   "id": "player_wrecked_02",
+   "category": "player_wrecked",
+   "text": "That's it for you! Your car is finished!",
+   "file": "player_wrecked_02.ogg",
+   "duration": 2.61,
+   "speech_end": 1.82,
+   "hash": "800befc7f5138ca6"
+  },
+  {
+   "id": "player_wrecked_03",
+   "category": "player_wrecked",
+   "text": "You're wrecked! What a valiant effort!",
+   "file": "player_wrecked_03.ogg",
+   "duration": 2.38,
+   "speech_end": 1.625,
+   "hash": "216ea59b6e31a4ac"
+  },
+  {
+   "id": "player_wrecked_04",
+   "category": "player_wrecked",
+   "text": "Game over, number seven! Better luck next time!",
+   "file": "player_wrecked_04.ogg",
+   "duration": 3.58,
+   "speech_end": 2.78,
+   "hash": "068ab8c23e1bcfbe"
+  },
+  {
+   "id": "player_wrecked_05",
+   "category": "player_wrecked",
+   "text": "Number seven has had it! The crowd salutes you!",
+   "file": "player_wrecked_05.ogg",
+   "duration": 3.6,
+   "speech_end": 2.675,
+   "hash": "44914fffbb9b61b3"
+  },
+  {
+   "id": "player_wrecked_06",
+   "category": "player_wrecked",
+   "text": "Your derby is done! Give that car a round of applause!",
+   "file": "player_wrecked_06.ogg",
+   "duration": 3.82,
+   "speech_end": 2.975,
+   "hash": "3aa98101bde9ece0"
+  },
+  {
+   "id": "rollover_01",
+   "category": "rollover",
+   "text": "Over it goes! A rollover!",
+   "file": "rollover_01.ogg",
+   "duration": 2.4,
+   "speech_end": 1.52,
+   "hash": "9b151c03e5b2bdcd"
+  },
+  {
+   "id": "rollover_02",
+   "category": "rollover",
+   "text": "Upside down! What a sight!",
+   "file": "rollover_02.ogg",
+   "duration": 2.33,
+   "speech_end": 1.41,
+   "hash": "27620a6df0e6cded"
+  },
+  {
+   "id": "rollover_03",
+   "category": "rollover",
+   "text": "Wheels in the air! It's gone right over!",
+   "file": "rollover_03.ogg",
+   "duration": 3.19,
+   "speech_end": 2.22,
+   "hash": "fa496ef1cbc57e61"
+  },
+  {
+   "id": "rollover_04",
+   "category": "rollover",
+   "text": "It's on its roof! The crowd goes wild!",
+   "file": "rollover_04.ogg",
+   "duration": 3.1,
+   "speech_end": 2.255,
+   "hash": "f5874a38f76a4b0f"
+  },
+  {
+   "id": "new_leader_01",
+   "category": "new_leader",
+   "text": "We have a new leader!",
+   "file": "new_leader_01.ogg",
+   "duration": 1.93,
+   "speech_end": 1.035,
+   "hash": "604e4357b2d27ddf"
+  },
+  {
+   "id": "new_leader_02",
+   "category": "new_leader",
+   "text": "Change at the top of the scoreboard!",
+   "file": "new_leader_02.ogg",
+   "duration": 2.51,
+   "speech_end": 1.59,
+   "hash": "e5efde27d1bf5c91"
+  },
+  {
+   "id": "new_leader_03",
+   "category": "new_leader",
+   "text": "A new car takes the lead on points!",
+   "file": "new_leader_03.ogg",
+   "duration": 2.61,
+   "speech_end": 1.825,
+   "hash": "843447144bf811b5"
+  },
+  {
+   "id": "new_leader_04",
+   "category": "new_leader",
+   "text": "Look at the scoreboard! New leader!",
+   "file": "new_leader_04.ogg",
+   "duration": 2.48,
+   "speech_end": 1.66,
+   "hash": "79ea9bb279b27526"
+  },
+  {
+   "id": "player_leader_01",
+   "category": "player_leader",
+   "text": "Number seven leads! Everyone's coming for you now!",
+   "file": "player_leader_01.ogg",
+   "duration": 3.65,
+   "speech_end": 2.795,
+   "hash": "b4df47a2d0603337"
+  },
+  {
+   "id": "player_leader_02",
+   "category": "player_leader",
+   "text": "You're top of the scoreboard! Watch your back!",
+   "file": "player_leader_02.ogg",
+   "duration": 2.85,
+   "speech_end": 2.065,
+   "hash": "e17726d1e9b0b9c4"
+  },
+  {
+   "id": "player_leader_03",
+   "category": "player_leader",
+   "text": "You're the leader! That's a target on your back!",
+   "file": "player_leader_03.ogg",
+   "duration": 3.03,
+   "speech_end": 2.205,
+   "hash": "7d7df7f44701de89"
+  },
+  {
+   "id": "player_leader_04",
+   "category": "player_leader",
+   "text": "You're in the lead! Now they all want a piece of you!",
+   "file": "player_leader_04.ogg",
+   "duration": 3.27,
+   "speech_end": 2.37,
+   "hash": "4edb7c4aa2e40530"
+  },
+  {
+   "id": "hunted_01",
+   "category": "hunted",
+   "text": "They're ganging up on you, seven!",
+   "file": "hunted_01.ogg",
+   "duration": 2.33,
+   "speech_end": 1.495,
+   "hash": "5781a1ff10eb37dd"
+  },
+  {
+   "id": "hunted_02",
+   "category": "hunted",
+   "text": "Look out! The whole pack is after you!",
+   "file": "hunted_02.ogg",
+   "duration": 2.87,
+   "speech_end": 1.965,
+   "hash": "8a1846f98445d5dd"
+  },
+  {
+   "id": "hunted_03",
+   "category": "hunted",
+   "text": "Everybody wants number seven! Get out of there!",
+   "file": "hunted_03.ogg",
+   "duration": 3.53,
+   "speech_end": 2.645,
+   "hash": "16dd8c610cc11728"
+  },
+  {
+   "id": "reverse_ram_01",
+   "category": "reverse_ram",
+   "text": "Backwards into them! Textbook!",
+   "file": "reverse_ram_01.ogg",
+   "duration": 2.64,
+   "speech_end": 1.75,
+   "hash": "11e3c74cf8fe7386"
+  },
+  {
+   "id": "reverse_ram_02",
+   "category": "reverse_ram",
+   "text": "Reverse ram! Engine safe, smart driving!",
+   "file": "reverse_ram_02.ogg",
+   "duration": 3.35,
+   "speech_end": 2.465,
+   "hash": "6c96c1f3b5ab4fbd"
+  },
+  {
+   "id": "reverse_ram_03",
+   "category": "reverse_ram",
+   "text": "Rear end first! That's how the pros do it!",
+   "file": "reverse_ram_03.ogg",
+   "duration": 3.35,
+   "speech_end": 2.415,
+   "hash": "4779d9cbae7ec33c"
+  },
+  {
+   "id": "reverse_ram_04",
+   "category": "reverse_ram",
+   "text": "Back it up, and bang! Beautiful!",
+   "file": "reverse_ram_04.ogg",
+   "duration": 2.65,
+   "speech_end": 1.73,
+   "hash": "97aa75fce2514a24"
+  },
+  {
+   "id": "pileup_01",
+   "category": "pileup",
+   "text": "Pile-up! Cars everywhere!",
+   "file": "pileup_01.ogg",
+   "duration": 2.24,
+   "speech_end": 1.33,
+   "hash": "340a8fbfacc39741"
+  },
+  {
+   "id": "pileup_02",
+   "category": "pileup",
+   "text": "What a tangle! Who's on top of who?",
+   "file": "pileup_02.ogg",
+   "duration": 2.68,
+   "speech_end": 1.7,
+   "hash": "bfe22f4e1f3f948f"
+  },
+  {
+   "id": "pileup_03",
+   "category": "pileup",
+   "text": "Three, four, five cars in one big heap!",
+   "file": "pileup_03.ogg",
+   "duration": 2.93,
+   "speech_end": 2.21,
+   "hash": "c4a4cc2130d2bfc5"
+  },
+  {
+   "id": "lull_01",
+   "category": "lull",
+   "text": "Come on, get stuck in!",
+   "file": "lull_01.ogg",
+   "duration": 2.11,
+   "speech_end": 1.22,
+   "hash": "4625c1948dfb0c95"
+  },
+  {
+   "id": "lull_02",
+   "category": "lull",
+   "text": "The crowd wants action!",
+   "file": "lull_02.ogg",
+   "duration": 2.07,
+   "speech_end": 1.17,
+   "hash": "3c1b052db824de3e"
+  },
+  {
+   "id": "lull_03",
+   "category": "lull",
+   "text": "Somebody hit somebody!",
+   "file": "lull_03.ogg",
+   "duration": 2.23,
+   "speech_end": 1.24,
+   "hash": "1355da75c1d8710f"
+  },
+  {
+   "id": "lull_04",
+   "category": "lull",
+   "text": "Don't be shy, drivers! Find a target!",
+   "file": "lull_04.ogg",
+   "duration": 3.12,
+   "speech_end": 2.18,
+   "hash": "ff30af857fd73beb"
+  },
+  {
+   "id": "lull_05",
+   "category": "lull",
+   "text": "We didn't come here to watch a parade!",
+   "file": "lull_05.ogg",
+   "duration": 2.79,
+   "speech_end": 1.875,
+   "hash": "54273887c2ac88a9"
+  },
+  {
+   "id": "lull_06",
+   "category": "lull",
+   "text": "Wake up out there! Let's see some contact!",
+   "file": "lull_06.ogg",
+   "duration": 2.87,
+   "speech_end": 2.165,
+   "hash": "78b61e4ec314ba60"
+  },
+  {
+   "id": "lull_07",
+   "category": "lull",
+   "text": "Is this a derby or a Sunday drive?",
+   "file": "lull_07.ogg",
+   "duration": 2.88,
+   "speech_end": 2.02,
+   "hash": "f116f646aa4b8517"
+  },
+  {
+   "id": "lull_08",
+   "category": "lull",
+   "text": "Plenty of cars left to hit, folks!",
+   "file": "lull_08.ogg",
+   "duration": 2.56,
+   "speech_end": 1.79,
+   "hash": "dce61863843c354d"
+  },
+  {
+   "id": "cars_left_10_01",
+   "category": "cars_left_10",
+   "text": "Ten cars left in the Bowl!",
+   "file": "cars_left_10_01.ogg",
+   "duration": 2.42,
+   "speech_end": 1.47,
+   "hash": "d766e6267bfc5f68"
+  },
+  {
+   "id": "cars_left_10_02",
+   "category": "cars_left_10",
+   "text": "We're down to ten! Half the field is scrap!",
+   "file": "cars_left_10_02.ogg",
+   "duration": 2.99,
+   "speech_end": 2.15,
+   "hash": "0b9f22364090f82e"
+  },
+  {
+   "id": "cars_left_5_01",
+   "category": "cars_left_5",
+   "text": "Five cars left!",
+   "file": "cars_left_5_01.ogg",
+   "duration": 1.87,
+   "speech_end": 1.05,
+   "hash": "433bdb1d88d91f12"
+  },
+  {
+   "id": "cars_left_5_02",
+   "category": "cars_left_5",
+   "text": "Only five survivors! This is getting serious!",
+   "file": "cars_left_5_02.ogg",
+   "duration": 3.57,
+   "speech_end": 2.72,
+   "hash": "1f8d229db1d6fb52"
+  },
+  {
+   "id": "cars_left_5_03",
+   "category": "cars_left_5",
+   "text": "Down to the final five!",
+   "file": "cars_left_5_03.ogg",
+   "duration": 2.24,
+   "speech_end": 1.315,
+   "hash": "1755c612283857b7"
+  },
+  {
+   "id": "cars_left_3_01",
+   "category": "cars_left_3",
+   "text": "Three cars left!",
+   "file": "cars_left_3_01.ogg",
+   "duration": 1.85,
+   "speech_end": 1.04,
+   "hash": "a49a71922e5d9fc1"
+  },
+  {
+   "id": "cars_left_3_02",
+   "category": "cars_left_3",
+   "text": "Just three remain! Who wants it most?",
+   "file": "cars_left_3_02.ogg",
+   "duration": 2.79,
+   "speech_end": 1.87,
+   "hash": "1aa246f782bd5d6b"
+  },
+  {
+   "id": "cars_left_3_03",
+   "category": "cars_left_3",
+   "text": "Final three! Every hit counts now!",
+   "file": "cars_left_3_03.ogg",
+   "duration": 2.91,
+   "speech_end": 2.015,
+   "hash": "5ddbb9e30ccbd0e6"
+  },
+  {
+   "id": "final_duel_01",
+   "category": "final_duel",
+   "text": "It's down to the last two!",
+   "file": "final_duel_01.ogg",
+   "duration": 2.36,
+   "speech_end": 1.405,
+   "hash": "5eb2d9bd052b1564"
+  },
+  {
+   "id": "final_duel_02",
+   "category": "final_duel",
+   "text": "Two cars left! One more hit could do it!",
+   "file": "final_duel_02.ogg",
+   "duration": 3.1,
+   "speech_end": 2.18,
+   "hash": "760e4b3697b4d605"
+  },
+  {
+   "id": "final_duel_03",
+   "category": "final_duel",
+   "text": "Head to head for the win! The crowd is on its feet!",
+   "file": "final_duel_03.ogg",
+   "duration": 3.49,
+   "speech_end": 2.745,
+   "hash": "1582d607c6b7c244"
+  },
+  {
+   "id": "final_duel_04",
+   "category": "final_duel",
+   "text": "Two left standing! This is it!",
+   "file": "final_duel_04.ogg",
+   "duration": 2.58,
+   "speech_end": 1.65,
+   "hash": "47eebd9ad133bb42"
+  },
+  {
+   "id": "player_wins_01",
+   "category": "player_wins",
+   "text": "Number seven is the last car running! You win!",
+   "file": "player_wins_01.ogg",
+   "duration": 3.49,
+   "speech_end": 2.585,
+   "hash": "70e94479c9a0adc6"
+  },
+  {
+   "id": "player_wins_02",
+   "category": "player_wins",
+   "text": "You did it! Champion of the Bowl!",
+   "file": "player_wins_02.ogg",
+   "duration": 2.71,
+   "speech_end": 1.74,
+   "hash": "035721d3e5f8301b"
+  },
+  {
+   "id": "player_wins_03",
+   "category": "player_wins",
+   "text": "The last car standing is number seven! What a performance!",
+   "file": "player_wins_03.ogg",
+   "duration": 4.18,
+   "speech_end": 3.355,
+   "hash": "8104b442dd25c459"
+  },
+  {
+   "id": "player_wins_04",
+   "category": "player_wins",
+   "text": "Victory for number seven! Take a bow!",
+   "file": "player_wins_04.ogg",
+   "duration": 3.2,
+   "speech_end": 2.19,
+   "hash": "6a548d7c4943beff"
+  },
+  {
+   "id": "results_01",
+   "category": "results",
+   "text": "What a night of destruction! Let's look at the scores!",
+   "file": "results_01.ogg",
+   "duration": 3.59,
+   "speech_end": 2.71,
+   "hash": "e7e79df6f8614b51"
+  },
+  {
+   "id": "results_02",
+   "category": "results",
+   "text": "That's the derby done! Here are your results!",
+   "file": "results_02.ogg",
+   "duration": 3.1,
+   "speech_end": 2.215,
+   "hash": "2ae3f55b670b2bfd"
+  },
+  {
+   "id": "results_03",
+   "category": "results",
+   "text": "Thank you, derby fans! See you next time in the Bowl!",
+   "file": "results_03.ogg",
+   "duration": 3.64,
+   "speech_end": 2.61,
+   "hash": "97f0841f074cd2c9"
+  },
+  {
+   "id": "wrecked_num_02",
+   "category": "wrecked_num",
+   "text": "Number two is out!",
+   "file": "wrecked_num_02.ogg",
+   "duration": 1.94,
+   "speech_end": 1.06,
+   "hash": "fe1bbcd7d4b85bb2"
+  },
+  {
+   "id": "wrecked_num_03",
+   "category": "wrecked_num",
+   "text": "That's it for number three!",
+   "file": "wrecked_num_03.ogg",
+   "duration": 2.2,
+   "speech_end": 1.265,
+   "hash": "28c42e7b82fda885"
+  },
+  {
+   "id": "wrecked_num_04",
+   "category": "wrecked_num",
+   "text": "Number four is out!",
+   "file": "wrecked_num_04.ogg",
+   "duration": 1.93,
+   "speech_end": 1.09,
+   "hash": "f4a9c5ad46e1a097"
+  },
+  {
+   "id": "wrecked_num_05",
+   "category": "wrecked_num",
+   "text": "That's it for number five!",
+   "file": "wrecked_num_05.ogg",
+   "duration": 2.23,
+   "speech_end": 1.31,
+   "hash": "dbd8be0744565b59"
+  },
+  {
+   "id": "wrecked_num_06",
+   "category": "wrecked_num",
+   "text": "Number six is out!",
+   "file": "wrecked_num_06.ogg",
+   "duration": 2.08,
+   "speech_end": 1.175,
+   "hash": "7c005b931edf5031"
+  },
+  {
+   "id": "wrecked_num_07",
+   "category": "wrecked_num",
+   "text": "That's it for number seven!",
+   "file": "wrecked_num_07.ogg",
+   "duration": 2.24,
+   "speech_end": 1.32,
+   "hash": "39e2f38ceae22c45"
+  },
+  {
+   "id": "wrecked_num_08",
+   "category": "wrecked_num",
+   "text": "Number eight is out!",
+   "file": "wrecked_num_08.ogg",
+   "duration": 1.86,
+   "speech_end": 1.045,
+   "hash": "ebc90df7fcd16a7f"
+  },
+  {
+   "id": "wrecked_num_09",
+   "category": "wrecked_num",
+   "text": "That's it for number nine!",
+   "file": "wrecked_num_09.ogg",
+   "duration": 2.09,
+   "speech_end": 1.21,
+   "hash": "219182f71f118872"
+  },
+  {
+   "id": "wrecked_num_10",
+   "category": "wrecked_num",
+   "text": "Number ten is out!",
+   "file": "wrecked_num_10.ogg",
+   "duration": 1.97,
+   "speech_end": 1.115,
+   "hash": "e046d0ca29165888"
+  },
+  {
+   "id": "wrecked_num_11",
+   "category": "wrecked_num",
+   "text": "That's it for number eleven!",
+   "file": "wrecked_num_11.ogg",
+   "duration": 2.25,
+   "speech_end": 1.35,
+   "hash": "387025fb475db8b3"
+  },
+  {
+   "id": "wrecked_num_12",
+   "category": "wrecked_num",
+   "text": "Number twelve is out!",
+   "file": "wrecked_num_12.ogg",
+   "duration": 1.99,
+   "speech_end": 1.165,
+   "hash": "ab76722ee418a1c0"
+  },
+  {
+   "id": "wrecked_num_13",
+   "category": "wrecked_num",
+   "text": "That's it for number thirteen!",
+   "file": "wrecked_num_13.ogg",
+   "duration": 2.39,
+   "speech_end": 1.515,
+   "hash": "be69028733de7b45"
+  },
+  {
+   "id": "wrecked_num_14",
+   "category": "wrecked_num",
+   "text": "Number fourteen is out!",
+   "file": "wrecked_num_14.ogg",
+   "duration": 2.17,
+   "speech_end": 1.325,
+   "hash": "6af41a44dd71e67e"
+  },
+  {
+   "id": "wrecked_num_15",
+   "category": "wrecked_num",
+   "text": "That's it for number fifteen!",
+   "file": "wrecked_num_15.ogg",
+   "duration": 2.34,
+   "speech_end": 1.465,
+   "hash": "94df97d596de4336"
+  },
+  {
+   "id": "wrecked_num_16",
+   "category": "wrecked_num",
+   "text": "Number sixteen is out!",
+   "file": "wrecked_num_16.ogg",
+   "duration": 2.27,
+   "speech_end": 1.35,
+   "hash": "2971d59c28332f25"
+  },
+  {
+   "id": "wrecked_num_17",
+   "category": "wrecked_num",
+   "text": "That's it for number seventeen!",
+   "file": "wrecked_num_17.ogg",
+   "duration": 2.46,
+   "speech_end": 1.595,
+   "hash": "fc17cc3c6e06d611"
+  },
+  {
+   "id": "wrecked_num_18",
+   "category": "wrecked_num",
+   "text": "Number eighteen is out!",
+   "file": "wrecked_num_18.ogg",
+   "duration": 2.06,
+   "speech_end": 1.235,
+   "hash": "e301e528b7a394bd"
+  },
+  {
+   "id": "wrecked_num_19",
+   "category": "wrecked_num",
+   "text": "That's it for number nineteen!",
+   "file": "wrecked_num_19.ogg",
+   "duration": 2.38,
+   "speech_end": 1.475,
+   "hash": "955f96b74e79b888"
+  },
+  {
+   "id": "wrecked_num_20",
+   "category": "wrecked_num",
+   "text": "Number twenty is out!",
+   "file": "wrecked_num_20.ogg",
+   "duration": 2.03,
+   "speech_end": 1.19,
+   "hash": "e1ac464c7d66af66"
+  },
+  {
+   "id": "wrecked_num_21",
+   "category": "wrecked_num",
+   "text": "That's it for number twenty-one!",
+   "file": "wrecked_num_21.ogg",
+   "duration": 2.51,
+   "speech_end": 1.595,
+   "hash": "672806e0172d8055"
+  },
+  {
+   "id": "wrecked_num_22",
+   "category": "wrecked_num",
+   "text": "Number twenty-two is out!",
+   "file": "wrecked_num_22.ogg",
+   "duration": 2.19,
+   "speech_end": 1.35,
+   "hash": "5e6834728434a539"
+  },
+  {
+   "id": "wrecked_num_23",
+   "category": "wrecked_num",
+   "text": "That's it for number twenty-three!",
+   "file": "wrecked_num_23.ogg",
+   "duration": 2.53,
+   "speech_end": 1.61,
+   "hash": "0d874b2dec2b8d2a"
+  },
+  {
+   "id": "wrecked_num_24",
+   "category": "wrecked_num",
+   "text": "Number twenty-four is out!",
+   "file": "wrecked_num_24.ogg",
+   "duration": 2.14,
+   "speech_end": 1.375,
+   "hash": "e015df3050925ed5"
+  },
+  {
+   "id": "wrecked_num_25",
+   "category": "wrecked_num",
+   "text": "That's it for number twenty-five!",
+   "file": "wrecked_num_25.ogg",
+   "duration": 2.57,
+   "speech_end": 1.665,
+   "hash": "befe7cd054146e9a"
+  },
+  {
+   "id": "wrecked_num_26",
+   "category": "wrecked_num",
+   "text": "Number twenty-six is out!",
+   "file": "wrecked_num_26.ogg",
+   "duration": 2.27,
+   "speech_end": 1.44,
+   "hash": "21bf6c3539c5b0f2"
+  },
+  {
+   "id": "wrecked_num_27",
+   "category": "wrecked_num",
+   "text": "That's it for number twenty-seven!",
+   "file": "wrecked_num_27.ogg",
+   "duration": 2.59,
+   "speech_end": 1.69,
+   "hash": "47e94c91dcbd985c"
+  },
+  {
+   "id": "wrecked_num_28",
+   "category": "wrecked_num",
+   "text": "Number twenty-eight is out!",
+   "file": "wrecked_num_28.ogg",
+   "duration": 2.19,
+   "speech_end": 1.355,
+   "hash": "d070703eb57f8d2a"
+  },
+  {
+   "id": "wrecked_num_29",
+   "category": "wrecked_num",
+   "text": "That's it for number twenty-nine!",
+   "file": "wrecked_num_29.ogg",
+   "duration": 2.44,
+   "speech_end": 1.575,
+   "hash": "659b1f96f62ef698"
+  },
+  {
+   "id": "wrecked_num_30",
+   "category": "wrecked_num",
+   "text": "Number thirty is out!",
+   "file": "wrecked_num_30.ogg",
+   "duration": 2.05,
+   "speech_end": 1.205,
+   "hash": "b508618b4c2a9768"
+  },
+  {
+   "id": "wrecked_num_31",
+   "category": "wrecked_num",
+   "text": "That's it for number thirty-one!",
+   "file": "wrecked_num_31.ogg",
+   "duration": 2.45,
+   "speech_end": 1.57,
+   "hash": "4eb1849f434289e7"
+  },
+  {
+   "id": "wrecked_num_32",
+   "category": "wrecked_num",
+   "text": "Number thirty-two is out!",
+   "file": "wrecked_num_32.ogg",
+   "duration": 2.17,
+   "speech_end": 1.32,
+   "hash": "ce631bcc4b452485"
+  },
+  {
+   "id": "wrecked_num_33",
+   "category": "wrecked_num",
+   "text": "That's it for number thirty-three!",
+   "file": "wrecked_num_33.ogg",
+   "duration": 2.52,
+   "speech_end": 1.635,
+   "hash": "04ee49cd8aa5be43"
+  },
+  {
+   "id": "wrecked_num_34",
+   "category": "wrecked_num",
+   "text": "Number thirty-four is out!",
+   "file": "wrecked_num_34.ogg",
+   "duration": 2.16,
+   "speech_end": 1.335,
+   "hash": "a36728f270ffc10b"
+  },
+  {
+   "id": "wrecked_num_35",
+   "category": "wrecked_num",
+   "text": "That's it for number thirty-five!",
+   "file": "wrecked_num_35.ogg",
+   "duration": 2.55,
+   "speech_end": 1.675,
+   "hash": "cd5711852c643abf"
+  },
+  {
+   "id": "wrecked_num_36",
+   "category": "wrecked_num",
+   "text": "Number thirty-six is out!",
+   "file": "wrecked_num_36.ogg",
+   "duration": 2.31,
+   "speech_end": 1.475,
+   "hash": "6525f668e9458deb"
+  },
+  {
+   "id": "wrecked_num_37",
+   "category": "wrecked_num",
+   "text": "That's it for number thirty-seven!",
+   "file": "wrecked_num_37.ogg",
+   "duration": 2.62,
+   "speech_end": 1.69,
+   "hash": "ff46f381b762fa28"
+  },
+  {
+   "id": "wrecked_num_38",
+   "category": "wrecked_num",
+   "text": "Number thirty-eight is out!",
+   "file": "wrecked_num_38.ogg",
+   "duration": 2.12,
+   "speech_end": 1.325,
+   "hash": "49a9d8a949d02538"
+  },
+  {
+   "id": "wrecked_num_39",
+   "category": "wrecked_num",
+   "text": "That's it for number thirty-nine!",
+   "file": "wrecked_num_39.ogg",
+   "duration": 2.35,
+   "speech_end": 1.5,
+   "hash": "7da7edc6e9f55d53"
+  },
+  {
+   "id": "wrecked_num_40",
+   "category": "wrecked_num",
+   "text": "Number forty is out!",
+   "file": "wrecked_num_40.ogg",
+   "duration": 1.98,
+   "speech_end": 1.21,
+   "hash": "65ea804cbd8ab7c0"
+  },
+  {
+   "id": "wrecked_num_41",
+   "category": "wrecked_num",
+   "text": "That's it for number forty-one!",
+   "file": "wrecked_num_41.ogg",
+   "duration": 2.45,
+   "speech_end": 1.55,
+   "hash": "6edcc896ea937440"
+  },
+  {
+   "id": "wrecked_num_42",
+   "category": "wrecked_num",
+   "text": "Number forty-two is out!",
+   "file": "wrecked_num_42.ogg",
+   "duration": 2.16,
+   "speech_end": 1.37,
+   "hash": "b92628c687a167c1"
+  },
+  {
+   "id": "wrecked_num_43",
+   "category": "wrecked_num",
+   "text": "That's it for number forty-three!",
+   "file": "wrecked_num_43.ogg",
+   "duration": 2.53,
+   "speech_end": 1.65,
+   "hash": "fab5b01c1c8ddf79"
+  },
+  {
+   "id": "wrecked_num_44",
+   "category": "wrecked_num",
+   "text": "Number forty-four is out!",
+   "file": "wrecked_num_44.ogg",
+   "duration": 2.21,
+   "speech_end": 1.375,
+   "hash": "625c198b7b83bd7f"
+  },
+  {
+   "id": "wrecked_num_45",
+   "category": "wrecked_num",
+   "text": "That's it for number forty-five!",
+   "file": "wrecked_num_45.ogg",
+   "duration": 2.5,
+   "speech_end": 1.66,
+   "hash": "535c09a11727ee01"
+  },
+  {
+   "id": "wrecked_num_46",
+   "category": "wrecked_num",
+   "text": "Number forty-six is out!",
+   "file": "wrecked_num_46.ogg",
+   "duration": 2.33,
+   "speech_end": 1.475,
+   "hash": "11c8c2dfa115191e"
+  },
+  {
+   "id": "wrecked_num_47",
+   "category": "wrecked_num",
+   "text": "That's it for number forty-seven!",
+   "file": "wrecked_num_47.ogg",
+   "duration": 2.63,
+   "speech_end": 1.71,
+   "hash": "3d7dedf920be7aee"
+  },
+  {
+   "id": "wrecked_num_48",
+   "category": "wrecked_num",
+   "text": "Number forty-eight is out!",
+   "file": "wrecked_num_48.ogg",
+   "duration": 2.21,
+   "speech_end": 1.385,
+   "hash": "de0cb839fc50cae8"
+  },
+  {
+   "id": "wrecked_num_49",
+   "category": "wrecked_num",
+   "text": "That's it for number forty-nine!",
+   "file": "wrecked_num_49.ogg",
+   "duration": 2.37,
+   "speech_end": 1.535,
+   "hash": "1833d8fa38abfa6d"
+  },
+  {
+   "id": "wrecked_num_50",
+   "category": "wrecked_num",
+   "text": "Number fifty is out!",
+   "file": "wrecked_num_50.ogg",
+   "duration": 2.05,
+   "speech_end": 1.215,
+   "hash": "c5824c1019eb3515"
+  },
+  {
+   "id": "wrecked_num_51",
+   "category": "wrecked_num",
+   "text": "That's it for number fifty-one!",
+   "file": "wrecked_num_51.ogg",
+   "duration": 2.47,
+   "speech_end": 1.54,
+   "hash": "a29de4d8143626e4"
+  },
+  {
+   "id": "wrecked_num_52",
+   "category": "wrecked_num",
+   "text": "Number fifty-two is out!",
+   "file": "wrecked_num_52.ogg",
+   "duration": 2.22,
+   "speech_end": 1.35,
+   "hash": "652420bd3e86462f"
+  },
+  {
+   "id": "wrecked_num_53",
+   "category": "wrecked_num",
+   "text": "That's it for number fifty-three!",
+   "file": "wrecked_num_53.ogg",
+   "duration": 2.58,
+   "speech_end": 1.65,
+   "hash": "9c8542169ffbae3c"
+  },
+  {
+   "id": "wrecked_num_54",
+   "category": "wrecked_num",
+   "text": "Number fifty-four is out!",
+   "file": "wrecked_num_54.ogg",
+   "duration": 2.14,
+   "speech_end": 1.34,
+   "hash": "ec04346b61ffaabd"
+  },
+  {
+   "id": "wrecked_num_55",
+   "category": "wrecked_num",
+   "text": "That's it for number fifty-five!",
+   "file": "wrecked_num_55.ogg",
+   "duration": 2.55,
+   "speech_end": 1.675,
+   "hash": "1aed1cd9b53297ce"
+  },
+  {
+   "id": "wrecked_num_56",
+   "category": "wrecked_num",
+   "text": "Number fifty-six is out!",
+   "file": "wrecked_num_56.ogg",
+   "duration": 2.36,
+   "speech_end": 1.5,
+   "hash": "5ce7ca96d750c470"
+  },
+  {
+   "id": "wrecked_num_57",
+   "category": "wrecked_num",
+   "text": "That's it for number fifty-seven!",
+   "file": "wrecked_num_57.ogg",
+   "duration": 2.62,
+   "speech_end": 1.675,
+   "hash": "93d32ca3e4f7ff5d"
+  },
+  {
+   "id": "wrecked_num_58",
+   "category": "wrecked_num",
+   "text": "Number fifty-eight is out!",
+   "file": "wrecked_num_58.ogg",
+   "duration": 2.13,
+   "speech_end": 1.31,
+   "hash": "25e2c89fb387a5ce"
+  },
+  {
+   "id": "wrecked_num_59",
+   "category": "wrecked_num",
+   "text": "That's it for number fifty-nine!",
+   "file": "wrecked_num_59.ogg",
+   "duration": 2.54,
+   "speech_end": 1.625,
+   "hash": "a37fc6c616840a1e"
+  },
+  {
+   "id": "wrecked_num_60",
+   "category": "wrecked_num",
+   "text": "Number sixty is out!",
+   "file": "wrecked_num_60.ogg",
+   "duration": 2.15,
+   "speech_end": 1.24,
+   "hash": "67af31f2de41447b"
+  },
+  {
+   "id": "wrecked_num_61",
+   "category": "wrecked_num",
+   "text": "That's it for number sixty-one!",
+   "file": "wrecked_num_61.ogg",
+   "duration": 2.54,
+   "speech_end": 1.575,
+   "hash": "606b107f9c2dae9d"
+  },
+  {
+   "id": "winner_num_02",
+   "category": "winner_num",
+   "text": "Number two is the last car running!",
+   "file": "winner_num_02.ogg",
+   "duration": 2.71,
+   "speech_end": 1.82,
+   "hash": "112961de141c45b1"
+  },
+  {
+   "id": "winner_num_03",
+   "category": "winner_num",
+   "text": "Number three is the last car running!",
+   "file": "winner_num_03.ogg",
+   "duration": 2.79,
+   "speech_end": 1.88,
+   "hash": "af2bc69baa202506"
+  },
+  {
+   "id": "winner_num_04",
+   "category": "winner_num",
+   "text": "Number four is the last car running!",
+   "file": "winner_num_04.ogg",
+   "duration": 2.7,
+   "speech_end": 1.9,
+   "hash": "b873e6ffc15602a2"
+  },
+  {
+   "id": "winner_num_05",
+   "category": "winner_num",
+   "text": "Number five is the last car running!",
+   "file": "winner_num_05.ogg",
+   "duration": 2.8,
+   "speech_end": 1.935,
+   "hash": "249b60922100ea98"
+  },
+  {
+   "id": "winner_num_06",
+   "category": "winner_num",
+   "text": "Number six is the last car running!",
+   "file": "winner_num_06.ogg",
+   "duration": 2.83,
+   "speech_end": 1.915,
+   "hash": "bbbd0f2d55718d03"
+  },
+  {
+   "id": "winner_num_07",
+   "category": "winner_num",
+   "text": "Number seven is the last car running!",
+   "file": "winner_num_07.ogg",
+   "duration": 2.89,
+   "speech_end": 1.98,
+   "hash": "8e292b5a56bed2b2"
+  },
+  {
+   "id": "winner_num_08",
+   "category": "winner_num",
+   "text": "Number eight is the last car running!",
+   "file": "winner_num_08.ogg",
+   "duration": 2.65,
+   "speech_end": 1.815,
+   "hash": "3d30936a40b9f66e"
+  },
+  {
+   "id": "winner_num_09",
+   "category": "winner_num",
+   "text": "Number nine is the last car running!",
+   "file": "winner_num_09.ogg",
+   "duration": 2.78,
+   "speech_end": 1.885,
+   "hash": "7f2de0f42823457c"
+  },
+  {
+   "id": "winner_num_10",
+   "category": "winner_num",
+   "text": "Number ten is the last car running!",
+   "file": "winner_num_10.ogg",
+   "duration": 2.74,
+   "speech_end": 1.845,
+   "hash": "0bea64b88bbd396a"
+  },
+  {
+   "id": "winner_num_11",
+   "category": "winner_num",
+   "text": "Number eleven is the last car running!",
+   "file": "winner_num_11.ogg",
+   "duration": 2.95,
+   "speech_end": 2.105,
+   "hash": "0c4731b81ca3c6a8"
+  },
+  {
+   "id": "winner_num_12",
+   "category": "winner_num",
+   "text": "Number twelve is the last car running!",
+   "file": "winner_num_12.ogg",
+   "duration": 2.86,
+   "speech_end": 2.01,
+   "hash": "1f418dabe7b0d3b4"
+  },
+  {
+   "id": "winner_num_13",
+   "category": "winner_num",
+   "text": "Number thirteen is the last car running!",
+   "file": "winner_num_13.ogg",
+   "duration": 2.92,
+   "speech_end": 2.055,
+   "hash": "17a1c6efbd66db26"
+  },
+  {
+   "id": "winner_num_14",
+   "category": "winner_num",
+   "text": "Number fourteen is the last car running!",
+   "file": "winner_num_14.ogg",
+   "duration": 3.01,
+   "speech_end": 2.105,
+   "hash": "842ef3e3785aabad"
+  },
+  {
+   "id": "winner_num_15",
+   "category": "winner_num",
+   "text": "Number fifteen is the last car running!",
+   "file": "winner_num_15.ogg",
+   "duration": 2.94,
+   "speech_end": 2.06,
+   "hash": "f5729b31652aee73"
+  },
+  {
+   "id": "winner_num_16",
+   "category": "winner_num",
+   "text": "Number sixteen is the last car running!",
+   "file": "winner_num_16.ogg",
+   "duration": 3.11,
+   "speech_end": 2.16,
+   "hash": "1524787c89d65081"
+  },
+  {
+   "id": "winner_num_17",
+   "category": "winner_num",
+   "text": "Number seventeen is the last car running!",
+   "file": "winner_num_17.ogg",
+   "duration": 3.15,
+   "speech_end": 2.28,
+   "hash": "daf09123f9b6bb96"
+  },
+  {
+   "id": "winner_num_18",
+   "category": "winner_num",
+   "text": "Number eighteen is the last car running!",
+   "file": "winner_num_18.ogg",
+   "duration": 2.85,
+   "speech_end": 1.985,
+   "hash": "394d7b343108ca0a"
+  },
+  {
+   "id": "winner_num_19",
+   "category": "winner_num",
+   "text": "Number nineteen is the last car running!",
+   "file": "winner_num_19.ogg",
+   "duration": 2.89,
+   "speech_end": 2.03,
+   "hash": "14f9a44de1f86c1a"
+  },
+  {
+   "id": "winner_num_20",
+   "category": "winner_num",
+   "text": "Number twenty is the last car running!",
+   "file": "winner_num_20.ogg",
+   "duration": 2.91,
+   "speech_end": 2.05,
+   "hash": "3d8c142e9ced1861"
+  },
+  {
+   "id": "winner_num_21",
+   "category": "winner_num",
+   "text": "Number twenty-one is the last car running!",
+   "file": "winner_num_21.ogg",
+   "duration": 3.07,
+   "speech_end": 2.23,
+   "hash": "f1867ed6d67bf155"
+  },
+  {
+   "id": "winner_num_22",
+   "category": "winner_num",
+   "text": "Number twenty-two is the last car running!",
+   "file": "winner_num_22.ogg",
+   "duration": 3.17,
+   "speech_end": 2.25,
+   "hash": "82ca63afd53feda0"
+  },
+  {
+   "id": "winner_num_23",
+   "category": "winner_num",
+   "text": "Number twenty-three is the last car running!",
+   "file": "winner_num_23.ogg",
+   "duration": 3.26,
+   "speech_end": 2.34,
+   "hash": "e42bdcee8abdd09d"
+  },
+  {
+   "id": "winner_num_24",
+   "category": "winner_num",
+   "text": "Number twenty-four is the last car running!",
+   "file": "winner_num_24.ogg",
+   "duration": 3.11,
+   "speech_end": 2.265,
+   "hash": "df479c37ced97798"
+  },
+  {
+   "id": "winner_num_25",
+   "category": "winner_num",
+   "text": "Number twenty-five is the last car running!",
+   "file": "winner_num_25.ogg",
+   "duration": 3.26,
+   "speech_end": 2.33,
+   "hash": "93aa033abf11441a"
+  },
+  {
+   "id": "winner_num_26",
+   "category": "winner_num",
+   "text": "Number twenty-six is the last car running!",
+   "file": "winner_num_26.ogg",
+   "duration": 3.09,
+   "speech_end": 2.285,
+   "hash": "ee6a3011101bdd4f"
+  },
+  {
+   "id": "winner_num_27",
+   "category": "winner_num",
+   "text": "Number twenty-seven is the last car running!",
+   "file": "winner_num_27.ogg",
+   "duration": 3.32,
+   "speech_end": 2.435,
+   "hash": "0eb810a627b35d54"
+  },
+  {
+   "id": "winner_num_28",
+   "category": "winner_num",
+   "text": "Number twenty-eight is the last car running!",
+   "file": "winner_num_28.ogg",
+   "duration": 3.09,
+   "speech_end": 2.225,
+   "hash": "131d36b248069ed3"
+  },
+  {
+   "id": "winner_num_29",
+   "category": "winner_num",
+   "text": "Number twenty-nine is the last car running!",
+   "file": "winner_num_29.ogg",
+   "duration": 3.12,
+   "speech_end": 2.195,
+   "hash": "d1817e4cecbae541"
+  },
+  {
+   "id": "winner_num_30",
+   "category": "winner_num",
+   "text": "Number thirty is the last car running!",
+   "file": "winner_num_30.ogg",
+   "duration": 2.9,
+   "speech_end": 1.98,
+   "hash": "428b000debc9865d"
+  },
+  {
+   "id": "winner_num_31",
+   "category": "winner_num",
+   "text": "Number thirty-one is the last car running!",
+   "file": "winner_num_31.ogg",
+   "duration": 3.01,
+   "speech_end": 2.155,
+   "hash": "c5ce3cf00f03fb46"
+  },
+  {
+   "id": "winner_num_32",
+   "category": "winner_num",
+   "text": "Number thirty-two is the last car running!",
+   "file": "winner_num_32.ogg",
+   "duration": 3.11,
+   "speech_end": 2.255,
+   "hash": "9c031c2f3477cc80"
+  },
+  {
+   "id": "winner_num_33",
+   "category": "winner_num",
+   "text": "Number thirty-three is the last car running!",
+   "file": "winner_num_33.ogg",
+   "duration": 3.23,
+   "speech_end": 2.295,
+   "hash": "bee68cea6bf05fcf"
+  },
+  {
+   "id": "winner_num_34",
+   "category": "winner_num",
+   "text": "Number thirty-four is the last car running!",
+   "file": "winner_num_34.ogg",
+   "duration": 3.03,
+   "speech_end": 2.185,
+   "hash": "80ba6e1be8dc958b"
+  },
+  {
+   "id": "winner_num_35",
+   "category": "winner_num",
+   "text": "Number thirty-five is the last car running!",
+   "file": "winner_num_35.ogg",
+   "duration": 3.11,
+   "speech_end": 2.255,
+   "hash": "1592df16c2170285"
+  },
+  {
+   "id": "winner_num_36",
+   "category": "winner_num",
+   "text": "Number thirty-six is the last car running!",
+   "file": "winner_num_36.ogg",
+   "duration": 3.14,
+   "speech_end": 2.32,
+   "hash": "89ea471344ae98ce"
+  },
+  {
+   "id": "winner_num_37",
+   "category": "winner_num",
+   "text": "Number thirty-seven is the last car running!",
+   "file": "winner_num_37.ogg",
+   "duration": 3.21,
+   "speech_end": 2.365,
+   "hash": "6311e7f612fe36d9"
+  },
+  {
+   "id": "winner_num_38",
+   "category": "winner_num",
+   "text": "Number thirty-eight is the last car running!",
+   "file": "winner_num_38.ogg",
+   "duration": 2.99,
+   "speech_end": 2.18,
+   "hash": "038678babf8eea76"
+  },
+  {
+   "id": "winner_num_39",
+   "category": "winner_num",
+   "text": "Number thirty-nine is the last car running!",
+   "file": "winner_num_39.ogg",
+   "duration": 3.06,
+   "speech_end": 2.155,
+   "hash": "5c09c51ca67a4e0d"
+  },
+  {
+   "id": "winner_num_40",
+   "category": "winner_num",
+   "text": "Number forty is the last car running!",
+   "file": "winner_num_40.ogg",
+   "duration": 2.85,
+   "speech_end": 1.985,
+   "hash": "634e70ae8027f0a7"
+  },
+  {
+   "id": "winner_num_41",
+   "category": "winner_num",
+   "text": "Number forty-one is the last car running!",
+   "file": "winner_num_41.ogg",
+   "duration": 3.06,
+   "speech_end": 2.16,
+   "hash": "28c95e45a46b85b4"
+  },
+  {
+   "id": "winner_num_42",
+   "category": "winner_num",
+   "text": "Number forty-two is the last car running!",
+   "file": "winner_num_42.ogg",
+   "duration": 3.05,
+   "speech_end": 2.23,
+   "hash": "58e3ffbb681c3eeb"
+  },
+  {
+   "id": "winner_num_43",
+   "category": "winner_num",
+   "text": "Number forty-three is the last car running!",
+   "file": "winner_num_43.ogg",
+   "duration": 3.14,
+   "speech_end": 2.31,
+   "hash": "ab805e5fa707da25"
+  },
+  {
+   "id": "winner_num_44",
+   "category": "winner_num",
+   "text": "Number forty-four is the last car running!",
+   "file": "winner_num_44.ogg",
+   "duration": 3.03,
+   "speech_end": 2.18,
+   "hash": "de4bc85c9ba64667"
+  },
+  {
+   "id": "winner_num_45",
+   "category": "winner_num",
+   "text": "Number forty-five is the last car running!",
+   "file": "winner_num_45.ogg",
+   "duration": 3.18,
+   "speech_end": 2.29,
+   "hash": "f6b21b9c0c611e7f"
+  },
+  {
+   "id": "winner_num_46",
+   "category": "winner_num",
+   "text": "Number forty-six is the last car running!",
+   "file": "winner_num_46.ogg",
+   "duration": 3.15,
+   "speech_end": 2.32,
+   "hash": "899bc013585a3f4b"
+  },
+  {
+   "id": "winner_num_47",
+   "category": "winner_num",
+   "text": "Number forty-seven is the last car running!",
+   "file": "winner_num_47.ogg",
+   "duration": 3.2,
+   "speech_end": 2.39,
+   "hash": "ef5cbf7db101a941"
+  },
+  {
+   "id": "winner_num_48",
+   "category": "winner_num",
+   "text": "Number forty-eight is the last car running!",
+   "file": "winner_num_48.ogg",
+   "duration": 3.08,
+   "speech_end": 2.185,
+   "hash": "b66551ff90df0607"
+  },
+  {
+   "id": "winner_num_49",
+   "category": "winner_num",
+   "text": "Number forty-nine is the last car running!",
+   "file": "winner_num_49.ogg",
+   "duration": 3.04,
+   "speech_end": 2.18,
+   "hash": "eacb2acad21e1859"
+  },
+  {
+   "id": "winner_num_50",
+   "category": "winner_num",
+   "text": "Number fifty is the last car running!",
+   "file": "winner_num_50.ogg",
+   "duration": 2.94,
+   "speech_end": 2.055,
+   "hash": "828442e08b14283a"
+  },
+  {
+   "id": "winner_num_51",
+   "category": "winner_num",
+   "text": "Number fifty-one is the last car running!",
+   "file": "winner_num_51.ogg",
+   "duration": 3.03,
+   "speech_end": 2.185,
+   "hash": "900d2bdc848e9af5"
+  },
+  {
+   "id": "winner_num_52",
+   "category": "winner_num",
+   "text": "Number fifty-two is the last car running!",
+   "file": "winner_num_52.ogg",
+   "duration": 3.03,
+   "speech_end": 2.16,
+   "hash": "74ab65d76a22e97a"
+  },
+  {
+   "id": "winner_num_53",
+   "category": "winner_num",
+   "text": "Number fifty-three is the last car running!",
+   "file": "winner_num_53.ogg",
+   "duration": 3.12,
+   "speech_end": 2.27,
+   "hash": "8d73e3e6e97c1808"
+  },
+  {
+   "id": "winner_num_54",
+   "category": "winner_num",
+   "text": "Number fifty-four is the last car running!",
+   "file": "winner_num_54.ogg",
+   "duration": 3.08,
+   "speech_end": 2.21,
+   "hash": "24ccc610474f667c"
+  },
+  {
+   "id": "winner_num_55",
+   "category": "winner_num",
+   "text": "Number fifty-five is the last car running!",
+   "file": "winner_num_55.ogg",
+   "duration": 3.11,
+   "speech_end": 2.255,
+   "hash": "15a788bdb8604dfb"
+  },
+  {
+   "id": "winner_num_56",
+   "category": "winner_num",
+   "text": "Number fifty-six is the last car running!",
+   "file": "winner_num_56.ogg",
+   "duration": 3.33,
+   "speech_end": 2.37,
+   "hash": "cf8e7c1d3fa1ec09"
+  },
+  {
+   "id": "winner_num_57",
+   "category": "winner_num",
+   "text": "Number fifty-seven is the last car running!",
+   "file": "winner_num_57.ogg",
+   "duration": 3.22,
+   "speech_end": 2.39,
+   "hash": "5ba49a037a285f2d"
+  },
+  {
+   "id": "winner_num_58",
+   "category": "winner_num",
+   "text": "Number fifty-eight is the last car running!",
+   "file": "winner_num_58.ogg",
+   "duration": 3.04,
+   "speech_end": 2.18,
+   "hash": "4ec7f793c9bfc160"
+  },
+  {
+   "id": "winner_num_59",
+   "category": "winner_num",
+   "text": "Number fifty-nine is the last car running!",
+   "file": "winner_num_59.ogg",
+   "duration": 3.09,
+   "speech_end": 2.18,
+   "hash": "1624c4cd295b7033"
+  },
+  {
+   "id": "winner_num_60",
+   "category": "winner_num",
+   "text": "Number sixty is the last car running!",
+   "file": "winner_num_60.ogg",
+   "duration": 3.01,
+   "speech_end": 2.085,
+   "hash": "df79320bb6ee90b2"
+  },
+  {
+   "id": "winner_num_61",
+   "category": "winner_num",
+   "text": "Number sixty-one is the last car running!",
+   "file": "winner_num_61.ogg",
+   "duration": 3.11,
+   "speech_end": 2.26,
+   "hash": "2ce5435db2723bce"
+  },
+  {
+   "id": "leader_num_02",
+   "category": "leader_num",
+   "text": "Number two takes the lead!",
+   "file": "leader_num_02.ogg",
+   "duration": 2.25,
+   "speech_end": 1.335,
+   "hash": "1ad7ee612424d986"
+  },
+  {
+   "id": "leader_num_03",
+   "category": "leader_num",
+   "text": "Number three takes the lead!",
+   "file": "leader_num_03.ogg",
+   "duration": 2.25,
+   "speech_end": 1.36,
+   "hash": "2968971b55f65508"
+  },
+  {
+   "id": "leader_num_04",
+   "category": "leader_num",
+   "text": "Number four takes the lead!",
+   "file": "leader_num_04.ogg",
+   "duration": 2.25,
+   "speech_end": 1.39,
+   "hash": "cfcee769b33ac899"
+  },
+  {
+   "id": "leader_num_05",
+   "category": "leader_num",
+   "text": "Number five takes the lead!",
+   "file": "leader_num_05.ogg",
+   "duration": 2.32,
+   "speech_end": 1.42,
+   "hash": "4c8a7960e1324da2"
+  },
+  {
+   "id": "leader_num_06",
+   "category": "leader_num",
+   "text": "Number six takes the lead!",
+   "file": "leader_num_06.ogg",
+   "duration": 2.33,
+   "speech_end": 1.425,
+   "hash": "f897ff3aa5b9fa66"
+  },
+  {
+   "id": "leader_num_07",
+   "category": "leader_num",
+   "text": "Number seven takes the lead!",
+   "file": "leader_num_07.ogg",
+   "duration": 2.35,
+   "speech_end": 1.47,
+   "hash": "f92b6022f3a72376"
+  },
+  {
+   "id": "leader_num_08",
+   "category": "leader_num",
+   "text": "Number eight takes the lead!",
+   "file": "leader_num_08.ogg",
+   "duration": 2.16,
+   "speech_end": 1.3,
+   "hash": "0abd86a61f070176"
+  },
+  {
+   "id": "leader_num_09",
+   "category": "leader_num",
+   "text": "Number nine takes the lead!",
+   "file": "leader_num_09.ogg",
+   "duration": 2.24,
+   "speech_end": 1.395,
+   "hash": "dd876ae2e4d41d32"
+  },
+  {
+   "id": "leader_num_10",
+   "category": "leader_num",
+   "text": "Number ten takes the lead!",
+   "file": "leader_num_10.ogg",
+   "duration": 2.23,
+   "speech_end": 1.345,
+   "hash": "ae648bf79cb3950d"
+  },
+  {
+   "id": "leader_num_11",
+   "category": "leader_num",
+   "text": "Number eleven takes the lead!",
+   "file": "leader_num_11.ogg",
+   "duration": 2.41,
+   "speech_end": 1.545,
+   "hash": "167fd8c49171ca92"
+  },
+  {
+   "id": "leader_num_12",
+   "category": "leader_num",
+   "text": "Number twelve takes the lead!",
+   "file": "leader_num_12.ogg",
+   "duration": 2.34,
+   "speech_end": 1.44,
+   "hash": "697b82b60586a632"
+  },
+  {
+   "id": "leader_num_13",
+   "category": "leader_num",
+   "text": "Number thirteen takes the lead!",
+   "file": "leader_num_13.ogg",
+   "duration": 2.55,
+   "speech_end": 1.595,
+   "hash": "a16f00ab79a184a8"
+  },
+  {
+   "id": "leader_num_14",
+   "category": "leader_num",
+   "text": "Number fourteen takes the lead!",
+   "file": "leader_num_14.ogg",
+   "duration": 2.48,
+   "speech_end": 1.64,
+   "hash": "bbcfe9567cb4e305"
+  },
+  {
+   "id": "leader_num_15",
+   "category": "leader_num",
+   "text": "Number fifteen takes the lead!",
+   "file": "leader_num_15.ogg",
+   "duration": 2.47,
+   "speech_end": 1.585,
+   "hash": "9e7723a7bfa2b13e"
+  },
+  {
+   "id": "leader_num_16",
+   "category": "leader_num",
+   "text": "Number sixteen takes the lead!",
+   "file": "leader_num_16.ogg",
+   "duration": 2.5,
+   "speech_end": 1.61,
+   "hash": "159601a316021fcb"
+  },
+  {
+   "id": "leader_num_17",
+   "category": "leader_num",
+   "text": "Number seventeen takes the lead!",
+   "file": "leader_num_17.ogg",
+   "duration": 2.66,
+   "speech_end": 1.76,
+   "hash": "2b16aa7a3f1283f5"
+  },
+  {
+   "id": "leader_num_18",
+   "category": "leader_num",
+   "text": "Number eighteen takes the lead!",
+   "file": "leader_num_18.ogg",
+   "duration": 2.31,
+   "speech_end": 1.48,
+   "hash": "318bae160af11792"
+  },
+  {
+   "id": "leader_num_19",
+   "category": "leader_num",
+   "text": "Number nineteen takes the lead!",
+   "file": "leader_num_19.ogg",
+   "duration": 2.43,
+   "speech_end": 1.535,
+   "hash": "e851ebcfa3f29408"
+  },
+  {
+   "id": "leader_num_20",
+   "category": "leader_num",
+   "text": "Number twenty takes the lead!",
+   "file": "leader_num_20.ogg",
+   "duration": 2.38,
+   "speech_end": 1.465,
+   "hash": "564690530c5dc320"
+  },
+  {
+   "id": "leader_num_21",
+   "category": "leader_num",
+   "text": "Number twenty-one takes the lead!",
+   "file": "leader_num_21.ogg",
+   "duration": 2.53,
+   "speech_end": 1.67,
+   "hash": "ac46ef9360b67297"
+  },
+  {
+   "id": "leader_num_22",
+   "category": "leader_num",
+   "text": "Number twenty-two takes the lead!",
+   "file": "leader_num_22.ogg",
+   "duration": 2.56,
+   "speech_end": 1.615,
+   "hash": "16eecb6ae98a142f"
+  },
+  {
+   "id": "leader_num_23",
+   "category": "leader_num",
+   "text": "Number twenty-three takes the lead!",
+   "file": "leader_num_23.ogg",
+   "duration": 2.56,
+   "speech_end": 1.71,
+   "hash": "ece5ccfa69fbfabb"
+  },
+  {
+   "id": "leader_num_24",
+   "category": "leader_num",
+   "text": "Number twenty-four takes the lead!",
+   "file": "leader_num_24.ogg",
+   "duration": 2.5,
+   "speech_end": 1.64,
+   "hash": "9fef6769cfc8a633"
+  },
+  {
+   "id": "leader_num_25",
+   "category": "leader_num",
+   "text": "Number twenty-five takes the lead!",
+   "file": "leader_num_25.ogg",
+   "duration": 2.57,
+   "speech_end": 1.685,
+   "hash": "5a5d02c9a1cd635f"
+  },
+  {
+   "id": "leader_num_26",
+   "category": "leader_num",
+   "text": "Number twenty-six takes the lead!",
+   "file": "leader_num_26.ogg",
+   "duration": 2.62,
+   "speech_end": 1.74,
+   "hash": "34797f820255bf30"
+  },
+  {
+   "id": "leader_num_27",
+   "category": "leader_num",
+   "text": "Number twenty-seven takes the lead!",
+   "file": "leader_num_27.ogg",
+   "duration": 2.65,
+   "speech_end": 1.795,
+   "hash": "27332f730d941b15"
+  },
+  {
+   "id": "leader_num_28",
+   "category": "leader_num",
+   "text": "Number twenty-eight takes the lead!",
+   "file": "leader_num_28.ogg",
+   "duration": 2.47,
+   "speech_end": 1.615,
+   "hash": "fecb732a22a16786"
+  },
+  {
+   "id": "leader_num_29",
+   "category": "leader_num",
+   "text": "Number twenty-nine takes the lead!",
+   "file": "leader_num_29.ogg",
+   "duration": 2.6,
+   "speech_end": 1.645,
+   "hash": "9263db3d2a4f4bff"
+  },
+  {
+   "id": "leader_num_30",
+   "category": "leader_num",
+   "text": "Number thirty takes the lead!",
+   "file": "leader_num_30.ogg",
+   "duration": 2.4,
+   "speech_end": 1.55,
+   "hash": "10c4b0a26500d1eb"
+  },
+  {
+   "id": "leader_num_31",
+   "category": "leader_num",
+   "text": "Number thirty-one takes the lead!",
+   "file": "leader_num_31.ogg",
+   "duration": 2.5,
+   "speech_end": 1.605,
+   "hash": "944e1d12ea4fb9c9"
+  },
+  {
+   "id": "leader_num_32",
+   "category": "leader_num",
+   "text": "Number thirty-two takes the lead!",
+   "file": "leader_num_32.ogg",
+   "duration": 2.62,
+   "speech_end": 1.67,
+   "hash": "a7b5932190d39791"
+  },
+  {
+   "id": "leader_num_33",
+   "category": "leader_num",
+   "text": "Number thirty-three takes the lead!",
+   "file": "leader_num_33.ogg",
+   "duration": 2.64,
+   "speech_end": 1.785,
+   "hash": "120fc1c483437e00"
+  },
+  {
+   "id": "leader_num_34",
+   "category": "leader_num",
+   "text": "Number thirty-four takes the lead!",
+   "file": "leader_num_34.ogg",
+   "duration": 2.59,
+   "speech_end": 1.695,
+   "hash": "e51a33dba15cfd5c"
+  },
+  {
+   "id": "leader_num_35",
+   "category": "leader_num",
+   "text": "Number thirty-five takes the lead!",
+   "file": "leader_num_35.ogg",
+   "duration": 2.69,
+   "speech_end": 1.735,
+   "hash": "0905a247efbeaa4e"
+  },
+  {
+   "id": "leader_num_36",
+   "category": "leader_num",
+   "text": "Number thirty-six takes the lead!",
+   "file": "leader_num_36.ogg",
+   "duration": 2.72,
+   "speech_end": 1.82,
+   "hash": "2d716cc6f9d9d43d"
+  },
+  {
+   "id": "leader_num_37",
+   "category": "leader_num",
+   "text": "Number thirty-seven takes the lead!",
+   "file": "leader_num_37.ogg",
+   "duration": 2.78,
+   "speech_end": 1.88,
+   "hash": "c733b5c0f34d2ed6"
+  },
+  {
+   "id": "leader_num_38",
+   "category": "leader_num",
+   "text": "Number thirty-eight takes the lead!",
+   "file": "leader_num_38.ogg",
+   "duration": 2.52,
+   "speech_end": 1.645,
+   "hash": "ec0207dc1d821562"
+  },
+  {
+   "id": "leader_num_39",
+   "category": "leader_num",
+   "text": "Number thirty-nine takes the lead!",
+   "file": "leader_num_39.ogg",
+   "duration": 2.52,
+   "speech_end": 1.67,
+   "hash": "a59430157a4744ee"
+  },
+  {
+   "id": "leader_num_40",
+   "category": "leader_num",
+   "text": "Number forty takes the lead!",
+   "file": "leader_num_40.ogg",
+   "duration": 2.4,
+   "speech_end": 1.55,
+   "hash": "de862cf557c906a1"
+  },
+  {
+   "id": "leader_num_41",
+   "category": "leader_num",
+   "text": "Number forty-one takes the lead!",
+   "file": "leader_num_41.ogg",
+   "duration": 2.5,
+   "speech_end": 1.62,
+   "hash": "a71e6c039788f905"
+  },
+  {
+   "id": "leader_num_42",
+   "category": "leader_num",
+   "text": "Number forty-two takes the lead!",
+   "file": "leader_num_42.ogg",
+   "duration": 2.6,
+   "speech_end": 1.65,
+   "hash": "913ada90296f9de3"
+  },
+  {
+   "id": "leader_num_43",
+   "category": "leader_num",
+   "text": "Number forty-three takes the lead!",
+   "file": "leader_num_43.ogg",
+   "duration": 2.64,
+   "speech_end": 1.785,
+   "hash": "8f9174c421805d59"
+  },
+  {
+   "id": "leader_num_44",
+   "category": "leader_num",
+   "text": "Number forty-four takes the lead!",
+   "file": "leader_num_44.ogg",
+   "duration": 2.57,
+   "speech_end": 1.7,
+   "hash": "806941c84f426785"
+  },
+  {
+   "id": "leader_num_45",
+   "category": "leader_num",
+   "text": "Number forty-five takes the lead!",
+   "file": "leader_num_45.ogg",
+   "duration": 2.63,
+   "speech_end": 1.74,
+   "hash": "4746ee7d59b57d84"
+  },
+  {
+   "id": "leader_num_46",
+   "category": "leader_num",
+   "text": "Number forty-six takes the lead!",
+   "file": "leader_num_46.ogg",
+   "duration": 2.7,
+   "speech_end": 1.815,
+   "hash": "b82f09941048ae7b"
+  },
+  {
+   "id": "leader_num_47",
+   "category": "leader_num",
+   "text": "Number forty-seven takes the lead!",
+   "file": "leader_num_47.ogg",
+   "duration": 2.82,
+   "speech_end": 1.895,
+   "hash": "85f971d3a03faffc"
+  },
+  {
+   "id": "leader_num_48",
+   "category": "leader_num",
+   "text": "Number forty-eight takes the lead!",
+   "file": "leader_num_48.ogg",
+   "duration": 2.51,
+   "speech_end": 1.67,
+   "hash": "7f99713b3a767210"
+  },
+  {
+   "id": "leader_num_49",
+   "category": "leader_num",
+   "text": "Number forty-nine takes the lead!",
+   "file": "leader_num_49.ogg",
+   "duration": 2.56,
+   "speech_end": 1.71,
+   "hash": "3c8a6aac832a62aa"
+  },
+  {
+   "id": "leader_num_50",
+   "category": "leader_num",
+   "text": "Number fifty takes the lead!",
+   "file": "leader_num_50.ogg",
+   "duration": 2.42,
+   "speech_end": 1.515,
+   "hash": "72165ca56feac3c2"
+  },
+  {
+   "id": "leader_num_51",
+   "category": "leader_num",
+   "text": "Number fifty-one takes the lead!",
+   "file": "leader_num_51.ogg",
+   "duration": 2.61,
+   "speech_end": 1.72,
+   "hash": "0390e2280016ecc8"
+  },
+  {
+   "id": "leader_num_52",
+   "category": "leader_num",
+   "text": "Number fifty-two takes the lead!",
+   "file": "leader_num_52.ogg",
+   "duration": 2.58,
+   "speech_end": 1.635,
+   "hash": "9127e40679b671c9"
+  },
+  {
+   "id": "leader_num_53",
+   "category": "leader_num",
+   "text": "Number fifty-three takes the lead!",
+   "file": "leader_num_53.ogg",
+   "duration": 2.63,
+   "speech_end": 1.725,
+   "hash": "1919257092231d86"
+  },
+  {
+   "id": "leader_num_54",
+   "category": "leader_num",
+   "text": "Number fifty-four takes the lead!",
+   "file": "leader_num_54.ogg",
+   "duration": 2.62,
+   "speech_end": 1.725,
+   "hash": "f6b3185f71fc7752"
+  },
+  {
+   "id": "leader_num_55",
+   "category": "leader_num",
+   "text": "Number fifty-five takes the lead!",
+   "file": "leader_num_55.ogg",
+   "duration": 2.7,
+   "speech_end": 1.74,
+   "hash": "320b6cc36b108472"
+  },
+  {
+   "id": "leader_num_56",
+   "category": "leader_num",
+   "text": "Number fifty-six takes the lead!",
+   "file": "leader_num_56.ogg",
+   "duration": 2.69,
+   "speech_end": 1.8,
+   "hash": "8fad32a914ba5734"
+  },
+  {
+   "id": "leader_num_57",
+   "category": "leader_num",
+   "text": "Number fifty-seven takes the lead!",
+   "file": "leader_num_57.ogg",
+   "duration": 2.86,
+   "speech_end": 1.95,
+   "hash": "eb10069d983bfc7b"
+  },
+  {
+   "id": "leader_num_58",
+   "category": "leader_num",
+   "text": "Number fifty-eight takes the lead!",
+   "file": "leader_num_58.ogg",
+   "duration": 2.5,
+   "speech_end": 1.64,
+   "hash": "295ecd9026198289"
+  },
+  {
+   "id": "leader_num_59",
+   "category": "leader_num",
+   "text": "Number fifty-nine takes the lead!",
+   "file": "leader_num_59.ogg",
+   "duration": 2.55,
+   "speech_end": 1.67,
+   "hash": "ae9aac34b1c9c339"
+  },
+  {
+   "id": "leader_num_60",
+   "category": "leader_num",
+   "text": "Number sixty takes the lead!",
+   "file": "leader_num_60.ogg",
+   "duration": 2.49,
+   "speech_end": 1.54,
+   "hash": "42eb915f0a76fa44"
+  },
+  {
+   "id": "leader_num_61",
+   "category": "leader_num",
+   "text": "Number sixty-one takes the lead!",
+   "file": "leader_num_61.ogg",
+   "duration": 2.61,
+   "speech_end": 1.75,
+   "hash": "f40533f1af280083"
+  }
+ ]
+}

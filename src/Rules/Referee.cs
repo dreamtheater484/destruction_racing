@@ -178,8 +178,10 @@ public sealed class Referee
         bool creditA = !a.Damage.IsWrecked && (aAttacks || hit.SpeedA >= _rules.Spin.MinVictimSpeed);
         bool creditB = !b.Damage.IsWrecked && (bAttacks || hit.SpeedB >= _rules.Spin.MinVictimSpeed);
         float grind = GrindFactor(time, a.Id, b.Id);
-        ApplyDamage(time, b, hit.Energy, hit.SideB, creditA ? a.Id : null, grind, "car hit");
-        ApplyDamage(time, a, hit.Energy, hit.SideA, creditB ? b.Id : null, grind, "car hit");
+        float shareA = hit.Attacker == HitAttacker.A ? _rules.AttackerDamageShare : 1f;
+        float shareB = hit.Attacker == HitAttacker.B ? _rules.AttackerDamageShare : 1f;
+        ApplyDamage(time, b, hit.Energy, hit.SideB, creditA ? a.Id : null, grind * shareB, "car hit");
+        ApplyDamage(time, a, hit.Energy, hit.SideA, creditB ? b.Id : null, grind * shareA, "car hit");
         if (!bWasWrecked && b.Damage.IsWrecked) Wreck(time, b, leader);
         if (!aWasWrecked && a.Damage.IsWrecked) Wreck(time, a, leader);
     }
@@ -308,13 +310,26 @@ public sealed class Referee
             bool rearWheel = wheel is Wheel.RearLeft or Wheel.RearRight;
             float share = _rules.WheelDamageShare;
             if (rearWheel && car.Damage.Health(DamageZone.Rear) < _rules.RearCriticalHealth) share *= 2f;
-            bool wasLost = car.Damage.IsWheelLost(wheel);
-            dealt += car.Damage.DamageWheel(wheel, dealt * share, _rules.WheelLoss);
-            if (!wasLost && car.Damage.IsWheelLost(wheel))
-                _events.Add(new RefereeEvent(RefereeEventKind.WheelLost, time, car.Id, creditTo ?? -1, Wheel: wheel));
+            dealt += DamageWheel(time, car, wheel, dealt * share, creditTo);
+        }
+        else if (side.Zone.Primary == DamageZone.Rear && car.Damage.Health(DamageZone.Rear) < _rules.RearCriticalHealth)
+        {
+            // Heavy rear damage (plan §6.1): with the crumple zone gone, a hit on the back reaches the rear axle,
+            // so a reverse-rammer with a ruined tail loses its rear wheels (Standard) or drives on bent ones.
+            float axle = dealt * _rules.WheelDamageShare * 2f;   // as a corner hit on a ruined rear
+            dealt += DamageWheel(time, car, Wheel.RearLeft, axle, creditTo) + DamageWheel(time, car, Wheel.RearRight, axle, creditTo);
         }
 
         if (creditTo is int attacker) car.Attribution.RecordDamage(attacker, time, dealt);
+    }
+
+    private float DamageWheel(double time, CarRecord car, Wheel wheel, float amount, int? creditTo)
+    {
+        bool wasLost = car.Damage.IsWheelLost(wheel);
+        float dealt = car.Damage.DamageWheel(wheel, amount, _rules.WheelLoss);
+        if (!wasLost && car.Damage.IsWheelLost(wheel))
+            _events.Add(new RefereeEvent(RefereeEventKind.WheelLost, time, car.Id, creditTo ?? -1, Wheel: wheel));
+        return dealt;
     }
 
     private void Wreck(double time, CarRecord victim, int? leaderBeforeHit)

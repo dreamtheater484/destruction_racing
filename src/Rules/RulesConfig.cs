@@ -89,10 +89,10 @@ public sealed record RulesConfig
     /// <summary>
     /// Calibration ✱: damage starts at this share at GO and ramps up to full over OpeningCrunchTime seconds, so the
     /// opening crunch and first minute hurt everyone but rarely eliminate anyone (frustration targets: player
-    /// wrecked in 30 s ≤ 5%, in 60 s ≤ 15%).
+    /// wrecked in 30 s ≤ 5%, in 60 s ≤ 15%). M4: ×0.4 over 90 s (M1b: ×0.5 over 75 s), for the harder-hitting M4 AI.
     /// </summary>
-    public float OpeningCrunchDamageScale { get; init; } = 0.5f;
-    public float OpeningCrunchTime { get; init; } = 75f;
+    public float OpeningCrunchDamageScale { get; init; } = 0.4f;
+    public float OpeningCrunchTime { get; init; } = 90f;
     /// <summary>
     /// Calibration ✱ (M1c): all damage in a race is scaled by this. Race contact is constant and mostly incidental
     /// (packs, crossover traffic, wrecks on the line), where the derby calibration assumes deliberate rams; at full
@@ -105,6 +105,12 @@ public sealed record RulesConfig
     /// </summary>
     public float ScrapeMinSpeed { get; init; } = 5.5f;
     public float ScrapeRate { get; init; } = 1.2f;
+    /// <summary>
+    /// Calibration ✱ (M4): in a one-sided ram the attacking car takes this share of the contact damage (its nose
+    /// hits the other car's flank or tail); head-ons, where both attack, stay at full damage on both. Ramming still
+    /// costs engine (plan §6.1), but less than it costs the car that was hit.
+    /// </summary>
+    public float AttackerDamageShare { get; init; } = 0.7f;
     /// <summary>Damage beyond a destroyed side or rear passes this share on to the front (so wrecks get finished off).</summary>
     public float OverflowToFront { get; init; } = 0.5f;
     /// <summary>

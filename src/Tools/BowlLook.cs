@@ -7,8 +7,10 @@ using Godot;
 namespace DestructionRacing.Tools;
 
 /// <summary>
-/// Look-dev of the Bowl (afternoon preset): the baked arena from BowlLookBuilder.gd with the generated cars
-/// lined up in the start ring, some of them already battered.
+/// Look-dev of the Bowl: the baked arena from BowlLookBuilder.gd (BowlLook.tscn = afternoon, BowlLook_Golden.tscn,
+/// BowlLook_Night.tscn) with the generated cars lined up in the start ring, some of them already battered, and the
+/// crowd. With <see cref="Empty"/> it is just the arena: the backdrop of test scenes and of the derby venue
+/// (<see cref="Tracks.Bowl"/>), with no camera control.
 /// Batch: --shots=out/bowl [--views=hero,stands,...]. Interactive: W/S move, arrows turn, V next view, P photo.
 /// </summary>
 public partial class BowlLook : Node3D
@@ -49,7 +51,7 @@ public partial class BowlLook : Node3D
 
     public override void _Ready()
     {
-        _camera = new Camera3D { Current = !Empty, Near = 0.05f, Far = 2000f };
+        _camera = new Camera3D { Current = !Empty, Near = 0.05f, Far = 4000f };
         AddChild(_camera);
         GetViewport().Msaa3D = Viewport.Msaa.Msaa4X;
         GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAEnum.Smaa;
@@ -60,8 +62,11 @@ public partial class BowlLook : Node3D
         var dev = DevTools.Instance;
         if (dev?.Arg("nolightmap") != null && GetNodeOrNull<LightmapGI>("LightmapGI") is { } lm) lm.LightData = null;
         if (!Empty && dev?.Arg("shots") is { } dir) RunShots(dir, dev);
-        else if (GetTree().CurrentScene == this) KeyGuide.Add(this, "The Bowl, afternoon (baked lighting)\nV next view   W/S move   arrows turn   P photo (out/bowl)   Esc quit");
+        else if (GetTree().CurrentScene == this) KeyGuide.Add(this, $"The Bowl, {PresetName} (baked lighting)\nV next view   W/S move   arrows turn   P photo (out/bowl)   Esc quit");
+        if (!Empty) AddChild(new Tracks.Crowd { Night = PresetName == "night", BaseExcitement = 0.35f });
     }
+
+    private string PresetName => SceneFilePath.Contains("Golden") ? "golden hour" : SceneFilePath.Contains("Night") ? "night" : "afternoon";
 
     private const float A = 55f, B = 38f;
 
@@ -272,7 +277,8 @@ public partial class BowlLook : Node3D
         {
             ApplyView(Views.First(v => v.Name == n));
             for (int i = 0; i < 20; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-            string path = $"{abs}/bowl_{n}.png";
+            string suffix = PresetName == "afternoon" ? "" : "_" + PresetName.Split(' ')[0];
+            string path = $"{abs}/bowl_{n}{suffix}.png";
             GetViewport().GetTexture().GetImage().SavePng(path);
             GD.Print($"[BowlLook] {path}");
         }
@@ -287,6 +293,7 @@ public partial class BowlLook : Node3D
 
     public override void _Process(double delta)
     {
+        if (Empty) return;
         foreach (var c in _cars) c.Flush();
         float dt = (float)delta;
         var t = _camera.Transform;
@@ -299,7 +306,7 @@ public partial class BowlLook : Node3D
 
     public override void _UnhandledInput(InputEvent e)
     {
-        if (e is not InputEventKey { Pressed: true, Echo: false } k) return;
+        if (Empty || e is not InputEventKey { Pressed: true, Echo: false } k) return;
         if (k.Keycode == Key.V) ApplyView(Views[_view = (_view + 1) % Views.Length]);
         if (k.Keycode == Key.P)
         {

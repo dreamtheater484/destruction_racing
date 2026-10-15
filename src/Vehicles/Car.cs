@@ -51,7 +51,27 @@ public partial class Car : RigidBody3D
     public int Id { get; set; }
     /// <summary>Health per zone and wheel, owned by the referee. Null = indestructible (driving test).</summary>
     public DamageState? Damage { get; set; }
-    public bool IsWrecked => Damage?.IsWrecked ?? false;
+    public bool IsWrecked => IsReplaying ? ReplayWrecked : Damage?.IsWrecked ?? false;
+
+    /// <summary>
+    /// Replay playback drives the car (plan §15.5): no physics or input; the pose, wheels and zone health come
+    /// from the recording (<see cref="Replay.ReplayPlayer"/>), so crush, smoke and fire replay with it.
+    /// </summary>
+    public bool IsReplaying { get; private set; }
+    public bool ReplayWrecked { get; set; }
+    public float ReplaySteer { get; set; }
+    public readonly float[] ReplaySpin = new float[4];
+    public readonly float[] ReplayHealth = { 1f, 1f, 1f, 1f };
+    public float ReplaySpeed { get; set; }
+
+    public void BeginReplay()
+    {
+        IsReplaying = true;
+        FreezeMode = FreezeModeEnum.Kinematic;
+        Freeze = true;
+        LinearVelocity = Vector3.Zero;
+        AngularVelocity = Vector3.Zero;
+    }
     /// <summary>Holds the car on the brakes and ignores the driver (countdown).</summary>
     public bool InputLocked { get; set; }
 
@@ -110,6 +130,8 @@ public partial class Car : RigidBody3D
         public Vector3 ContactNormal = Vector3.Up;
         public float Load;
         public float SlipAngle;
+        /// <summary>How hard the tyre slides, locks or spins on the ground (0..1), for the ground marks.</summary>
+        public float Mark;
         public float Spin;
         public Node3D Visual = null!;
         public Rules.Wheel Index;
@@ -217,13 +239,24 @@ public partial class Car : RigidBody3D
     public void OnVisualHit(Vector3 point, Vector3 intoCar, float energy) => Visual?.OnHit(point, intoCar, energy);
 
     /// <summary>Sustained sliding contact, for the visuals (scrape streaks and sparks).</summary>
-    public void OnVisualScrape(Vector3 point, Vector3 normalOut, Vector3 slideVelocity, float dt) =>
-        Visual?.OnScrape(point, normalOut, slideVelocity, dt);
+    public void OnVisualScrape(Vector3 point, Vector3 normalOut, Vector3 slideVelocity, float dt, bool wall = false) =>
+        Visual?.OnScrape(point, normalOut, slideVelocity, dt, wall);
 
     /// <summary>Wheel centre in car-local space (follows the suspension).</summary>
+    /// <summary>For the ground marks: wheel i's contact point and how hard it slides, locks or spins (0..1). False in the air.</summary>
+    public bool WheelMark(int i, out Vector3 point, out float skid)
+    {
+        var w = _wheels[i];
+        point = w.ContactPoint;
+        skid = w.Mark;
+        return w.Grounded;
+    }
+
     public Vector3 WheelCentre(int i) => _wheels[i].Mount + Vector3.Down * (Tuning.RestLength - _wheels[i].Compression);
-    public float WheelSteer(int i) => _wheels[i].Front ? -_steerRad : 0f;
-    public float WheelSpin(int i) => _wheels[i].Spin;
+    public float WheelSteer(int i) => _wheels[i].Front ? -(IsReplaying ? ReplaySteer : _steerRad) : 0f;
+    public float WheelSpin(int i) => IsReplaying ? ReplaySpin[i] : _wheels[i].Spin;
+    /// <summary>The front wheels' steering angle (rad), as recorded for replays.</summary>
+    public float SteerAngle => _steerRad;
 
     public void ApplyTuning(CarTuning t)
     {
@@ -278,6 +311,7 @@ public partial class Car : RigidBody3D
     public override void _PhysicsProcess(double delta)
     {
         float dt = (float)delta;
+        if (IsReplaying) return;
         var t = Tuning;
         var xf = GlobalTransform;
         Vector3 up = xf.Basis.Y.Normalized();
@@ -427,6 +461,7 @@ public partial class Car : RigidBody3D
             float vLat = pointVelocity.Dot(wheelSide);
             float slip = Mathf.Atan2(vLat, MathF.Max(MathF.Abs(vLong), 1.5f));
             w.SlipAngle = slip;
+            float mark = Mathf.Clamp((MathF.Abs(vLat) - 1.5f) / 5f, 0f, 1f);
 
             float grip = t.SurfaceGrip * (w.Front ? t.FrontGrip : t.RearGrip);
             if (!w.Front && TurningAround) grip *= t.TurnAroundRearGrip;
@@ -449,6 +484,8 @@ public partial class Car : RigidBody3D
                 float available = maxLong * MathF.Sqrt(MathF.Max(0f, 1f - lateralUse * lateralUse));
                 float wheelDrive = drive / drivenGrounded;
                 fx += Mathf.Clamp(wheelDrive, -available * t.TractionControl, available * t.TractionControl);
+                if (MathF.Abs(wheelDrive) > available * t.TractionControl && MathF.Abs(vLong) < 9f)
+                    mark = MathF.Max(mark, 0.6f * (1f - MathF.Abs(vLong) / 9f));        // wheelspin
                 DriveForceApplied += fx;
             }
             if (brake > 0f)
@@ -457,6 +494,7 @@ public partial class Car : RigidBody3D
                 float brakeForce = brake * t.BrakeForce * bias * 0.5f;
                 float stopForce = MathF.Abs(vLong) * cornerMass / dt;
                 fx -= MathF.Sign(vLong) * MathF.Min(brakeForce, stopForce);
+                if (brakeForce > maxLong && MathF.Abs(vLong) > 2f) mark = MathF.Max(mark, 0.7f);  // locked
             }
 
             // Friction ellipse: drive/brake may use LongitudinalGrip times the cornering grip.
@@ -475,6 +513,7 @@ public partial class Car : RigidBody3D
             float comHeight = (comWorld - w.ContactPoint).Dot(up);
             Vector3 applyAt = w.ContactPoint + up * (comHeight * t.LateralForceHeight);
             ApplyForce(wheelFwd * fx + wheelSide * fy, applyAt - xf.Origin);
+            w.Mark = mark;
 
             w.Spin += vLong / _wheelRadius * dt;
         }
@@ -505,7 +544,8 @@ public partial class Car : RigidBody3D
     private bool IsDriven(Wheel w) => Tuning.RearWheelDrive ? !w.Front : w.Front;
 
     /// <summary>Zone health as 0..1 (1 when the car has no damage model).</summary>
-    public float Health(DamageZone zone) => Damage == null ? 1f : Damage.Health(zone) / DamageState.MaxHealth;
+    public float Health(DamageZone zone) =>
+        IsReplaying ? ReplayHealth[(int)zone] : Damage == null ? 1f : Damage.Health(zone) / DamageState.MaxHealth;
 
     /// <summary>
     /// Calibration on car-car hits (plan §15.3): extra yaw from the hit's angular impulse, strongest on the

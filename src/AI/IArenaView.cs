@@ -24,4 +24,11 @@ public interface IArenaView
     (Car? Attacker, double Time) LastHitBy(Car victim);
     /// <summary>Extra aggression from the anti-stall director (0 = none).</summary>
     float AggressionBoost(Car car);
+    /// <summary>When <paramref name="car"/> last landed a real attacking hit (seconds since GO; -100 = never).</summary>
+    double LastAttackTime(Car car) => -100;
+    /// <summary>
+    /// Share of <paramref name="car"/>'s real attacking hits in the last 45 s that it made in reverse, tail first
+    /// (0 with fewer than three hits).
+    /// </summary>
+    float TailRamShare(Car car) => 0f;
 }

@@ -118,6 +118,8 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
 
     public string HudRank => $"{_standings.PositionOf(_player.Id):00}";
     public string HudStatus => _standings.HasFinished(_player.Id) ? "FINISHED" : $"Lap  {_standings.LapOf(_player.Id)}/{Laps}";
+    public string HudStatusLabel => _standings.HasFinished(_player.Id) ? "" : "LAP";
+    public string HudStatusValue => _standings.HasFinished(_player.Id) ? "FINISHED" : $"{_standings.LapOf(_player.Id)}/{Laps}";
     public string? HudWarning => _wrongWayTime > 0.8f && _phase == Phase.Running && !PlayerOut ? "WRONG WAY" : null;
 
     public string StandingsText()
@@ -145,6 +147,9 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
             if (int.TryParse(dev.Arg("laps"), out int laps)) Laps = Math.Max(1, laps);
             if (dev.Arg("car") is { } car) PlayerModel = car;
         }
+        // --attackshare=X (experiments): the attacker's share of contact damage.
+        if (float.TryParse(DevTools.Instance?.Arg("attackshare"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float share))
+            Rules = Rules with { AttackerDamageShare = share };
         _rng = new Random(Seed);
         _countdown = CountdownTime;
         if (!Headless) Controls.Apply(Controls.Current);

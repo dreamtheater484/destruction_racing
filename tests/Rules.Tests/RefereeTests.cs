@@ -222,6 +222,26 @@ public class RefereeTests
     }
 
     [Fact]
+    public void Rear_hits_reach_the_rear_axle_once_the_rear_is_ruined()
+    {
+        var r = Make();
+        var tail = new HitSide(new ZoneSplit(DamageZone.Rear, DamageZone.Left, 0f), null);
+        var events = new List<RefereeEvent>();
+        for (int i = 0; i < 80 && !r.Damage(2).IsWheelLost(Wheel.RearLeft) && !r.Damage(2).IsWrecked; i++)
+        {
+            bool ruined = r.Damage(2).Health(DamageZone.Rear) < Std.RearCriticalHealth;
+            if (!ruined) Assert.Equal(DamageState.MaxHealth, r.Damage(2).WheelHealth(Wheel.RearLeft));
+            r.OnCarHit(i * 0.3, Ram(1, 2, 120_000f, tail));
+            events.AddRange(r.DrainEvents());
+        }
+        var d = r.Damage(2);
+        Assert.True(d.IsWheelLost(Wheel.RearLeft), $"F{d.Health(DamageZone.Front)} R{d.Health(DamageZone.Rear)} RL{d.WheelHealth(Wheel.RearLeft)} wrecked {d.IsWrecked}");
+        Assert.True(r.Damage(2).IsWheelLost(Wheel.RearRight));
+        Assert.Equal(DamageState.MaxHealth, r.Damage(2).WheelHealth(Wheel.FrontLeft));
+        Assert.Contains(events, e => e.Kind == RefereeEventKind.WheelLost && e.Car == 2 && e.Wheel == Wheel.RearRight);
+    }
+
+    [Fact]
     public void Stock_car_contact_never_scores()
     {
         var r = Make(GameMode.StockCarRacing);

@@ -51,11 +51,27 @@ public partial class CarVisual : Node3D
         public Aabb Box;
         public bool Broken;
         public bool Front;
+        /// <summary>A headlamp (clear glass at the front), as opposed to an indicator or tail lamp.</summary>
+        public bool Head;
+        /// <summary>A reversing lamp (clear glass at the back): lit only while reversing.</summary>
+        public bool Reverse;
     }
 
     public Car Car { get; }
     public CarModel Model { get; }
     public CarSpec Spec { get; }
+
+    /// <summary>
+    /// Damage moments for sound and commentary (glass, lamp, part off with its kind, rollover): the visual, what
+    /// happened ("glass", "lamp", "hood", "trunk", "door", "bumper", "mirror", "wheel", "roll") and where.
+    /// </summary>
+    public static event System.Action<CarVisual, string, Vector3>? Moment;
+
+    /// <summary>How hard the car is grinding against something right now (0..1) and whether it is the wall.</summary>
+    public float ScrapeLevel { get; private set; }
+    public bool ScrapeOnWall { get; private set; }
+    /// <summary>The car is on fire (a wrecked car burns for a while).</summary>
+    public bool Burning { get; private set; }
 
     private readonly Livery _livery;
     private readonly List<Part> _parts = new();
@@ -212,8 +228,78 @@ public partial class CarVisual : Node3D
             }
             else if (name.StartsWith("Light_") && (mi.Mesh.SurfaceGetMaterial(0)?.ResourceName ?? "").StartsWith("lens"))
             {
-                _lamps.Add(new Lamp { Mesh = mi, Box = box, Front = box.GetCenter().Z < 0f });
+                string material = mi.Mesh.SurfaceGetMaterial(0)?.ResourceName ?? "";
+                bool front = box.GetCenter().Z < 0f, clear = material.StartsWith("lens_clear");
+                _lamps.Add(new Lamp { Mesh = mi, Box = box, Front = front, Head = clear && front, Reverse = clear && !front });
+                if (clear && !front) mi.SetInstanceShaderParameter("lamp_lit", 0f);
             }
+        }
+    }
+
+    /// <summary>Headlamps and tail lamps lit (dusk and night); a wrecked car's lamps go out.</summary>
+    public bool LightsOn
+    {
+        get => _lightsOn;
+        set
+        {
+            _lightsOn = value;
+            UpdateLampGlow();
+        }
+    }
+    private bool _lightsOn;
+    private bool _lampsDark;
+    private bool _reverseLit;
+
+    /// <summary>Reversing lamps follow the reverse gear (any time of day).</summary>
+    private void UpdateReverseLamps()
+    {
+        bool lit = !Car.IsWrecked && (Car.LastControls.Reverse || Car.ForwardSpeed < -1f);
+        if (lit == _reverseLit) return;
+        _reverseLit = lit;
+        foreach (var lamp in _lamps)
+            if (lamp.Reverse) lamp.Mesh.SetInstanceShaderParameter("lamp_lit", lit ? 1f : 0f);
+        // The clear lens glows only through its lit instances; by day it needs some energy of its own.
+        if (!_lightsOn) (Model.Material("lens_clear") as ShaderMaterial)?.SetShaderParameter("emission_energy", lit ? 3f : 0f);
+        foreach (var lamp in _lamps)
+            if (lamp.Head && !_lightsOn) lamp.Mesh.SetInstanceShaderParameter("lamp_lit", lit ? 0f : 1f);
+    }
+
+    private void UpdateLampGlow()
+    {
+        bool on = _lightsOn && !_lampsDark;
+        (Model.Material("lens_clear") as ShaderMaterial)?.SetShaderParameter("emission_energy", on ? 5f : 0f);
+        (Model.Material("lens_red") as ShaderMaterial)?.SetShaderParameter("emission_energy", on ? 1.6f : 0f);
+    }
+
+    /// <summary>Share of the headlamps still working (0 when the lights are off or the car is wrecked).</summary>
+    public float HeadlightStrength
+    {
+        get
+        {
+            if (!_lightsOn || _lampsDark) return 0f;
+            int total = 0, working = 0;
+            foreach (var lamp in _lamps)
+            {
+                if (!lamp.Head) continue;
+                total++;
+                if (!lamp.Broken) working++;
+            }
+            return total == 0 ? 0f : (float)working / total;
+        }
+    }
+
+    /// <summary>Where the headlight beam starts, in the car's local space (between the working headlamps).</summary>
+    public Vector3 HeadlightOrigin
+    {
+        get
+        {
+            Vector3 sum = Vector3.Zero;
+            int n = 0;
+            foreach (var lamp in _lamps)
+                if (lamp.Head && !lamp.Broken) { sum += lamp.Box.GetCenter(); n++; }
+            if (n == 0) return new Vector3(0f, 0.65f + Car.GroundY, -2.2f);
+            var c = sum / n;
+            return new Vector3(c.X, c.Y + Car.GroundY, c.Z - 0.05f);
         }
     }
 
@@ -390,10 +476,12 @@ public partial class CarVisual : Node3D
     }
 
     /// <summary>Sustained sliding contact: grinds a streak into the paint and throws sparks at the contact.</summary>
-    public void OnScrape(Vector3 worldPoint, Vector3 normalOut, Vector3 slideVelocity, float dt)
+    public void OnScrape(Vector3 worldPoint, Vector3 normalOut, Vector3 slideVelocity, float dt, bool wall = false)
     {
         float slide = slideVelocity.Length();
         if (slide < 2f) return;
+        ScrapeLevel = Mathf.Max(ScrapeLevel, Mathf.Clamp((slide - 2f) / 10f, 0.15f, 1f));
+        ScrapeOnWall = wall;
         Vector3 p = ToModel(worldPoint);
         var body = Spec.Body;
         p = new Vector3(Mathf.Clamp(p.X, body.Position.X, body.End.X), Mathf.Clamp(p.Y, body.Position.Y + 0.15f, body.End.Y - 0.3f),
@@ -413,6 +501,7 @@ public partial class CarVisual : Node3D
         Vector3 centre = pane.Mesh.GlobalTransform * pane.Box.GetCenter();
         float area = pane.Box.Size.X * pane.Box.Size.Y + pane.Box.Size.Z * pane.Box.Size.Y + pane.Box.Size.X * pane.Box.Size.Z;
         FxPool.Get(this).Glass(centre, intoCar * 0.5f + Vector3.Up * 0.3f, Mathf.Clamp(area * 0.9f, 0.25f, 1f));
+        Moment?.Invoke(this, "glass", centre);
     }
 
     private void Break(Lamp lamp)
@@ -423,6 +512,7 @@ public partial class CarVisual : Node3D
         var fx = FxPool.Get(this);
         fx.Glass(c, Car.GlobalBasis.Z * (lamp.Front ? -1f : 1f), 0.15f);
         fx.Sparks(c, Vector3.Up, 0.1f);
+        Moment?.Invoke(this, lamp.Head ? "headlamp" : "lamp", c);
     }
 
     // ------------------------------------------------------------------ parts
@@ -451,6 +541,7 @@ public partial class CarVisual : Node3D
     {
         if (part.State == PartState.Off) return;
         part.State = PartState.Off;
+        Moment?.Invoke(this, part.Kind.ToString().ToLowerInvariant(), ToWorld(part.Box.GetCenter()));
         if (part.Kind != PartKind.Wheel) _frozenThisFrame ??= Model.FreezeMaterials();
         foreach (var n in part.Nodes)
         {
@@ -584,6 +675,7 @@ public partial class CarVisual : Node3D
         SwingParts(dt, ToModelDir(accel));
         UpdateRollover();
         UpdateEffects(dt);
+        UpdateReverseLamps();
         if (_scrapeTimer > 0f && (_scrapeTimer -= dt) <= 0f) _scrape.Emitting = false;
         Model.Flush(budgeted: true);
     }
@@ -642,6 +734,7 @@ public partial class CarVisual : Node3D
         if (!_rolled && upY < -0.2f)
         {
             _rolled = true;
+            Moment?.Invoke(this, "roll", Car.GlobalPosition);
             var b = Spec.Body;
             Model.Damage.AddDent(new Vector3(0f, b.End.Y, b.GetCenter().Z), new Vector3(0f, -0.13f, 0f), 0.75f);
             Model.Damage.AddScrape(new Vector3(0f, b.End.Y, b.GetCenter().Z), 0.8f, 0.6f);
@@ -658,12 +751,16 @@ public partial class CarVisual : Node3D
         if (wrecked && !_wreckSeen)
         {
             _wreckSeen = true;
+            _lampsDark = true;
+            UpdateLampGlow();
             _fireTime = 9f;                       // DD2: a wreck burns for a while, then smoulders
             fx.Sparks(ToWorld(_enginePoint), Vector3.Up, 0.6f);
             fx.Dust(ToWorld(_enginePoint), 0.6f);
         }
         if (_fireTime > 0f) _fireTime -= dt;
         bool fire = front < 0.08f || _fireTime > 0f;
+        Burning = fire;
+        ScrapeLevel = Mathf.Max(0f, ScrapeLevel - dt * 6f);
 
         // The plume: steam (radiator) → grey smoke → black smoke (plan §6.1), from the engine bay.
         var pm = (ParticleProcessMaterial)_smoke.ProcessMaterial;

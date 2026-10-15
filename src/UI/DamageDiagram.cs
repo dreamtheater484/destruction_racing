@@ -42,8 +42,15 @@ public partial class DamageDiagram : Control
     public override void _Draw()
     {
         var d = Target?.Damage;
-        Color Zone(DamageZone z) =>
-            HealthColor(d?.Health(z) ?? 100f).Lerp(Colors.White, _pulse[(int)z] * 0.8f);
+        // A critical zone (under 25 %) throbs red (plan §11, own critical damage); a hit flashes it white.
+        float throb = 0.5f + 0.5f * MathF.Sin(Time.GetTicksMsec() * 0.012f);
+        Color Zone(DamageZone z)
+        {
+            float h = d?.Health(z) ?? 100f;
+            var c = HealthColor(h);
+            if (h > 0f && h < 25f) c = c.Lerp(new Color(1f, 0.35f, 0.3f), throb * 0.6f);
+            return c.Lerp(Colors.White, _pulse[(int)z] * 0.8f);
+        }
 
         // Body: 60 × 150 centred, with side strips and front/rear blocks.
         float cx = Size.X * 0.5f, top = 30f, w = 60f, h = 150f;

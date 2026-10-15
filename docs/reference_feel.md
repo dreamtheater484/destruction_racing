@@ -81,7 +81,7 @@ Probe measurements:
 
 | Hit | Damage |
 |---|---|
-| T-bone at 40 km/h | victim's side −15, attacker's front −18 |
+| T-bone at 40 km/h | victim's side −14, attacker's front −15 (M4: the attacker takes 70% in a one-sided ram; was −18) |
 | Head-on into a wall at 40 km/h | front −33 |
 
 **Damage curve** (`RulesConfig`):

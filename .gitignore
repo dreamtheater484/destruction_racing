@@ -21,3 +21,7 @@ out/
 # Python
 __pycache__/
 *.pyc
+
+# Your own music and announcer recordings (read by the game, never committed)
+/Music/
+/Announcer/

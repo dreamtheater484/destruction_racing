@@ -14,6 +14,10 @@ uniform vec3 sand_tint : source_color = vec3(0.78, 0.72, 0.64);
 uniform vec3 mud_tint : source_color = vec3(0.72, 0.68, 0.62);
 uniform vec2 arena_axes = vec2(55.0, 38.0);
 uniform float rut_strength : hint_range(0.0, 1.0) = 0.6;
+// Live marks from GroundMarks.cs over the arena_axes rectangle: red = ruts and skids, green = oil.
+uniform sampler2D marks : filter_linear, repeat_disable;
+uniform float marks_on = 0.0;
+uniform float marks_debug = 0.0;
 
 varying vec3 world_pos;
 
@@ -62,11 +66,22 @@ void fragment() {
 	albedo *= 1.0 - 0.28 * rut;
 	float rough = mix(orm.g, 0.6, rut * 0.6);
 	nt.xy *= 1.0 - 0.6 * rut;
+	// Today's marks: packed, darker tyre tracks and skids; oil is near black and glossy.
+	vec2 live = marks_on > 0.5 ? texture(marks, w / (arena_axes * 2.0) + 0.5).rg : vec2(0.0);
+	// One hard skid reads clearly; many passes build up to deep, dark, packed tracks.
+	float tracks = 1.0 - exp(-3.0 * live.r);
+	float oil = min(live.g, 1.0);
+	albedo *= mix(vec3(1.0), vec3(0.42, 0.40, 0.39), tracks);
+	rough = mix(rough, 0.5, tracks * 0.6);
+	nt.xy *= 1.0 - 0.75 * tracks;
+	albedo = mix(albedo, vec3(0.02, 0.018, 0.016), oil * 0.92);
+	rough = mix(rough, 0.1, oil);
 	// Planar map on the XZ plane: tangent +X, bitangent +Z, normal +Y.
 	vec3 wn = normalize(vec3(nt.x, nt.z, nt.y));
 	NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
 	ALBEDO = albedo * (0.92 + 0.16 * n2(w * 1.7));
 	ROUGHNESS = rough;
 	AO = orm.r;
-	SPECULAR = 0.4;
+	SPECULAR = mix(0.4, 0.6, oil);
+	if (marks_debug > 0.5) ALBEDO = vec3(1.0 - tracks, 1.0 - oil, 1.0);
 }

@@ -1,0 +1,386 @@
+id	category	text
+
+intro_01	intro	Ladies and gentlemen, welcome to the Bowl!
+intro_02	intro	Twenty cars! One survivor! Let's make some noise!
+intro_03	intro	Welcome, derby fans! Only the toughest car drives home!
+intro_04	intro	Twenty cars in the Bowl, and none of them leave pretty!
+intro_05	intro	Good evening, and welcome to the derby! Hold on to your hats!
+intro_06	intro	Simple rules, folks! Hit hard, spin them, stay alive!
+
+start_01	start	Let's get it on!
+start_02	start	Go, go, go!
+start_03	start	And they're off! Here comes the carnage!
+start_04	start	Floor it! Let the demolition begin!
+start_05	start	Here we go! Pedal to the metal!
+
+opening_crunch_01	opening_crunch	What a crunch in the middle! Nobody got out clean!
+opening_crunch_02	opening_crunch	The big pile-up in the centre! Metal everywhere!
+opening_crunch_03	opening_crunch	And there's the first big smash! The crowd loves it!
+opening_crunch_04	opening_crunch	Wow! A wall of wreckage right in the middle of the Bowl!
+
+big_hit_01	big_hit	Ooh, what a hit!
+big_hit_02	big_hit	That's gonna leave a mark!
+big_hit_03	big_hit	Bang! Right in the door!
+big_hit_04	big_hit	Massive hit!
+big_hit_05	big_hit	Crunch! Somebody felt that one!
+big_hit_06	big_hit	What a wallop!
+big_hit_07	big_hit	Ouch! Did you hear that?
+big_hit_08	big_hit	Smash! The crowd is on its feet!
+big_hit_09	big_hit	Sheet metal is flying!
+big_hit_10	big_hit	That one rattled the grandstand!
+big_hit_11	big_hit	Oh my, that's a big one!
+big_hit_12	big_hit	Talk about a body blow!
+big_hit_13	big_hit	Boom! Right on target!
+big_hit_14	big_hit	Now that's how you hit a car!
+big_hit_15	big_hit	Somebody's going to need a new paint job!
+
+player_big_hit_01	player_big_hit	Great hit, number seven!
+player_big_hit_02	player_big_hit	You really nailed that one!
+player_big_hit_03	player_big_hit	Wham! Number seven means business!
+player_big_hit_04	player_big_hit	Beautiful shot! Right in the side!
+player_big_hit_05	player_big_hit	Ooh, you made them pay for that!
+player_big_hit_06	player_big_hit	Now that's a hit! Keep it up!
+player_big_hit_07	player_big_hit	You folded that car like a deck chair!
+player_big_hit_08	player_big_hit	Number seven, delivering the goods!
+player_big_hit_09	player_big_hit	Textbook hit! The crowd loves you!
+player_big_hit_10	player_big_hit	Bullseye! What a hit from number seven!
+
+huge_hit_01	huge_hit	Head-on! Oh, that was enormous!
+huge_hit_02	huge_hit	Oh my word! Nose to nose at full speed!
+huge_hit_03	huge_hit	What a collision! I felt that one up here in the booth!
+huge_hit_04	huge_hit	Unbelievable! Two cars, one almighty bang!
+huge_hit_05	huge_hit	That's the hit of the night, folks!
+
+player_spin_01	player_spin	You spun them round! Nice!
+player_spin_02	player_spin	Spin! Points for number seven!
+player_spin_03	player_spin	Round they go! Lovely work!
+player_spin_04	player_spin	Nice spin! The points are rolling in!
+player_spin_05	player_spin	You sent that car twirling!
+player_spin_06	player_spin	Look at that one spin! Great driving!
+player_spin_07	player_spin	A perfect tap, and away they spin!
+player_spin_08	player_spin	That's a spinner! Well done, seven!
+player_spin_09	player_spin	Spun right round! The judges like that!
+player_spin_10	player_spin	Clip the back, watch them spin! Beautiful!
+
+spin_360_01	spin_360	All the way round!
+spin_360_02	spin_360	A full three-sixty! Incredible!
+spin_360_03	spin_360	Round, and round, and round! What a spin!
+spin_360_04	spin_360	They went all the way round! Spectacular!
+
+player_wrecks_car_01	player_wrecks_car	You wrecked them! What a finish!
+player_wrecks_car_02	player_wrecks_car	That car is going nowhere, thanks to you!
+player_wrecks_car_03	player_wrecks_car	Number seven claims another victim!
+player_wrecks_car_04	player_wrecks_car	Lights out! You finished them off!
+player_wrecks_car_05	player_wrecks_car	One less car in the Bowl, courtesy of number seven!
+player_wrecks_car_06	player_wrecks_car	You put that one out of its misery!
+player_wrecks_car_07	player_wrecks_car	Another wreck! Number seven is on a rampage!
+player_wrecks_car_08	player_wrecks_car	That's scrap metal now! Great work!
+
+wreck_generic_01	wreck_generic	That car is done for!
+wreck_generic_02	wreck_generic	And that's the end of that one!
+wreck_generic_03	wreck_generic	Totally wrecked! Off to the scrap yard!
+wreck_generic_04	wreck_generic	Out of the derby! That car is finished!
+wreck_generic_05	wreck_generic	Steam, smoke, and silence! That one's out!
+wreck_generic_06	wreck_generic	Another one for the scrap heap!
+wreck_generic_07	wreck_generic	Game over for that car!
+wreck_generic_08	wreck_generic	They're out! Somebody fetch the tow truck!
+wreck_generic_09	wreck_generic	That one won't be driving home tonight!
+wreck_generic_10	wreck_generic	Down goes another one!
+
+player_spun_01	player_spun	Whoa, you got spun round!
+player_spun_02	player_spun	Round you go! Shake it off, seven!
+player_spun_03	player_spun	They spun you! Get back in it!
+player_spun_04	player_spun	Uh oh, number seven is facing the wrong way!
+
+player_lost_hood_01	player_lost_hood	You've lost your hood!
+player_lost_hood_02	player_lost_hood	There goes your hood!
+player_lost_hood_03	player_lost_hood	Your bonnet's gone flying!
+
+player_lost_bumper_01	player_lost_bumper	You've lost your bumper!
+player_lost_bumper_02	player_lost_bumper	There goes the bumper! Never mind, it's only trim!
+player_lost_bumper_03	player_lost_bumper	Bumper's gone! Not that you needed it!
+
+player_lost_wheel_01	player_lost_wheel	You've lost a wheel!
+player_lost_wheel_02	player_lost_wheel	There goes a wheel! Hang on to that steering!
+player_lost_wheel_03	player_lost_wheel	Your wheel is rolling away without you!
+player_lost_wheel_04	player_lost_wheel	Three wheels and a prayer, number seven!
+
+player_on_fire_01	player_on_fire	You're on fire!
+player_on_fire_02	player_on_fire	Number seven is on fire! Keep moving!
+player_on_fire_03	player_on_fire	Flames! Your car is on fire!
+player_on_fire_04	player_on_fire	Fire! Better make this count, seven!
+
+player_smoking_01	player_smoking	You're smoking, number seven!
+player_smoking_02	player_smoking	Smoke pouring out of number seven! Careful now!
+player_smoking_03	player_smoking	That engine's smoking! Not long left!
+
+player_glass_01	player_glass	There goes your windscreen!
+player_glass_02	player_glass	Glass everywhere! Can you still see out of that thing?
+player_glass_03	player_glass	Your windows are history!
+
+player_front_critical_01	player_front_critical	Your front end is history! Turn round and use your rear!
+player_front_critical_02	player_front_critical	Front's gone, seven! Go backwards, save that engine!
+player_front_critical_03	player_front_critical	Front end in pieces! Reverse into them!
+
+player_rear_critical_01	player_rear_critical	Your rear end is hanging by a thread!
+player_rear_critical_02	player_rear_critical	The back end can't take much more! Mind your rear!
+
+player_side_critical_01	player_side_critical	Your side's caved in! Protect those doors!
+player_side_critical_02	player_side_critical	That door can't take another hit, seven!
+
+player_lights_01	player_lights	There go your headlights!
+player_lights_02	player_lights	Lights out up front, seven! Drive by feel!
+
+player_wrecked_01	player_wrecked	Oh no! Number seven is out!
+player_wrecked_02	player_wrecked	That's it for you! Your car is finished!
+player_wrecked_03	player_wrecked	You're wrecked! What a valiant effort!
+player_wrecked_04	player_wrecked	Game over, number seven! Better luck next time!
+player_wrecked_05	player_wrecked	Number seven has had it! The crowd salutes you!
+player_wrecked_06	player_wrecked	Your derby is done! Give that car a round of applause!
+
+rollover_01	rollover	Over it goes! A rollover!
+rollover_02	rollover	Upside down! What a sight!
+rollover_03	rollover	Wheels in the air! It's gone right over!
+rollover_04	rollover	It's on its roof! The crowd goes wild!
+
+new_leader_01	new_leader	We have a new leader!
+new_leader_02	new_leader	Change at the top of the scoreboard!
+new_leader_03	new_leader	A new car takes the lead on points!
+new_leader_04	new_leader	Look at the scoreboard! New leader!
+
+player_leader_01	player_leader	Number seven leads! Everyone's coming for you now!
+player_leader_02	player_leader	You're top of the scoreboard! Watch your back!
+player_leader_03	player_leader	You're the leader! That's a target on your back!
+player_leader_04	player_leader	You're in the lead! Now they all want a piece of you!
+
+hunted_01	hunted	They're ganging up on you, seven!
+hunted_02	hunted	Look out! The whole pack is after you!
+hunted_03	hunted	Everybody wants number seven! Get out of there!
+
+reverse_ram_01	reverse_ram	Backwards into them! Textbook!
+reverse_ram_02	reverse_ram	Reverse ram! Engine safe, smart driving!
+reverse_ram_03	reverse_ram	Rear end first! That's how the pros do it!
+reverse_ram_04	reverse_ram	Back it up, and bang! Beautiful!
+
+pileup_01	pileup	Pile-up! Cars everywhere!
+pileup_02	pileup	What a tangle! Who's on top of who?
+pileup_03	pileup	Three, four, five cars in one big heap!
+
+lull_01	lull	Come on, get stuck in!
+lull_02	lull	The crowd wants action!
+lull_03	lull	Somebody hit somebody!
+lull_04	lull	Don't be shy, drivers! Find a target!
+lull_05	lull	We didn't come here to watch a parade!
+lull_06	lull	Wake up out there! Let's see some contact!
+lull_07	lull	Is this a derby or a Sunday drive?
+lull_08	lull	Plenty of cars left to hit, folks!
+
+cars_left_10_01	cars_left_10	Ten cars left in the Bowl!
+cars_left_10_02	cars_left_10	We're down to ten! Half the field is scrap!
+
+cars_left_5_01	cars_left_5	Five cars left!
+cars_left_5_02	cars_left_5	Only five survivors! This is getting serious!
+cars_left_5_03	cars_left_5	Down to the final five!
+
+cars_left_3_01	cars_left_3	Three cars left!
+cars_left_3_02	cars_left_3	Just three remain! Who wants it most?
+cars_left_3_03	cars_left_3	Final three! Every hit counts now!
+
+final_duel_01	final_duel	It's down to the last two!
+final_duel_02	final_duel	Two cars left! One more hit could do it!
+final_duel_03	final_duel	Head to head for the win! The crowd is on its feet!
+final_duel_04	final_duel	Two left standing! This is it!
+
+player_wins_01	player_wins	Number seven is the last car running! You win!
+player_wins_02	player_wins	You did it! Champion of the Bowl!
+player_wins_03	player_wins	The last car standing is number seven! What a performance!
+player_wins_04	player_wins	Victory for number seven! Take a bow!
+
+results_01	results	What a night of destruction! Let's look at the scores!
+results_02	results	That's the derby done! Here are your results!
+results_03	results	Thank you, derby fans! See you next time in the Bowl!
+
+# ---- generated number lines: generate.py rewrites everything below from NUMBER_TEMPLATES, edit there ----
+
+wrecked_num_02	wrecked_num	Number two is out!
+wrecked_num_03	wrecked_num	That's it for number three!
+wrecked_num_04	wrecked_num	Number four is out!
+wrecked_num_05	wrecked_num	That's it for number five!
+wrecked_num_06	wrecked_num	Number six is out!
+wrecked_num_07	wrecked_num	That's it for number seven!
+wrecked_num_08	wrecked_num	Number eight is out!
+wrecked_num_09	wrecked_num	That's it for number nine!
+wrecked_num_10	wrecked_num	Number ten is out!
+wrecked_num_11	wrecked_num	That's it for number eleven!
+wrecked_num_12	wrecked_num	Number twelve is out!
+wrecked_num_13	wrecked_num	That's it for number thirteen!
+wrecked_num_14	wrecked_num	Number fourteen is out!
+wrecked_num_15	wrecked_num	That's it for number fifteen!
+wrecked_num_16	wrecked_num	Number sixteen is out!
+wrecked_num_17	wrecked_num	That's it for number seventeen!
+wrecked_num_18	wrecked_num	Number eighteen is out!
+wrecked_num_19	wrecked_num	That's it for number nineteen!
+wrecked_num_20	wrecked_num	Number twenty is out!
+wrecked_num_21	wrecked_num	That's it for number twenty-one!
+wrecked_num_22	wrecked_num	Number twenty-two is out!
+wrecked_num_23	wrecked_num	That's it for number twenty-three!
+wrecked_num_24	wrecked_num	Number twenty-four is out!
+wrecked_num_25	wrecked_num	That's it for number twenty-five!
+wrecked_num_26	wrecked_num	Number twenty-six is out!
+wrecked_num_27	wrecked_num	That's it for number twenty-seven!
+wrecked_num_28	wrecked_num	Number twenty-eight is out!
+wrecked_num_29	wrecked_num	That's it for number twenty-nine!
+wrecked_num_30	wrecked_num	Number thirty is out!
+wrecked_num_31	wrecked_num	That's it for number thirty-one!
+wrecked_num_32	wrecked_num	Number thirty-two is out!
+wrecked_num_33	wrecked_num	That's it for number thirty-three!
+wrecked_num_34	wrecked_num	Number thirty-four is out!
+wrecked_num_35	wrecked_num	That's it for number thirty-five!
+wrecked_num_36	wrecked_num	Number thirty-six is out!
+wrecked_num_37	wrecked_num	That's it for number thirty-seven!
+wrecked_num_38	wrecked_num	Number thirty-eight is out!
+wrecked_num_39	wrecked_num	That's it for number thirty-nine!
+wrecked_num_40	wrecked_num	Number forty is out!
+wrecked_num_41	wrecked_num	That's it for number forty-one!
+wrecked_num_42	wrecked_num	Number forty-two is out!
+wrecked_num_43	wrecked_num	That's it for number forty-three!
+wrecked_num_44	wrecked_num	Number forty-four is out!
+wrecked_num_45	wrecked_num	That's it for number forty-five!
+wrecked_num_46	wrecked_num	Number forty-six is out!
+wrecked_num_47	wrecked_num	That's it for number forty-seven!
+wrecked_num_48	wrecked_num	Number forty-eight is out!
+wrecked_num_49	wrecked_num	That's it for number forty-nine!
+wrecked_num_50	wrecked_num	Number fifty is out!
+wrecked_num_51	wrecked_num	That's it for number fifty-one!
+wrecked_num_52	wrecked_num	Number fifty-two is out!
+wrecked_num_53	wrecked_num	That's it for number fifty-three!
+wrecked_num_54	wrecked_num	Number fifty-four is out!
+wrecked_num_55	wrecked_num	That's it for number fifty-five!
+wrecked_num_56	wrecked_num	Number fifty-six is out!
+wrecked_num_57	wrecked_num	That's it for number fifty-seven!
+wrecked_num_58	wrecked_num	Number fifty-eight is out!
+wrecked_num_59	wrecked_num	That's it for number fifty-nine!
+wrecked_num_60	wrecked_num	Number sixty is out!
+wrecked_num_61	wrecked_num	That's it for number sixty-one!
+
+winner_num_02	winner_num	Number two is the last car running!
+winner_num_03	winner_num	Number three is the last car running!
+winner_num_04	winner_num	Number four is the last car running!
+winner_num_05	winner_num	Number five is the last car running!
+winner_num_06	winner_num	Number six is the last car running!
+winner_num_07	winner_num	Number seven is the last car running!
+winner_num_08	winner_num	Number eight is the last car running!
+winner_num_09	winner_num	Number nine is the last car running!
+winner_num_10	winner_num	Number ten is the last car running!
+winner_num_11	winner_num	Number eleven is the last car running!
+winner_num_12	winner_num	Number twelve is the last car running!
+winner_num_13	winner_num	Number thirteen is the last car running!
+winner_num_14	winner_num	Number fourteen is the last car running!
+winner_num_15	winner_num	Number fifteen is the last car running!
+winner_num_16	winner_num	Number sixteen is the last car running!
+winner_num_17	winner_num	Number seventeen is the last car running!
+winner_num_18	winner_num	Number eighteen is the last car running!
+winner_num_19	winner_num	Number nineteen is the last car running!
+winner_num_20	winner_num	Number twenty is the last car running!
+winner_num_21	winner_num	Number twenty-one is the last car running!
+winner_num_22	winner_num	Number twenty-two is the last car running!
+winner_num_23	winner_num	Number twenty-three is the last car running!
+winner_num_24	winner_num	Number twenty-four is the last car running!
+winner_num_25	winner_num	Number twenty-five is the last car running!
+winner_num_26	winner_num	Number twenty-six is the last car running!
+winner_num_27	winner_num	Number twenty-seven is the last car running!
+winner_num_28	winner_num	Number twenty-eight is the last car running!
+winner_num_29	winner_num	Number twenty-nine is the last car running!
+winner_num_30	winner_num	Number thirty is the last car running!
+winner_num_31	winner_num	Number thirty-one is the last car running!
+winner_num_32	winner_num	Number thirty-two is the last car running!
+winner_num_33	winner_num	Number thirty-three is the last car running!
+winner_num_34	winner_num	Number thirty-four is the last car running!
+winner_num_35	winner_num	Number thirty-five is the last car running!
+winner_num_36	winner_num	Number thirty-six is the last car running!
+winner_num_37	winner_num	Number thirty-seven is the last car running!
+winner_num_38	winner_num	Number thirty-eight is the last car running!
+winner_num_39	winner_num	Number thirty-nine is the last car running!
+winner_num_40	winner_num	Number forty is the last car running!
+winner_num_41	winner_num	Number forty-one is the last car running!
+winner_num_42	winner_num	Number forty-two is the last car running!
+winner_num_43	winner_num	Number forty-three is the last car running!
+winner_num_44	winner_num	Number forty-four is the last car running!
+winner_num_45	winner_num	Number forty-five is the last car running!
+winner_num_46	winner_num	Number forty-six is the last car running!
+winner_num_47	winner_num	Number forty-seven is the last car running!
+winner_num_48	winner_num	Number forty-eight is the last car running!
+winner_num_49	winner_num	Number forty-nine is the last car running!
+winner_num_50	winner_num	Number fifty is the last car running!
+winner_num_51	winner_num	Number fifty-one is the last car running!
+winner_num_52	winner_num	Number fifty-two is the last car running!
+winner_num_53	winner_num	Number fifty-three is the last car running!
+winner_num_54	winner_num	Number fifty-four is the last car running!
+winner_num_55	winner_num	Number fifty-five is the last car running!
+winner_num_56	winner_num	Number fifty-six is the last car running!
+winner_num_57	winner_num	Number fifty-seven is the last car running!
+winner_num_58	winner_num	Number fifty-eight is the last car running!
+winner_num_59	winner_num	Number fifty-nine is the last car running!
+winner_num_60	winner_num	Number sixty is the last car running!
+winner_num_61	winner_num	Number sixty-one is the last car running!
+
+leader_num_02	leader_num	Number two takes the lead!
+leader_num_03	leader_num	Number three takes the lead!
+leader_num_04	leader_num	Number four takes the lead!
+leader_num_05	leader_num	Number five takes the lead!
+leader_num_06	leader_num	Number six takes the lead!
+leader_num_07	leader_num	Number seven takes the lead!
+leader_num_08	leader_num	Number eight takes the lead!
+leader_num_09	leader_num	Number nine takes the lead!
+leader_num_10	leader_num	Number ten takes the lead!
+leader_num_11	leader_num	Number eleven takes the lead!
+leader_num_12	leader_num	Number twelve takes the lead!
+leader_num_13	leader_num	Number thirteen takes the lead!
+leader_num_14	leader_num	Number fourteen takes the lead!
+leader_num_15	leader_num	Number fifteen takes the lead!
+leader_num_16	leader_num	Number sixteen takes the lead!
+leader_num_17	leader_num	Number seventeen takes the lead!
+leader_num_18	leader_num	Number eighteen takes the lead!
+leader_num_19	leader_num	Number nineteen takes the lead!
+leader_num_20	leader_num	Number twenty takes the lead!
+leader_num_21	leader_num	Number twenty-one takes the lead!
+leader_num_22	leader_num	Number twenty-two takes the lead!
+leader_num_23	leader_num	Number twenty-three takes the lead!
+leader_num_24	leader_num	Number twenty-four takes the lead!
+leader_num_25	leader_num	Number twenty-five takes the lead!
+leader_num_26	leader_num	Number twenty-six takes the lead!
+leader_num_27	leader_num	Number twenty-seven takes the lead!
+leader_num_28	leader_num	Number twenty-eight takes the lead!
+leader_num_29	leader_num	Number twenty-nine takes the lead!
+leader_num_30	leader_num	Number thirty takes the lead!
+leader_num_31	leader_num	Number thirty-one takes the lead!
+leader_num_32	leader_num	Number thirty-two takes the lead!
+leader_num_33	leader_num	Number thirty-three takes the lead!
+leader_num_34	leader_num	Number thirty-four takes the lead!
+leader_num_35	leader_num	Number thirty-five takes the lead!
+leader_num_36	leader_num	Number thirty-six takes the lead!
+leader_num_37	leader_num	Number thirty-seven takes the lead!
+leader_num_38	leader_num	Number thirty-eight takes the lead!
+leader_num_39	leader_num	Number thirty-nine takes the lead!
+leader_num_40	leader_num	Number forty takes the lead!
+leader_num_41	leader_num	Number forty-one takes the lead!
+leader_num_42	leader_num	Number forty-two takes the lead!
+leader_num_43	leader_num	Number forty-three takes the lead!
+leader_num_44	leader_num	Number forty-four takes the lead!
+leader_num_45	leader_num	Number forty-five takes the lead!
+leader_num_46	leader_num	Number forty-six takes the lead!
+leader_num_47	leader_num	Number forty-seven takes the lead!
+leader_num_48	leader_num	Number forty-eight takes the lead!
+leader_num_49	leader_num	Number forty-nine takes the lead!
+leader_num_50	leader_num	Number fifty takes the lead!
+leader_num_51	leader_num	Number fifty-one takes the lead!
+leader_num_52	leader_num	Number fifty-two takes the lead!
+leader_num_53	leader_num	Number fifty-three takes the lead!
+leader_num_54	leader_num	Number fifty-four takes the lead!
+leader_num_55	leader_num	Number fifty-five takes the lead!
+leader_num_56	leader_num	Number fifty-six takes the lead!
+leader_num_57	leader_num	Number fifty-seven takes the lead!
+leader_num_58	leader_num	Number fifty-eight takes the lead!
+leader_num_59	leader_num	Number fifty-nine takes the lead!
+leader_num_60	leader_num	Number sixty takes the lead!
+leader_num_61	leader_num	Number sixty-one takes the lead!

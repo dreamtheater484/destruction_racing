@@ -1,5 +1,6 @@
 @echo off
-rem Builds and starts the M1b grey-box Destruction Derby (the Bowl, 20 cars).
+rem Builds and starts Destruction Derby in the Bowl (M4 vertical slice): pick the light (afternoon, golden
+rem hour, night), your car and the division, then 20 cars, last car running wins.
 cd /d "%~dp0"
 echo Building...
 dotnet build DestructionRacing.csproj -nologo -v q
@@ -14,6 +15,9 @@ if not exist ".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_m
   pause
   exit /b 1
 )
+if not exist out mkdir out
+echo Importing new assets (quick when nothing changed)...
+".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64_console.exe" --headless --path . --import > "out\last_import.log" 2>&1
 echo Starting the derby...
 rem "--path ." (not "%~dp0"): a trailing backslash before a quote breaks the argument.
-start "" ".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64.exe" --path . --log-file "out\last_run.log" -- --scene=res://scenes/derby/Derby.tscn
+start "" ".engine\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64.exe" --path . --log-file "out\last_run.log" -- --scene=res://scenes/derby/DerbySetup.tscn

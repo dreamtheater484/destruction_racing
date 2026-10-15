@@ -11,15 +11,16 @@ Work in progress, built milestone by milestone (`IMPLEMENTATION_PLAN.md` §18):
 |---|---|
 | M0 Foundation, M1 driving feel, M1b grey-box derby, M1c grey-box Wreckin' Racing | done |
 | M2 Art and audio spike (generated cars, layered damage, the Bowl's look, engine sound) | approved |
-| M3 Full damage and VFX (parts that come off, glass, lights, smoke, fire, sparks, debris) | in review |
-| M4 Vertical slice: the Destruction Derby | next |
+| M3 Full damage and VFX (parts that come off, glass, lights, smoke, fire, sparks, debris) | approved |
+| M4 Vertical slice: the Destruction Derby (the final Bowl in three lights, crowd, derby AI, broadcast HUD, announcer, sound, replays) | in review |
+| M5 Car roster | next |
 
 Progress notes and test results: [`docs/PROGRESS.md`](docs/PROGRESS.md).
 
 ## Running it
 1. Install the **.NET 8 SDK** and put **Godot 4.7.2 .NET** in `.engine/godot/` (see [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)).
 2. Double-click a launcher in the project folder; each one builds and starts a scene:
-   - **Play Derby.cmd**: a 20-car Destruction Derby in the Bowl.
+   - **Play Derby.cmd**: Destruction Derby in the Bowl: pick the light (afternoon, golden hour, night), your car and the division, then 20 cars, last car running wins. After the event, V shows the replay.
    - **Play Wreckin.cmd**: Wreckin' Racing on the figure-8.
    - **Play Driving Test.cmd**: free driving with the tuning panel.
    - **Damage Lab.cmd**: real crashes into a parked car, to look at the damage.

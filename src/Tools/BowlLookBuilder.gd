@@ -1,8 +1,13 @@
 extends SceneTree
-## Builds the Bowl look-dev scene (plan §7.3, M2): the static arena with lightmap UVs, materials from the
-## Poly Haven CC0 set, sun + HDRI sky (mountains) and a LightmapGI ready for tools/dev/bake.ps1.
-## Run: Godot --headless --path <project> -s res://src/Tools/BowlLookBuilder.gd
-## Output: res://scenes/bowl/BowlLook.tscn (+ meshes and materials under res://assets/bowl/).
+## Builds the Bowl (plan §7.3): the static arena with lightmap UVs, materials from the Poly Haven CC0 set and a
+## LightmapGI ready for tools/dev/bake.ps1, in one of three lighting presets (M4):
+##   afternoon  sun + the Alps HDRI (the M2 hero look)                               -> res://scenes/bowl/BowlLook.tscn
+##   golden     low warm sun, procedural sky, mountain ridges, floodlights coming on -> BowlLook_Golden.tscn
+##   night      moon, stars, four shadowed floodlight spots, emissive lamp heads     -> BowlLook_Night.tscn
+## Run: Godot --headless --path <project> -s res://src/Tools/BowlLookBuilder.gd -- [--preset=golden] [--rebuild-meshes]
+## The arena meshes under res://assets/bowl/meshes are shared by all presets and only written when missing (or
+## with --rebuild-meshes): their lightmap UVs must not change under an existing bake. After --rebuild-meshes,
+## rebake every preset.
 
 const A := 55.0          # ellipse semi-axes of the arena floor edge (matches GreyBoxArena)
 const B := 38.0
@@ -11,18 +16,39 @@ const PH := "res://assets/third_party/polyhaven/"
 const OUT_MESH := "res://assets/bowl/meshes/"
 const OUT_MAT := "res://assets/bowl/materials/"
 
+const SCENES := {
+	"afternoon": "res://scenes/bowl/BowlLook.tscn",
+	"golden": "res://scenes/bowl/BowlLook_Golden.tscn",
+	"night": "res://scenes/bowl/BowlLook_Night.tscn",
+}
+
 var arena: Node3D
 var mats := {}
+var preset := "afternoon"
+var rebuild_meshes := false
 
 
 func _init() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--preset="):
+			preset = arg.substr("--preset=".length())
+		elif arg == "--rebuild-meshes":
+			rebuild_meshes = true
+	if not SCENES.has(preset):
+		push_error("unknown preset %s (afternoon, golden, night)" % preset)
+		quit(1)
+		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_MESH))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_MAT))
 	arena = Node3D.new()
 	arena.name = "BowlLook"
 	arena.set_script(load("res://src/Tools/BowlLook.cs"))
 	_materials()
-	_environment()
+	if preset == "afternoon":
+		_environment()
+	else:
+		_environment_procedural()
+		_mountains()
 	_floor()
 	_outside()
 	_wall()
@@ -40,8 +66,8 @@ func _init() -> void:
 		push_error("pack failed: %s" % err)
 		quit(1)
 		return
-	err = ResourceSaver.save(packed, "res://scenes/bowl/BowlLook.tscn")
-	print("[BowlLookBuilder] saved res://scenes/bowl/BowlLook.tscn (%s)" % error_string(err))
+	err = ResourceSaver.save(packed, SCENES[preset])
+	print("[BowlLookBuilder] saved %s (%s)" % [SCENES[preset], error_string(err)])
 	quit(0 if err == OK else 1)
 
 
@@ -114,6 +140,15 @@ func _materials() -> void:
 	lamp.emission = Color(1.0, 0.95, 0.85)
 	lamp.emission_energy_multiplier = 0.0
 	ResourceSaver.save(lamp, OUT_MAT + "lamp.tres")
+	# Lit lamp heads for the golden-hour and night presets (glow picks them up).
+	for p in [["lamp_golden", 5.0], ["lamp_night", 14.0]]:
+		var lit := _flat(p[0], Color(0.95, 0.95, 0.9), 0.2)
+		lit.emission_enabled = true
+		lit.emission = Color(1.0, 0.94, 0.82)
+		lit.emission_energy_multiplier = p[1]
+		ResourceSaver.save(lit, OUT_MAT + p[0] + ".tres")
+	_flat("rock", Color(0.16, 0.17, 0.15), 1.0)
+	_flat("rock_far", Color(0.20, 0.22, 0.24), 1.0)
 	_flat("board", Color(0.02, 0.02, 0.025), 0.4)
 	var ground := ShaderMaterial.new()
 	ground.resource_name = "ground"
@@ -194,11 +229,13 @@ func _ellipse(t: float, off: float) -> Vector3:
 
 
 func _mesh_instance(name: String, mesh: ArrayMesh, mat: String, texel := 0.25) -> MeshInstance3D:
-	mesh.surface_set_material(0, mats[mat])
-	var err := mesh.lightmap_unwrap(Transform3D.IDENTITY, texel)
-	if err != OK:
-		push_warning("lightmap_unwrap %s: %s" % [name, error_string(err)])
-	ResourceSaver.save(mesh, OUT_MESH + name + ".res")
+	var path := OUT_MESH + name + ".res"
+	if rebuild_meshes or not ResourceLoader.exists(path):
+		mesh.surface_set_material(0, mats[mat])
+		var err := mesh.lightmap_unwrap(Transform3D.IDENTITY, texel)
+		if err != OK:
+			push_warning("lightmap_unwrap %s: %s" % [name, error_string(err)])
+		ResourceSaver.save(mesh, path)
 	var mi := MeshInstance3D.new()
 	mi.name = name
 	mi.mesh = load(OUT_MESH + name + ".res")
@@ -392,7 +429,28 @@ func _floodlight(at: Vector3) -> void:
 			lamp.mesh = lm
 			lamp.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 			lamp.position = Vector3(-2.0 + c * 1.0, -0.85 + r * 0.85, -0.22)
+			if preset != "afternoon":
+				lamp.material_override = mats["lamp_" + preset]
 			_add(lamp, head)
+	if preset != "afternoon":
+		# One shadowed spot per tower lights the floor and the cars; its indirect light is baked.
+		var spot := SpotLight3D.new()
+		spot.name = "Flood"
+		spot.position = Vector3(0, 0, -0.6)
+		spot.light_color = Color(1.0, 0.93, 0.8)
+		spot.light_energy = 13.0 if preset == "night" else 4.0
+		spot.light_indirect_energy = 1.0
+		spot.light_volumetric_fog_energy = 0.6 if preset == "night" else 0.0
+		spot.spot_range = 170.0
+		spot.spot_attenuation = 0.85
+		spot.spot_angle = 48.0
+		spot.spot_angle_attenuation = 1.4
+		spot.light_size = 1.2
+		spot.shadow_enabled = true
+		spot.shadow_bias = 0.04
+		spot.shadow_normal_bias = 1.2
+		spot.light_bake_mode = Light3D.BAKE_DYNAMIC
+		_add(spot, head)
 
 
 func _scoreboard() -> void:
@@ -429,6 +487,153 @@ func _scoreboard() -> void:
 	sub.outline_size = 0
 	sub.position = Vector3(0, 8.6, 0.48)
 	_add(sub, sb)
+
+
+func _environment_procedural() -> void:
+	# Golden hour and night: our sky shader (gradient, light glow and disk, clouds, stars) instead of the HDRI,
+	# so the sun can sit low and the night can be dark. The mountains are geometry (_mountains).
+	var golden := preset == "golden"
+	var sky_mat := ShaderMaterial.new()
+	sky_mat.shader = load("res://assets/shaders/bowl_sky.gdshader")
+	var p := {}
+	if golden:
+		p = {"zenith_color": Color(0.05, 0.13, 0.40), "horizon_color": Color(1.0, 0.55, 0.25),
+			"mid_color": Color(0.85, 0.78, 0.6), "mid_height": 0.08,
+			"ground_color": Color(0.10, 0.07, 0.05), "horizon_power": 0.45,
+			"glow_color": Color(1.0, 0.5, 0.2), "glow_strength": 1.4, "glow_tightness": 5.0,
+			"disk_color": Color(1.0, 0.78, 0.5), "disk_size": 0.03, "disk_energy": 40.0,
+			"cloud_cover": 0.38, "cloud_lit": Color(1.0, 0.62, 0.36), "cloud_shade": Color(0.26, 0.22, 0.27),
+			"star_density": 0.0, "energy": 0.9}
+	else:
+		p = {"zenith_color": Color(0.003, 0.005, 0.013), "horizon_color": Color(0.035, 0.034, 0.045),
+			"mid_color": Color(0.012, 0.016, 0.03), "mid_height": 0.12,
+			"ground_color": Color(0.006, 0.006, 0.008), "horizon_power": 0.5,
+			"glow_color": Color(0.35, 0.42, 0.6), "glow_strength": 0.08, "glow_tightness": 18.0,
+			"disk_color": Color(0.9, 0.93, 1.0), "disk_size": 0.012, "disk_energy": 6.0,
+			"cloud_cover": 0.3, "cloud_lit": Color(0.07, 0.08, 0.11), "cloud_shade": Color(0.015, 0.017, 0.025),
+			"star_density": 0.012, "energy": 1.0}
+	for k in p:
+		sky_mat.set_shader_parameter(k, p[k])
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	sky.radiance_size = Sky.RADIANCE_SIZE_512
+	var env := Environment.new()
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	env.tonemap_exposure = 1.0 if golden else 1.0
+	env.ssao_enabled = true
+	env.ssao_radius = 1.2
+	env.ssao_intensity = 1.8
+	env.ssil_enabled = true
+	env.glow_enabled = true
+	env.glow_intensity = 0.45 if golden else 0.8
+	env.glow_bloom = 0.0 if golden else 0.04
+	env.glow_hdr_threshold = 1.0
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.85, 0.6, 0.42) if golden else Color(0.03, 0.035, 0.05)
+	env.fog_density = 0.00042 if golden else 0.0009
+	env.fog_aerial_perspective = 0.6 if golden else 0.3
+	env.fog_sun_scatter = 0.25 if golden else 0.0
+	env.fog_sky_affect = 0.1
+	# Haze in the air: god rays from the low sun, beams from the floodlights at night.
+	env.volumetric_fog_enabled = true
+	env.volumetric_fog_density = 0.0009 if golden else 0.0012
+	env.volumetric_fog_albedo = Color(0.9, 0.82, 0.72) if golden else Color(0.75, 0.75, 0.78)
+	env.volumetric_fog_anisotropy = 0.55 if golden else 0.4
+	env.volumetric_fog_length = 140.0
+	env.volumetric_fog_temporal_reprojection_amount = 0.5
+	env.volumetric_fog_sky_affect = 0.0
+	env.volumetric_fog_ambient_inject = 0.0
+	var we := WorldEnvironment.new()
+	we.name = "WorldEnvironment"
+	we.environment = env
+	_add(we)
+
+	var light := DirectionalLight3D.new()
+	if golden:
+		# Low in the west (-X), a little to the south: long shadows across the floor, the stands half lit.
+		light.name = "Sun"
+		var to_sun := Vector3(-0.92, 0.0, 0.37).normalized() * cos(deg_to_rad(11.0)) + Vector3.UP * sin(deg_to_rad(11.0))
+		light.transform = Transform3D(Basis.looking_at(-to_sun, Vector3.UP), to_sun * 50.0)
+		light.light_energy = 3.6
+		light.light_color = Color(1.0, 0.64, 0.36)
+		light.light_angular_distance = 0.8
+		light.light_volumetric_fog_energy = 1.0
+		light.shadow_enabled = true
+		light.directional_shadow_max_distance = 180.0
+	else:
+		light.name = "Moon"
+		var to_moon := Vector3(0.45, 0.0, -0.6).normalized() * cos(deg_to_rad(38.0)) + Vector3.UP * sin(deg_to_rad(38.0))
+		light.transform = Transform3D(Basis.looking_at(-to_moon, Vector3.UP), to_moon * 50.0)
+		light.light_energy = 0.07
+		light.light_color = Color(0.62, 0.72, 1.0)
+		light.light_volumetric_fog_energy = 0.0
+		light.shadow_enabled = false
+	light.light_bake_mode = Light3D.BAKE_DYNAMIC
+	_add(light)
+
+
+func _mountains() -> void:
+	# Two rings of ridges far behind the arena (DD1's mountain backdrop): a strip that rises from below the
+	# horizon to a noisy ridge line, faceted by height noise. Not shadowed or baked; fog gives the depth.
+	var layers := [
+		{"name": "MountainsNear", "r": 1350.0, "depth": 350.0, "h": 150.0, "seed": 11, "mat": "rock"},
+		{"name": "MountainsFar", "r": 2300.0, "depth": 500.0, "h": 330.0, "seed": 23, "mat": "rock_far"},
+	]
+	for layer in layers:
+		var noise := FastNoiseLite.new()
+		noise.seed = layer["seed"]
+		noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+		noise.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+		noise.fractal_octaves = 5
+		noise.frequency = 1.0
+		var detail := FastNoiseLite.new()
+		detail.seed = layer["seed"] + 100
+		detail.frequency = 0.02
+		detail.fractal_octaves = 3
+		var steps := 900
+		var rows := 7
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var grid := []
+		for j in rows:
+			var t := float(j) / (rows - 1)
+			var row := []
+			for i in steps + 1:
+				var ang := TAU * i / steps
+				var dir := Vector3(cos(ang), 0, sin(ang))
+				# Ridge height: ridged noise sampled on a circle, so the ring closes seamlessly.
+				var ridge: float = 0.5 + 0.5 * noise.get_noise_2d(cos(ang) * 1.6, sin(ang) * 1.6)
+				ridge = 0.2 + 0.8 * pow(ridge, 1.6)
+				var r: float = layer["r"] + t * layer["depth"]
+				var y: float = lerp(-40.0, ridge * layer["h"], pow(t, 0.8))
+				var q := dir * r
+				y += detail.get_noise_2d(q.x, q.z) * layer["h"] * 0.12 * t * (1.0 - t) * 4.0
+				row.append(dir * r + Vector3.UP * y)
+			grid.append(row)
+		for j in rows - 1:
+			for i in steps:
+				var a: Vector3 = grid[j][i]
+				var b: Vector3 = grid[j][i + 1]
+				var c: Vector3 = grid[j + 1][i]
+				var d: Vector3 = grid[j + 1][i + 1]
+				# Faces point inwards, at the arena (clockwise as seen from the centre).
+				st.add_vertex(a); st.add_vertex(c); st.add_vertex(b)
+				st.add_vertex(b); st.add_vertex(c); st.add_vertex(d)
+		st.generate_normals()
+		var mesh := st.commit()
+		mesh.surface_set_material(0, mats[layer["mat"]])
+		var path: String = OUT_MESH + layer["name"] + ".res"
+		ResourceSaver.save(mesh, path)
+		var mi := MeshInstance3D.new()
+		mi.name = layer["name"]
+		mi.mesh = load(path)
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_add(mi)
 
 
 func _lightmap() -> void:

@@ -1,0 +1,495 @@
+{
+  "sample_rate": 44100,
+  "generator": "tools/sfxsynth/synth.py",
+  "sounds": {
+    "hit_metal_light": {
+      "files": [
+        "hit_metal_light_0.wav",
+        "hit_metal_light_1.wav",
+        "hit_metal_light_2.wav",
+        "hit_metal_light_3.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.273,
+        0.275,
+        0.331,
+        0.34
+      ]
+    },
+    "hit_metal_medium": {
+      "files": [
+        "hit_metal_medium_0.wav",
+        "hit_metal_medium_1.wav",
+        "hit_metal_medium_2.wav",
+        "hit_metal_medium_3.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.665,
+        0.582,
+        0.541,
+        0.757
+      ]
+    },
+    "hit_metal_heavy": {
+      "files": [
+        "hit_metal_heavy_0.wav",
+        "hit_metal_heavy_1.wav",
+        "hit_metal_heavy_2.wav",
+        "hit_metal_heavy_3.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.33,
+        0.977,
+        1.076,
+        1.124
+      ]
+    },
+    "hit_metal_huge": {
+      "files": [
+        "hit_metal_huge_0.wav",
+        "hit_metal_huge_1.wav",
+        "hit_metal_huge_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.594,
+        1.902,
+        1.904
+      ]
+    },
+    "hit_tyres_light": {
+      "files": [
+        "hit_tyres_light_0.wav",
+        "hit_tyres_light_1.wav",
+        "hit_tyres_light_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.381,
+        0.43,
+        0.465
+      ]
+    },
+    "hit_tyres_medium": {
+      "files": [
+        "hit_tyres_medium_0.wav",
+        "hit_tyres_medium_1.wav",
+        "hit_tyres_medium_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.816,
+        0.622,
+        0.762
+      ]
+    },
+    "hit_tyres_heavy": {
+      "files": [
+        "hit_tyres_heavy_0.wav",
+        "hit_tyres_heavy_1.wav",
+        "hit_tyres_heavy_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.018,
+        1.3,
+        1.071
+      ]
+    },
+    "hit_concrete_heavy": {
+      "files": [
+        "hit_concrete_heavy_0.wav",
+        "hit_concrete_heavy_1.wav",
+        "hit_concrete_heavy_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.973,
+        1.114,
+        1.079
+      ]
+    },
+    "glass_break": {
+      "files": [
+        "glass_break_0.wav",
+        "glass_break_1.wav",
+        "glass_break_2.wav",
+        "glass_break_3.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.122,
+        1.371,
+        1.355,
+        1.258
+      ]
+    },
+    "lamp_break": {
+      "files": [
+        "lamp_break_0.wav",
+        "lamp_break_1.wav",
+        "lamp_break_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.364,
+        0.382,
+        0.32
+      ]
+    },
+    "part_off": {
+      "files": [
+        "part_off_0.wav",
+        "part_off_1.wav",
+        "part_off_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.727,
+        0.864,
+        0.986
+      ]
+    },
+    "debris_clatter": {
+      "files": [
+        "debris_clatter_0.wav",
+        "debris_clatter_1.wav",
+        "debris_clatter_2.wav",
+        "debris_clatter_3.wav",
+        "debris_clatter_4.wav",
+        "debris_clatter_5.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.502,
+        0.375,
+        0.579,
+        0.257,
+        0.312,
+        0.423
+      ]
+    },
+    "wheel_bounce": {
+      "files": [
+        "wheel_bounce_0.wav",
+        "wheel_bounce_1.wav",
+        "wheel_bounce_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.468,
+        0.416,
+        0.357
+      ]
+    },
+    "scrape_metal_loop": {
+      "files": [
+        "scrape_metal_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        4.0
+      ]
+    },
+    "scrape_wall_loop": {
+      "files": [
+        "scrape_wall_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        5.0
+      ]
+    },
+    "tyre_squeal_loop": {
+      "files": [
+        "tyre_squeal_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        4.0
+      ]
+    },
+    "tyre_dirt_loop": {
+      "files": [
+        "tyre_dirt_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        4.0
+      ]
+    },
+    "hub_grind_loop": {
+      "files": [
+        "hub_grind_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        4.0
+      ]
+    },
+    "fire_loop": {
+      "files": [
+        "fire_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        5.0
+      ]
+    },
+    "steam_loop": {
+      "files": [
+        "steam_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        4.0
+      ]
+    },
+    "crowd_bed_loop": {
+      "files": [
+        "crowd_bed_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        16.0
+      ]
+    },
+    "crowd_excited_loop": {
+      "files": [
+        "crowd_excited_loop.wav"
+      ],
+      "loop": true,
+      "duration": [
+        16.0
+      ]
+    },
+    "crowd_ooh": {
+      "files": [
+        "crowd_ooh_0.wav",
+        "crowd_ooh_1.wav",
+        "crowd_ooh_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        2.082,
+        2.332,
+        1.825
+      ]
+    },
+    "crowd_cheer": {
+      "files": [
+        "crowd_cheer_0.wav",
+        "crowd_cheer_1.wav",
+        "crowd_cheer_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        2.583,
+        2.828,
+        2.341
+      ]
+    },
+    "crowd_roar": {
+      "files": [
+        "crowd_roar_0.wav",
+        "crowd_roar_1.wav"
+      ],
+      "loop": false,
+      "duration": [
+        3.841,
+        3.454
+      ]
+    },
+    "crowd_groan": {
+      "files": [
+        "crowd_groan_0.wav",
+        "crowd_groan_1.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.713,
+        1.897
+      ]
+    },
+    "crowd_applause": {
+      "files": [
+        "crowd_applause.wav"
+      ],
+      "loop": false,
+      "duration": [
+        5.441
+      ]
+    },
+    "countdown_beep": {
+      "files": [
+        "countdown_beep.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.28
+      ]
+    },
+    "countdown_go": {
+      "files": [
+        "countdown_go.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.674
+      ]
+    },
+    "air_horn": {
+      "files": [
+        "air_horn.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.188
+      ]
+    },
+    "sting_spin_1": {
+      "files": [
+        "sting_spin_1.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.442
+      ]
+    },
+    "sting_spin_2": {
+      "files": [
+        "sting_spin_2.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.542
+      ]
+    },
+    "sting_spin_3": {
+      "files": [
+        "sting_spin_3.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.643
+      ]
+    },
+    "sting_spin_4": {
+      "files": [
+        "sting_spin_4.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.791
+      ]
+    },
+    "sting_wreck": {
+      "files": [
+        "sting_wreck.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.983
+      ]
+    },
+    "sting_final": {
+      "files": [
+        "sting_final.wav"
+      ],
+      "loop": false,
+      "duration": [
+        1.972
+      ]
+    },
+    "banner_whoosh": {
+      "files": [
+        "banner_whoosh.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.479
+      ]
+    },
+    "slowmo_in": {
+      "files": [
+        "slowmo_in.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.587
+      ]
+    },
+    "warning_beep": {
+      "files": [
+        "warning_beep.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.234
+      ]
+    },
+    "misfire": {
+      "files": [
+        "misfire_0.wav",
+        "misfire_1.wav",
+        "misfire_2.wav",
+        "misfire_3.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.281,
+        0.18,
+        0.254,
+        0.222
+      ]
+    },
+    "ui_move": {
+      "files": [
+        "ui_move.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.052
+      ]
+    },
+    "ui_select": {
+      "files": [
+        "ui_select.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.147
+      ]
+    },
+    "ui_back": {
+      "files": [
+        "ui_back.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.118
+      ]
+    },
+    "tally_tick": {
+      "files": [
+        "tally_tick.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.035
+      ]
+    },
+    "tally_done": {
+      "files": [
+        "tally_done.wav"
+      ],
+      "loop": false,
+      "duration": [
+        0.495
+      ]
+    }
+  }
+}

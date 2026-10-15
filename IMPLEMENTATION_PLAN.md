@@ -292,7 +292,7 @@ The DD1 PS manual teaches five tactics. Each one **must reliably work** for the 
 ### 6.1 Mechanical implementation
 - **Damage per hit:** `dmg = k × max(0, E − E_threshold)^0.8 / (zoneToughness × carToughness)`.
   - The zone comes from the contact point and normal in car‑local space, with spill‑over on corner hits.
-  - Both cars take damage, so **ramming with your front costs engine**.
+  - Both cars take damage, so **ramming with your front costs engine**. In a one‑sided ram the attacker takes 70% of it ✱ (M4 calibration); in a head‑on both take it in full, so the last‑moment turn (T5) still pays.
 - **Zone toughness:** Front 1.0, Sides 1.2, **Rear 2.5**. That makes reverse‑ramming strong but not invincible. It is tuned against the reference feel sheet's "hits to wreck" values.
 - **Effects:**
   - **Front:** power × f(health). Below 60%: steam. Below 35%: grey smoke and stutter. Below 15%: black smoke, misfires, hood loose. Below 8%: **fire**. At 0: **wrecked**.

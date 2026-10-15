@@ -6,10 +6,13 @@ using Godot;
 namespace DestructionRacing.AI;
 
 /// <summary>
-/// Derby AI for the Bowl (plan §10.4), M1b version: utility-based targeting (distance, closing angle, exposed
-/// side or rear, finishing a wreck, revenge, the ×2 leader, the player-attention budget) and the behaviours
-/// Rush (opening crunch), Hunt / Ram, ReverseRam (weak front), LastSecondTurn (DD Code T5), Circle, wall
-/// avoidance and Recover. Uses the same <see cref="CarControls"/> as the player; no cheating.
+/// Derby AI for the Bowl (plan §10.4): utility-based targeting (distance, closing angle, exposed side or rear,
+/// finishing a wreck, revenge, the ×2 leader, the player-attention budget, extra attention for a player who
+/// hides or only rams tail first) and the behaviours Rush (opening crunch), Hunt / Ram, Squeeze (DD Code T4: pin a car against the wall
+/// or a wreck), ReverseRam (weak front), LastSecondTurn (T5, <see cref="Behaviour.Evade"/>), UseCover (a wreck as
+/// a shield), Circle, wall avoidance and Recover. Uses the same <see cref="CarControls"/> as the player.
+/// A <see cref="Strategy"/> other than Normal turns the brain into one of the dominant-strategy test bots
+/// (plan §17.4) for the PlayerProxy.
 /// </summary>
 public sealed class DerbyBrain
 {
@@ -17,12 +20,18 @@ public sealed class DerbyBrain
     {
         Rush,
         Hunt,
+        Squeeze,
         ReverseRam,
         Evade,
+        UseCover,
         Circle,
+        Hide,
         AvoidWall,
         Recover,
     }
+
+    /// <summary>The dominant-strategy test bots (plan §17.4); Normal is the real AI and the "average fan".</summary>
+    public enum Strategy { Normal, Hide, PureRam, ReverseOnly, SpinFarm }
 
     private readonly Personality _p;
     private readonly Random _rng;
@@ -42,11 +51,24 @@ public sealed class DerbyBrain
     private int _circleDir;
     private bool _reverseMode;
     private double _modeLockedUntil;
+    private float _pushTime;
+    private int _pushCycles;
+    private Car? _pushVictim;
+    private double _noSqueezeUntil = -10;
+    private readonly System.Collections.Generic.List<double> _stuckAt = new();
+    private bool _recoverTurn;
+    private double _coverUntil = -10, _nextCoverCheck;
+    private Vector3 _coverPoint;
+    private Car? _farmVictim;
+    private double _farmRestUntil = -10;
+    private Vector3 _hideSpot;
+    private double _nextHideSpot;
 
-    public DerbyBrain(Personality personality, int seed)
+    public DerbyBrain(Personality personality, int seed, Strategy strategy = Strategy.Normal)
     {
         _p = personality;
         _rng = new Random(seed);
+        Plan = strategy;
         _phase = (float)_rng.NextDouble() * 10f;
         _rushTime = 1.6f + (float)_rng.NextDouble() * 0.6f;
         _rushOffset = new Vector3((float)_rng.NextDouble() * 6f - 3f, 0f, (float)_rng.NextDouble() * 6f - 3f);
@@ -54,6 +76,11 @@ public sealed class DerbyBrain
     }
 
     public Personality Personality => _p;
+    /// <summary>Experiments (--nosqueeze): the T4 squeeze off for every brain.</summary>
+    public static bool SqueezeEnabled { get; set; } = true;
+    /// <summary>Experiments (--nocover): UseCover off for every brain.</summary>
+    public static bool CoverEnabled { get; set; } = true;
+    public Strategy Plan { get; }
     public Car? Target { get; private set; }
     public Behaviour Current { get; private set; } = Behaviour.Rush;
 
@@ -66,37 +93,63 @@ public sealed class DerbyBrain
         float speed = me.LinearVelocity.Length();
         float aggression = Mathf.Clamp(_p.Aggression + view.AggressionBoost(me), 0f, 1.2f);
 
-        // Recovery from being stuck (against a wall or in a pile).
+        // Recovery from being stuck (against a wall or in a pile). A car that keeps getting stuck in the same
+        // spot backs out further, with full lock, and the DD1 turn-around (the immobilised rule wrecks a car
+        // that rocks in place for 20 s).
         if (_recoverTime > 0f)
         {
             _recoverTime -= dt;
             Current = Behaviour.Recover;
+            float lockSteer = MathF.Abs(_lastSteer) > 0.3f ? -MathF.Sign(_lastSteer) : 1f;
+            if (_recoverTurn)
+                return new CarControls { Throttle = 1f, TurnAround = true, Steer = lockSteer };
             return _recoverForward
                 ? new CarControls { Throttle = 1f, Steer = -_lastSteer }
-                : new CarControls { Reverse = true, Steer = -_lastSteer };
+                : new CarControls { Reverse = true, Steer = _stuckAt.Count >= 2 ? lockSteer : -_lastSteer };
         }
 
-        // The opening crunch: everyone floors it for the middle (plan §4.1).
-        if (t < _rushTime)
+        // The opening crunch: everyone floors it for the middle (plan §4.1). The hide bot stays out of it.
+        if (t < _rushTime && Plan != Strategy.Hide)
         {
             Current = Behaviour.Rush;
             return Drive(me, view, fwd, _rushOffset - pos, speed, throttle: 1f);
         }
 
+        CarControls c;
+        if (Plan == Strategy.Hide)
+        {
+            Target = null;
+            var evadeHide = Evade(me, view, fwd, speed, t, dt);
+            if (evadeHide.HasValue) { Current = Behaviour.Evade; c = evadeHide.Value; }
+            else { Current = Behaviour.Hide; c = Hide(me, view, fwd, speed, t); }
+            return Finish(me, view, fwd, speed, t, dt, c);
+        }
+
         if (t >= _nextRetarget || Target == null || !view.IsRunning(Target))
         {
-            Target = PickTarget(me, view, aggression);
+            Target = Plan == Strategy.SpinFarm ? FarmTarget(me, view, aggression) : PickTarget(me, view, aggression);
             _nextRetarget = t + 0.3 + (1.0 - _p.Skill) * 0.5 + _rng.NextDouble() * 0.15;
         }
 
-        CarControls c;
-        var evade = Evade(me, view, fwd, speed, t, dt);
+        var evade = Plan is Strategy.PureRam or Strategy.ReverseOnly ? null : Evade(me, view, fwd, speed, t, dt);
+        var cover = Plan == Strategy.Normal && CoverEnabled ? UseCover(me, view, fwd, speed, t) : null;
         if (evade.HasValue)
         {
             Current = Behaviour.Evade;
             c = evade.Value;
         }
-        else if (Target == null || (aggression < 0.35f && Target.GlobalPosition.DistanceTo(pos) > 15f))
+        else if (cover.HasValue)
+        {
+            Current = Behaviour.UseCover;
+            c = cover.Value;
+        }
+        else if (Plan == Strategy.SpinFarm && (Target == null || t < _farmRestUntil))
+        {
+            // Let the victim recover a little between spins, so it keeps driving (a spin needs a moving car).
+            Current = Behaviour.Circle;
+            c = Circle(me, view, fwd, speed);
+        }
+        else if (Target == null || (Plan == Strategy.Normal && aggression < 0.35f && Target.GlobalPosition.DistanceTo(pos) > 15f))
         {
             Current = Behaviour.Circle;
             c = Circle(me, view, fwd, speed);
@@ -112,7 +165,9 @@ public sealed class DerbyBrain
             Vector3 targetBack = FlatDir(Target.GlobalTransform.Basis.Z);
             bool targetBacksAtUs = Target.ForwardSpeed < -1f && targetBack.Dot(Flat(pos - Target.GlobalPosition).Normalized()) > 0.5f;
             bool forcedHunt = view.AggressionBoost(me) >= 0.8f;
-            if (t >= _modeLockedUntil || forcedHunt)
+            if (Plan == Strategy.ReverseOnly) _reverseMode = true;
+            else if (Plan is Strategy.PureRam or Strategy.SpinFarm) _reverseMode = false;
+            else if (t >= _modeLockedUntil || forcedHunt)
             {
                 bool wantReverse = frontHealth < reverseBelow && dist < 25f && !targetBacksAtUs && !forcedHunt;
                 if (wantReverse != _reverseMode)
@@ -128,13 +183,15 @@ public sealed class DerbyBrain
             }
             else
             {
-                Current = Behaviour.Hunt;
-                c = Hunt(me, view, fwd, speed, aggression);
+                c = Hunt(me, view, fwd, speed, aggression, dt);
             }
         }
+        return Finish(me, view, fwd, speed, t, dt, c);
+    }
 
-        if (Current is Behaviour.Hunt or Behaviour.Circle && AvoidWall(me, view, fwd, speed, ref c)) Current = Behaviour.AvoidWall;
-
+    private CarControls Finish(Car me, IArenaView view, Vector3 fwd, float speed, double t, float dt, CarControls c)
+    {
+        if (Current is Behaviour.Hunt or Behaviour.Circle or Behaviour.Hide && AvoidWall(me, view, fwd, speed, ref c)) Current = Behaviour.AvoidWall;
         UpdateStuck(me, c, speed, dt);
         // Imperfect hands: a little steering noise for less skilled drivers.
         c.Steer = Mathf.Clamp(c.Steer + (1f - _p.Skill) * 0.25f * Mathf.Sin((float)t * 2.3f + _phase), -1f, 1f);
@@ -159,20 +216,47 @@ public sealed class DerbyBrain
             if (d < 0.1f) continue;
             Vector3 dir = Flat(to) / d;
 
-            float uDist = 1f / (1f + d / 18f);
+            float reach = 18f;
             float uFacing = 0.45f + 0.55f * (0.5f + 0.5f * fwd.Dot(dir));
-            // Prefer exposed sides and rears; a car facing us head-on is a worse target.
+            // Prefer exposed sides and rears; a car facing us head-on is a worse target. A car backing up (DD1
+            // reverse-ramming) shows us its engine instead: its front is the end to go for, not a threat.
             Vector3 cFwd = FlatDir(-c.GlobalTransform.Basis.Z);
             float facesMe = cFwd.Dot(-dir);
-            float uExposure = facesMe > 0.6f ? 0.55f : 1f;
+            float uExposure = c.ForwardSpeed < -1.5f ? (facesMe > 0.3f ? 1.25f : 1f) : facesMe > 0.6f ? 0.55f : 1f;
             float bonus = 1f;
             bonus += (1f - c.Health(DamageZone.Front)) * _p.Opportunism;          // finish a wreck
             if (view.LeaderId == c.Id) bonus += 0.5f;                              // ×2 points
             if (revengeOn == c && view.Time - revengeAt < 10.0) bonus += 0.6f * _p.Vengefulness;
-            if (c == view.Player && view.Time > 45.0) bonus += 0.3f;               // later on, the human is everyone's rival
+            int budget = view.PlayerAttentionBudget;
+            if (c == view.Player)
+            {
+                if (view.Time > 45.0) bonus += 0.3f;                               // later on, the human is everyone's rival
+                // A player who hides gets hunted (plan §10.4): 20 s without landing a real hit slowly draws the
+                // field from further and further away, after 30 s one more car may join the hunt and after 50 s
+                // another. Normal play (a hit every few seconds) never triggers it.
+                double idle = view.Time - Math.Max(view.LastAttackTime(c), 0.0);
+                if (view.Time > 30.0 && idle > 20.0)
+                {
+                    float hiding = Mathf.Clamp((float)(idle - 20.0) / 15f, 0f, 1f);
+                    bonus += hiding;
+                    reach += hiding * 22f;
+                    if (idle > 30.0) budget += 1;
+                    if (idle > 50.0) budget += 1;
+                }
+                // The same for a player who only ever rams tail first to keep the engine safe: the field notices,
+                // one more car may join the hunt, and the hunters go for the engine (see Hunt).
+                float tail = view.TailRamShare(c);
+                if (tail > 0.6f)
+                {
+                    float tailFirst = (tail - 0.6f) / 0.4f;
+                    bonus += tailFirst * (view.Time > 60.0 ? 1.5f : 1f);
+                    budget += view.Time > 60.0 && tail > 0.85f ? 2 : 1;
+                }
+            }
 
+            float uDist = 1f / (1f + d / reach);
             float u = uDist * uFacing * uExposure * bonus;
-            if (c == view.Player && c != Target && d > 8f && view.CountTargeting(c, me) >= view.PlayerAttentionBudget)
+            if (c == view.Player && c != Target && d > 8f && view.CountTargeting(c, me) >= budget)
                 u *= 0.15f;                                                         // attention budget
             if (c == Target) u *= 1.3f;                                             // hysteresis
             if (u > bestU)
@@ -184,9 +268,26 @@ public sealed class DerbyBrain
         return best;
     }
 
+    /// <summary>The spin-farm bot sticks to one victim and lets it get going again between spins.</summary>
+    private Car? FarmTarget(Car me, IArenaView view, float aggression)
+    {
+        if (_farmVictim != null && view.IsRunning(_farmVictim))
+        {
+            // Back off for a while once it is close to wrecking (a wreck ends the farm) or after a hit.
+            float weakest = MathF.Min(MathF.Min(_farmVictim.Health(DamageZone.Front), _farmVictim.Health(DamageZone.Rear)),
+                MathF.Min(_farmVictim.Health(DamageZone.Left), _farmVictim.Health(DamageZone.Right)));
+            if (weakest < 0.3f && view.Time >= _farmRestUntil) _farmRestUntil = view.Time + 5.0;
+            if (view.LastHitBy(_farmVictim) is ({ } a, var at) && a == me && view.Time - at < 0.2)
+                _farmRestUntil = view.Time + 2.5;
+            return _farmVictim;
+        }
+        _farmVictim = PickTarget(me, view, aggression);
+        return _farmVictim;
+    }
+
     // ------------------------------------------------------------------ behaviours
 
-    private CarControls Hunt(Car me, IArenaView view, Vector3 fwd, float speed, float aggression)
+    private CarControls Hunt(Car me, IArenaView view, Vector3 fwd, float speed, float aggression, float dt)
     {
         var target = Target!;
         Vector3 pos = me.GlobalPosition;
@@ -195,6 +296,51 @@ public sealed class DerbyBrain
         Vector3 tRight = FlatDir(target.GlobalTransform.Basis.X);
         float dist = Flat(tPos - pos).Length();
 
+        // DD Code T4: a target against the wall or a wreck gets pinned there — come in from the open side and
+        // keep pushing (the grinding damage is credited to the squeezer).
+        bool canSqueeze = SqueezeEnabled && Plan is Strategy.Normal or Strategy.PureRam && _p.Skill >= 0.45f && aggression >= 0.45f
+                          && view.Time >= _noSqueezeUntil;
+        if (target != _pushVictim)
+        {
+            _pushVictim = target;
+            _pushCycles = 0;
+        }
+        if (canSqueeze && dist < 26f && FindAnvil(target, view, out Vector3 anvil))
+        {
+            Current = Behaviour.Squeeze;
+            Vector3 fromTarget = Flat(pos - tPos);
+            bool openSide = fromTarget.Dot(-anvil) > 0.45f * fromTarget.Length();
+            if (!openSide && dist < 10f)
+            {
+                // On the wrong side: swing round to the open side first.
+                _pushTime = 0f;
+                return Drive(me, view, fwd, tPos - anvil * 6f - pos, speed, throttle: 0.8f);
+            }
+            if (dist < 4.2f && speed < 3.5f)
+            {
+                _pushTime += dt;
+                if (_pushTime > 1.8f)
+                {
+                    // Back off and come again rather than grind forever; after two pushes, leave it be for a while.
+                    _pushTime = 0f;
+                    _recoverTime = 1.1f;
+                    _recoverForward = false;
+                    _recoverTurn = false;
+                    if (++_pushCycles >= 2)
+                    {
+                        _pushCycles = 0;
+                        _noSqueezeUntil = view.Time + 6.0;
+                    }
+                }
+                return new CarControls { Throttle = 1f, Steer = Steer(fwd, Flat(tPos + anvil - pos)) };
+            }
+            _pushTime = 0f;
+            float approach = dist < 12f && speed > 12f ? 0.55f : 1f;
+            return Drive(me, view, fwd, tPos + anvil * 0.6f - pos, speed, approach);
+        }
+        _pushTime = 0f;
+        Current = Behaviour.Hunt;
+
         // Lead the target, then aim for its rear quarter on our side (that spins it, DD Code T2).
         float closing = MathF.Max(speed, 8f);
         float lead = Mathf.Clamp(dist / closing, 0f, 1.0f) * (0.4f + 0.6f * _p.Skill);
@@ -202,15 +348,45 @@ public sealed class DerbyBrain
         float side = MathF.Sign((pos - tPos).Dot(tRight));
         if (side == 0f) side = 1f;
         bool inFrontOfIt = (pos - tPos).Dot(tFwd) > 0f;
-        Vector3 aim = inFrontOfIt
-            ? predicted + tRight * side * 1.4f                       // coming from the front: go for its flank
-            : predicted - tFwd * 1.6f + tRight * side * 0.5f;        // otherwise the rear quarter
+        bool backingUp = target.ForwardSpeed < -1.5f;
+        // Pushed by the director (the last cars, nothing happening): straight at it. Two cars that both go for the
+        // other's rear quarter can circle each other at walking pace for minutes.
+        bool straightAtIt = view.AggressionBoost(me) >= 0.8f && dist < 14f;
+        Vector3 aim = straightAtIt ? predicted : !inFrontOfIt
+            ? backingUp
+                ? predicted + tRight * side * 2.6f + tFwd * 1.0f     // its tough tail coming at us: swing past it to its flank
+                : predicted - tFwd * 1.6f + tRight * side * 0.5f     // from behind: the rear quarter
+            : backingUp
+                ? predicted + tFwd * 1.5f + tRight * side * 0.3f     // a car backing away: straight into its engine
+                : predicted + tRight * side * 1.4f;                  // coming from the front: go for its flank
 
         float throttle = 1f;
-        if (aggression < 0.6f && dist > 25f) throttle = 0.75f;
+        if (Plan == Strategy.Normal && aggression < 0.6f && dist > 25f) throttle = 0.75f;
         // Don't slam into the wall behind a target parked against it.
-        if (dist < 20f && EllipseScale(tPos, view.ArenaSemiAxes) > 0.85f && speed > 14f) throttle = 0.4f;
+        if (Plan == Strategy.Normal && dist < 20f && EllipseScale(tPos, view.ArenaSemiAxes) > 0.85f && speed > 14f) throttle = 0.4f;
         return Drive(me, view, fwd, aim - pos, speed, throttle);
+    }
+
+    /// <summary>The wall or a wreck right behind the target, as the direction from the target to it.</summary>
+    private static bool FindAnvil(Car target, IArenaView view, out Vector3 dir)
+    {
+        Vector3 tPos = target.GlobalPosition;
+        Vector2 axes = view.ArenaSemiAxes;
+        if (EllipseScale(tPos, axes) > 0.88f)
+        {
+            dir = new Vector3(tPos.X / (axes.X * axes.X), 0f, tPos.Z / (axes.Y * axes.Y)).Normalized();
+            return true;
+        }
+        Car? best = null;
+        float bestD = 3.4f;
+        foreach (var c in view.Cars)
+        {
+            if (c == target || view.IsRunning(c)) continue;
+            float d = Flat(c.GlobalPosition - tPos).Length();
+            if (d < bestD) { bestD = d; best = c; }
+        }
+        dir = best != null ? Flat(best.GlobalPosition - tPos).Normalized() : Vector3.Zero;
+        return best != null;
     }
 
     private CarControls ReverseRam(Car me, Vector3 fwd, float speed)
@@ -234,7 +410,7 @@ public sealed class DerbyBrain
 
     /// <summary>
     /// DD Code T5: when a head-on is about to happen and our front is the weaker one (or we are careful),
-    /// turn at the last moment so the other car's front hits our side.
+    /// turn at the last moment so the other car's front hits our side. The same against a reverse-rammer's tail.
     /// </summary>
     private CarControls? Evade(Car me, IArenaView view, Vector3 fwd, float speed, double t, float dt)
     {
@@ -258,13 +434,15 @@ public sealed class DerbyBrain
             if (ttc < 0.05f || ttc > 0.6f) continue;
             if (fwd.Dot(dir) < 0.82f) continue;                                     // it is ahead of us
             Vector3 oFwd = FlatDir(-other.GlobalTransform.Basis.Z);
-            if (oFwd.Dot(-dir) < 0.82f) continue;                                   // and pointing at us
+            // Pointing at us: its nose, or its tail when it reverse-rams (the tough rear always wins against a front).
+            bool tailRam = other.ForwardSpeed < -2f && oFwd.Dot(dir) > 0.82f;
+            if (oFwd.Dot(-dir) < 0.82f && !tailRam) continue;
 
             if (_evadeFrom == other && t - _evadeDecidedAt < 2.0) return null;      // already decided to take it
             _evadeFrom = other;
             _evadeDecidedAt = t;
-            bool weaker = me.Health(DamageZone.Front) <= other.Health(DamageZone.Front);
-            bool careful = _p.SelfPreservation > 0.45f || weaker;
+            bool weaker = tailRam || me.Health(DamageZone.Front) <= other.Health(DamageZone.Front);
+            bool careful = _p.SelfPreservation > 0.45f || weaker || Plan == Strategy.Hide;
             if (!careful || _rng.NextDouble() > _p.Skill * 0.95) return null;
 
             Vector3 right = FlatDir(me.GlobalTransform.Basis.X);
@@ -276,6 +454,53 @@ public sealed class DerbyBrain
         return null;
     }
 
+    /// <summary>
+    /// A wreck as a shield (plan §10.4): a careful driver with a battered front who is being chased puts the
+    /// nearest wreck between itself and the attacker for a moment.
+    /// </summary>
+    private CarControls? UseCover(Car me, IArenaView view, Vector3 fwd, float speed, double t)
+    {
+        Vector3 pos = me.GlobalPosition;
+        if (t < _coverUntil)
+        {
+            Vector3 to = Flat(_coverPoint - pos);
+            if (to.Length() < 2.2f) return new CarControls { Brake = 1f, Hold = true, Steer = 0f };
+            return Drive(me, view, fwd, to, speed, throttle: 0.85f);
+        }
+        if (t < _nextCoverCheck || _p.SelfPreservation < 0.45f || me.Health(DamageZone.Front) > 0.4f) return null;
+        _nextCoverCheck = t + 0.5;
+
+        // The threat: a running car near us, closing fast and pointed at us.
+        Car? threat = null;
+        foreach (var other in view.Cars)
+        {
+            if (other == me || !view.IsRunning(other)) continue;
+            Vector3 rel = Flat(pos - other.GlobalPosition);
+            float d = rel.Length();
+            if (d > 18f || d < 1f) continue;
+            Vector3 dir = rel / d;
+            if (FlatDir(-other.GlobalTransform.Basis.Z).Dot(dir) < 0.8f || Flat(other.LinearVelocity).Dot(dir) < 4f) continue;
+            threat = other;
+            break;
+        }
+        if (threat == null) return null;
+        Car? wreck = null;
+        float best = 25f;
+        foreach (var c in view.Cars)
+        {
+            if (view.IsRunning(c)) continue;
+            float d = Flat(c.GlobalPosition - pos).Length();
+            if (d < best) { best = d; wreck = c; }
+        }
+        if (wreck == null) return null;
+        Vector3 away = Flat(wreck.GlobalPosition - threat.GlobalPosition);
+        if (away.LengthSquared() < 0.01f) return null;
+        _coverPoint = wreck.GlobalPosition + away.Normalized() * 3.6f;
+        if (EllipseScale(_coverPoint, view.ArenaSemiAxes) > 0.92f) return null;     // no cover against the wall
+        _coverUntil = t + 2.5;
+        return Drive(me, view, fwd, Flat(_coverPoint - pos), speed, throttle: 0.85f);
+    }
+
     private CarControls Circle(Car me, IArenaView view, Vector3 fwd, float speed)
     {
         Vector3 pos = me.GlobalPosition;
@@ -283,6 +508,31 @@ public sealed class DerbyBrain
         float angle = Mathf.Atan2(pos.Z / axes.Y, pos.X / axes.X) + 0.6f * _circleDir;
         var aim = new Vector3(axes.X * Mathf.Cos(angle), 0f, axes.Y * Mathf.Sin(angle));
         return Drive(me, view, fwd, aim - pos, speed, throttle: 0.6f);
+    }
+
+    /// <summary>The hide bot: drives to the emptiest part of the Bowl and keeps moving (so it isn't immobilised).</summary>
+    private CarControls Hide(Car me, IArenaView view, Vector3 fwd, float speed, double t)
+    {
+        Vector3 pos = me.GlobalPosition;
+        if (t >= _nextHideSpot || Flat(_hideSpot - pos).Length() < 4f)
+        {
+            _nextHideSpot = t + 3.0;
+            float bestScore = -1f;
+            Vector2 axes = view.ArenaSemiAxes * 0.72f;
+            for (int i = 0; i < 16; i++)
+            {
+                float a = Mathf.Tau * i / 16f;
+                var p = new Vector3(axes.X * Mathf.Cos(a), 0f, axes.Y * Mathf.Sin(a));
+                float nearest = float.MaxValue;
+                foreach (var c in view.Cars)
+                    if (c != me && view.IsRunning(c)) nearest = MathF.Min(nearest, Flat(c.GlobalPosition - p).Length());
+                // Prefer empty spots that aren't on the far side of the pack.
+                float score = nearest - 0.15f * Flat(p - pos).Length();
+                if (score > bestScore) { bestScore = score; _hideSpot = p; }
+            }
+        }
+        float throttle = Flat(_hideSpot - pos).Length() < 10f ? 0.4f : 0.8f;
+        return Drive(me, view, fwd, _hideSpot - pos, speed, throttle);
     }
 
     /// <summary>Steers back towards the middle when the car is about to hit the wall without a target there.</summary>
@@ -302,20 +552,32 @@ public sealed class DerbyBrain
         return true;
     }
 
+    private double _clock;
+
     private void UpdateStuck(Car me, CarControls c, float speed, float dt)
     {
-        bool trying = c.Throttle > 0.5f || c.Reverse;
+        _clock += dt;
+        bool trying = (c.Throttle > 0.2f || c.Reverse) && Current != Behaviour.Squeeze;
         if (trying && speed < 1.0f) _stuckTime += dt;
         else _stuckTime = MathF.Max(0f, _stuckTime - dt * 2f);
         if (_stuckTime > 0.8f)
         {
             _stuckTime = 0f;
-            _recoverTime = 0.8f + (float)_rng.NextDouble() * 0.4f;
-            _recoverForward = c.Reverse;
+            _stuckAt.Add(_clock);
+            _stuckAt.RemoveAll(x => _clock - x > 10.0);
+            int repeats = _stuckAt.Count;
+            // Each repeat in the last 10 s: longer, and from the third on, alternate with the turn-around.
+            _recoverTime = (0.8f + (float)_rng.NextDouble() * 0.4f) * (repeats >= 2 ? 1.8f : 1f);
+            _recoverForward = repeats >= 2 ? !_recoverForward : c.Reverse;
+            _recoverTurn = repeats >= 3 && repeats % 2 == 1;
+            if (repeats >= 2) Target = null;     // pick something else to do afterwards
         }
     }
 
     // ------------------------------------------------------------------ steering
+
+    private float Steer(Vector3 fwd, Vector3 dir) =>
+        dir.LengthSquared() < 1e-4f ? 0f : Mathf.Clamp(-SignedAngle(fwd, dir.Normalized()) * (2.0f + _p.Skill), -1f, 1f);
 
     /// <summary>Forward driving towards a direction, with braking and the DD1 turn-around for sharp turns.</summary>
     private CarControls Drive(Car me, IArenaView view, Vector3 fwd, Vector3 toAim, float speed, float throttle)
@@ -334,7 +596,8 @@ public sealed class DerbyBrain
             return new CarControls { Brake = 1f, Steer = steer, Hold = true };
         return new CarControls
         {
-            Throttle = absErr < 1.2f ? throttle : throttle * 0.5f,
+            // Ease off for a sharp turn at speed; a car that has nearly stopped needs the throttle to turn at all.
+            Throttle = absErr < 1.2f || speed < 3f ? throttle : throttle * 0.5f,
             Steer = steer,
             FastSteer = absErr > 0.6f && speed < 20f && _p.Skill > 0.4f,
         };

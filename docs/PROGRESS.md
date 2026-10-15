@@ -9,7 +9,85 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M3 Full damage and VFX — ready for you to look at
+## M4 Vertical slice: Destruction Derby — ready for you to play
+- **Play it yourself:** double-click **Play Derby.cmd**.
+  - **Set-up screen:** pick the light (afternoon, golden hour, night), your car (Kitsune, Brougham, Nordvik) and the division (4 = rookies … 1 = the best). ↑/↓ choose, ←/→ change, Enter start.
+  - **The derby:** 20 cars, last car running wins. Tab = standings, Esc/P = pause. When you are wrecked: ←/→ watch another car, T = TV or chase camera, Space = ×2 speed, Enter = skip to the results.
+  - **Results:** the points tally up per car, then V = the replay, R = race again, M = menu, Q = quit.
+  - **Replay:** Space pause, S slow motion (½, ¼), ←/→ −/+10 s, F next car, C camera (TV or chase), Esc back. It starts 8 s before your wreck (or the last 30 s).
+- **The Bowl, final art** (plan §7.3, §8): three baked presets.
+  - **Afternoon:** the M2 look (HDRI sky, sun, baked lightmap).
+  - **Golden hour:** low sun at 11°, a procedural sky with a three-stop gradient, two rings of mountains, the floodlights on.
+  - **Night:** a starry sky, floodlights with volumetric cones, lit lamp heads, and real headlights on the six cars nearest the camera.
+  - The floodlights flare up when it gets down to 5, 3 and 2 cars. The scoreboard shows the cars left.
+  - **Ground marks** (moved here from M3): rolling ruts that build up where the field drives, darker marks from sliding, locked or spinning wheels, gouges from a hub without its wheel, an oil trail from a car with a critical front, and an oil pool under each wreck. By the end the floor shows the whole fight.
+- **Crowd** (plan §8.5): about 1,500 spectators on the two grandstands (one MultiMesh, animated in a shader). They cheer with big hits and wrecks, get louder as the field shrinks, and take flash photos at night.
+- **Derby AI and director** (plan §10.4):
+  - **Behaviours:** opening rush, hunt (rear quarter for spins), squeeze (DD Code T4: pin a car against the wall or a wreck), reverse-ram with a weak front, last-second turn (T5), a wreck as cover, circling, wall avoidance, recovery.
+  - **Targeting:** distance, angle, exposed side or rear, finishing a wreck, revenge, the ×2 leader, and the player-attention budget (at most 2/3/4 cars hunt you, by division; 2 in the first minute).
+  - **Against exploits:** a player who stops attacking is hunted from further away and by more cars (from 20 s without a real hit). The same goes for a player who rams almost only tail first. A car backing up shows its engine, so hunters go for its front. Its tail coming at you: swing past to its flank, or turn at the last moment.
+  - **Director:** wakes passive cars when nothing happens for 4 s; nudges the last cars together.
+- **Broadcast HUD** (plan §13; Barlow Condensed): points and speed, position, cars left and time, the damage diagram (critical zones throb red), hit popups, the event feed, banners (FINAL FIVE, LAST THREE, FINAL DUEL "YOU vs #N", YOU WIN!), how many cars are hunting you, the wrecked screen, and the results with an animated tally. Wreckin' Racing uses the same HUD.
+- **Juice:** a short slow motion on huge hits (at most once per 10 s), a chromatic flash when you are in a huge hit, camera punch, ROLLOVER popups.
+- **Audio v1** (plan §12):
+  - **Mix:** buses for music, announcer and world (effects, engines, crowd), ducking under the announcer and after crashes, a muffle during slow motion, a limiter on the master.
+  - **Effects:** 45 synthesized sounds (87 files) by `tools/sfxsynth`: crashes by size and surface, glass, scrapes on metal and on the tyre wall, tyres on dirt, squeal, hub grinding, fire, steam, the crowd, stings, the countdown, UI.
+  - **Engines:** the M2 granular engines on the six cars nearest the listener; your engine misfires with a critical front.
+- **Announcer v1:** 345 lines in 40 categories: intro, start, opening crunch, big hits, spins, wrecks (with the car number: "number 23 is out!"), the leader, cars left, the final duel, your damage (smoke, fire, lost wheel, hood, glass), lulls, the winner, the results. No line repeats within 3 minutes; important calls wait for a gap or cut in.
+  - Voiced offline with Kokoro-82M (Apache 2.0, voice `am_fenrir`) through a stadium PA chain. The model is not shipped.
+  - **Your own voice:** any line can be replaced by a recording with the same name in an `Announcer` folder next to the game or in `user://announcer` (`docs/announcer_recording_guide.md`).
+- **Music:** the player is ready (tracks come up as the field shrinks) but ships no tracks yet: the shortlist is waiting for your OK. Until then, put your own OGG or MP3 files in a `Music` folder in the project (git ignores it).
+- **Replays (basic):** every car's pose, wheels and zone health at 30 Hz plus the hits. Crush, smoke and fire replay; dents and parts that came off show as they ended (full damage replay is M8).
+- **Checks** (plan §17, all headless and reproducible):
+  - **Derby sims**, 80 derbies with the PlayerProxy "average fan": **every plan §17.4 target is met.**
+
+    | Metric | Result | Target |
+    |---|---|---|
+    | First contact | 1.7 s | < 3 s |
+    | Longest idle stretch, ≥ 5 cars (median / p90) | 6.3 / 9.2 s | ≤ 8 s |
+    | Player hits per minute | 22.5 | ≥ 8 |
+    | Event length | 175 s | 120–240 s |
+    | Player survival | 109 s | 60–150 s |
+    | Points from deliberate play (aimed hits only) | 100% (71%) | ≥ 70% |
+    | Player wrecked within 30 s / 60 s | 0% / 12.5% | ≤ 5% / ≤ 15% |
+    | Wrecked by ≥ 3 cars within 3 s | 2% | ≤ 10% |
+    | Stuck or recovering | 2.5% of the time | ≤ 5% |
+    | Time-outs | none | none |
+
+    The bot wins 18% of the derbies (last car running).
+  - **Dominant-strategy bots** (plan §17.4; share of derbies won as the last car running, target ≤ 40%):
+
+    | Bot | Wins |
+    |---|---|
+    | Hide | 10% |
+    | Pure ram | 0% |
+    | Spin-farm one victim | 0% |
+    | **Reverse only** | **48% ❌** (40 derbies) |
+
+    - **Reverse-only is the one target still missed.** It was 85–100% at the start of the M4 tuning. Most wrecks come from a car's own front: its own rams and head-ons cost the average fan about 50 of the 78 front points it loses in the first minute. A car that only ever hits tail first skips all of that, and the rear is 2.5× as tough as the front.
+    - **What brought it down:** hunters go for the engine of a car backing away; against a tail coming at them they swing to the flank or turn at the last moment; the field gives more attention to a player who rams almost only tail first; and a ruined rear now costs rear wheels.
+    - **What didn't help:** a softer rear (toughness 2.0) left reverse-only at 60% and pushed the average fan's early wrecks to 32%.
+    - This is for your playtest: in DD1, reverse-ramming was the strong tactic too.
+  - **DD Code T1–T5:** 10/10 each.
+  - **Wreckin' sims**, 40 races (regression for the damage changes): all targets met (7–8 spins per lap, 22–25 crossover incidents, 31–35 position changes, the leader spun twice (median), 86–91% of the race with cars within 3 s, 0% wrecked before half distance, under 0.5% stuck, no time-outs).
+  - **86 unit tests** pass (new: rear hits reach the rear axle once the rear is ruined).
+  - **Performance** (RTX 5090, 1080p, night, the heaviest preset): 182–237 fps on average, 1% lows of 124–180 fps after the opening (83 fps in the first 10 s while shaders compile), up to 6.5k draw calls in the opening crunch, 0.8 GB VRAM.
+- **Rule and calibration changes** (✱, from the sims):
+  - **Opening crunch:** damage now starts at ×0.4 and ramps to full over 90 s (was ×0.5 over 75 s). The M4 field attacks harder than the M1b one.
+  - **Attacker's share** (new, `AttackerDamageShare` 0.7): in a one-sided ram the attacking car takes 70% of the contact damage. A 40 km/h T-bone now costs the victim's side and the attacker's front about the same, 14–15 each (the attacker used to lose 18 against the victim's 15). Head-ons stay at full damage on both, so the last-second turn (T5) still pays. Ramming still costs engine (plan §6.1).
+  - **Heavy rear damage** (plan §6.1, now complete): below 25% rear health, a hit on the tail also reaches the rear axle, so rear wheels can come off (Standard rules).
+  - **Stuck cars:** an AI that barely moves now notices it and backs out, and a car steering hard at a standstill keeps its throttle. In one sim the last two cars sat against opposite walls for seven minutes.
+- **Metric definitions** (plan §17.4, stated so you can check them):
+  - **Deliberate points:** points from aimed attacking hits (throttle on, heading within 45° of the contact), from cars that hit your side just after a last-second turn (T5), and from grinding a car against the wall or a wreck on the throttle (T4). The strict reading (aimed hits only) is reported next to it.
+  - **Stuck:** trying to move at under 1 m/s, except while shoving a running car in front of you.
+  - **Idle stretch:** no hit of 9 kJ or more anywhere while 5 or more cars run.
+- **Your turn** (the M4 acceptance, plan §18):
+  - **Playtest:** a few derbies, ideally in all three lights. Do the first minute and the endgame feel fair? Is reverse-ramming too strong?
+  - **Audio gate:** the crash sounds, the crowd, the announcer's voice and how often it talks, the mix.
+  - **Music:** OK the shortlist (or pick tracks) and they go in.
+  - **Licence:** pick CC BY-NC 4.0 or BY-NC-SA 4.0 for the assets, then the licence files go in.
+
+## M3 Full damage and VFX — approved (2026‑10‑15: "Yes, it looks bloody good!")
 - **Look at it yourself:**
   - **Damage Lab.cmd**: a parked car in the Bowl takes real hits from ram cars, so the whole chain runs (impact → referee damage → crush, dents, parts, glass, smoke, fire). 1 = front ram, 2 = rear ram, 3/4 = left/right T-bone, 5 = corner (Shift = harder), 6 = wall scrape, 7 = roll it, 8 = wreck it, 9 = knock a wheel off, R = fresh car, Tab = next model, Space = slow motion. The keys are on screen.
   - **Pileup Test.cmd**: the 20-car stress scene with all effects; shows the frame rate and the PASS/FAIL checks on screen. R = again.

@@ -16,6 +16,8 @@ uniform int lens_pattern = 0;                         // 0 none, 1 fluted headla
 uniform float lens_pitch = 0.007;
 // Per lamp (SetInstanceShaderParameter): a smashed lamp goes dark and its lens crazes.
 instance uniform float lamp_broken = 0.0;
+// Per lamp: 0 keeps a lamp dark while its lens material glows (a reversing lamp when not reversing).
+instance uniform float lamp_lit = 1.0;
 
 // Lens optics as a bump: flutes (vertical cylinders) or a prism grid, faded out before they alias.
 float lens_height(vec3 p) {
@@ -63,5 +65,5 @@ void fragment() {
 		ALBEDO = mix(ALBEDO, ALBEDO * 0.25 + vec3(0.12), lamp_broken * (0.6 + 0.4 * craze));
 		ROUGHNESS = mix(ROUGHNESS, 0.7, lamp_broken);
 	}
-	EMISSION = emission * emission_energy * (1.0 - crumple_amount) * (1.0 - lamp_broken);
+	EMISSION = emission * emission_energy * (1.0 - crumple_amount) * (1.0 - lamp_broken) * lamp_lit;
 }
