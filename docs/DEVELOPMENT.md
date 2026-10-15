@@ -12,11 +12,12 @@
 | `src/Rules/` | Pure C# rules library (no Godot): scoring, spins, hit energy, damage, the referee, derby and race standings, championship |
 | `tests/Rules.Tests/` | xUnit tests for the rules |
 | `src/Core/` | Boot scene, DevTools autoload (command‑line hooks), controls |
-| `src/Vehicles/` | The car (`Car.cs`), tuning, keyboard input, the `ImpactSystem` (hit energy from pre‑solve velocities) |
+| `src/Vehicles/` | The car (`Car.cs`), tuning, keyboard input, the `ImpactSystem` (hit energy from pre‑solve velocities); the generated model (`CarModel`, `CarSpec` = the rig spec read from the glb) and its damage (`CarDamageVisual` = dent and wear volumes, `CarVisual` = parts, glass, lamps, smoke and fire) |
 | `src/AI/` | Derby AI (`DerbyBrain`), racing AI (`RaceBrain`), personalities, the PlayerProxy bot |
 | `src/Modes/` | `DerbyMode` (the Bowl), `WreckinMode` (Wreckin' Racing), their metrics and sim harnesses (`DerbySim`, `WreckinSim`) |
 | `src/Cameras/`, `src/UI/` | Camera rig; the event HUD (`EventHud`, shared by derby and race), the damage diagram, the tuning panel |
-| `src/Tools/` | Look-dev scenes: `PhotoStudio` (cars), `BowlLook` and `BowlLookBuilder.gd` (the Bowl), `FogTest` |
+| `src/Fx/` | Shared effects of a scene: `FxPool` (pooled spark, glass, paint-chip and dust bursts; smoke, flame and scrape-spark emitters) and `DebrisPool` (parts that came off, at most 150, resting ones turn static) |
+| `src/Tools/` | Look-dev and stress scenes: `PhotoStudio` (cars), `BowlLook` and `BowlLookBuilder.gd` (the Bowl), `FogTest`, `DamageLab` (real hits on a parked car), `PileupTest` (the 20-car stress scene) |
 | `src/Audio/` | The granular engine (`GranularEngine`) and `EngineTest` |
 | `src/Tracks/` | Venues and test scenes: `GreyBoxArena` (grey‑box Bowl), `FigureEightTrack` (grey‑box figure‑8) and `TrackPath` (racing line), `DriveTest`, `DdCodeTest` (tactics T1–T5) |
 | `assets/` | Generated cars (`cars/`), shaders (`shaders/`), engine grains (`audio/engines/`), the Bowl's meshes and materials (`bowl/`), CC0 downloads (`third_party/`) |
@@ -40,6 +41,8 @@
 | `tools/dev/editor.ps1` | Opens the Godot editor |
 | `tools/dev/studio.ps1 -Car kitsune [-Presets studio,outdoor] [-Modes normal,zebra] [-Views q34f,side] [-Damage derby]` | Photo-studio renders of a car into `out/studio` |
 | `tools/dev/gate_m2.ps1` | The M2 art-gate set: all cars clean, zebra and damaged, plus the Bowl, into `out/gate` |
+| `tools/dev/lab.ps1 [-Model brougham] [-Out out/lab] [-NoBuild]` | The scripted damage lab: rams from every side, battered, smoking, wrecked and burning, wheel off, scraped, rolled; 14 shots and a contact sheet into `out/lab`. The window must stay visible: a minimised or covered window draws no frames (the script retries once if shots are missing) |
+| `python tools/dev/contact_sheet.py <out.png> <images...> [--cols 3]` | Tiles screenshots into one labelled sheet |
 | `tools/carsmith/build.ps1 <car>` | Generates a car: `assets/cars/<car>/<car>.glb` plus a Blender preview in `out/cars` |
 | `python tools/enginesynth/synth.py assets/audio/engines` | Re-synthesizes the engine grains |
 
@@ -47,11 +50,19 @@
 - **Handling scenarios:** `headless.ps1 -Scene res://scenes/test/DriveTest.tscn -UserArgs '--scenario=accel'` (also `brake`, `circle`, `slalom`, `turnaround`, `keys`).
 - **DD Code tactics T1–T5** (plan §4.7, each must succeed in ≥ 60% of trials): `headless.ps1 -Scene res://scenes/test/DdCodeTest.tscn -UserArgs @('--tactic=all','--trials=10') -Filter DDCode`. Add `--verbose` for per-trial notes, `--hits` for spin-assist details, `--tactic=probe` for raw impact measurements.
 - **Derby sims** (plan §17.4): `headless.ps1 -Scene res://scenes/test/DerbySim.tscn -UserArgs @('--sims=30') -Filter 'Sim\]'`. The PlayerProxy bot drives the player's car through the keyboard path; the report goes to `out/sims/`. `--profile=skilled`, `--seed=N`, `--dump=60` (print every car's state every 60 s).
-- **Wreckin' sims** (plan §17.4): `headless.ps1 -Scene res://scenes/test/WreckinSim.tscn -UserArgs @('--sims=10') -Filter 'Sim\]'`. `--profile=average|racer|hunter|skilled|compare` (`compare` runs the racer and the hunter bot on every seed), `--skill=X`, `--laps=L`, `--cars=N` (`--cars=1` = the bot alone: a clean-lap check), `--dump=S`, `--wallhits`, `--playerhits` (every hit on the player with its source). Each race also prints its damage by source.
+- **Wreckin' sims** (plan §17.4): `headless.ps1 -Scene res://scenes/test/WreckinSim.tscn -UserArgs @('--sims=10') -Filter 'Sim\]'`. `--profile=average|racer|hunter|skilled|compare` (`compare` runs the racer and the hunter bot on every seed), `--skill=X`, `--laps=L`, `--cars=N` (`--cars=1` = the bot alone: a clean-lap check), `--dump=S`, `--wallhits`, `--playerhits` (every hit on the player with its source). Each race (and each derby) also prints its damage by source.
+- **Reproducible:** the same command gives the same results (the impact system sorts Jolt's contacts). A seed run alone plays out differently from the same seed inside a batch, because Jolt's history differs; replay a batch with `--sims=N` up to that seed.
+- **Model cars vs the grey box:** every scene uses the generated cars (`kitsune`, `brougham`, `nordvik`; their size, wheel positions and collider come from the glb). `--greybox` turns every car back into the M1 grey box, for comparing tuning against the M1 baselines; the DD Code test takes `--model=<car>` for both cars.
+- **Pileup stress test** (plan §16, at every milestone): `headless.ps1 -Scene res://scenes/test/PileupTest.tscn -Filter Pileup` checks Jolt stability (no launches, nothing through the floor, no jitter once settled, no cars inside each other) and the cost per physics tick. With rendering, effects and debris: `--visual --perf=2 --quit` (windowed).
 - **Watch the bot play:** run `res://scenes/derby/Derby.tscn` or `res://scenes/race/FigureEight.tscn` with `--proxy` (and `--seed=N`). The race also takes `--laps=L`, `--overview[=SIZE]` (top-down view of the layout) and `--view=Chase|ChaseFar|Bumper|InCar`.
 
 ## Command‑line hooks (after `--`)
 - `--scene=res://...`: the scene to open instead of the default.
 - `--capture=<path>` with `--capture-frame=N`: save a screenshot, then quit.
 - `--quit-after=N`: smoke test that quits after N frames.
+- `--perf[=S]`: print frame time (mean and 1% low), draw calls, triangles and VRAM every S seconds (default 5).
+- `--shot-every=S --shot-dir=out/x`: save a screenshot every S seconds (stress scenes).
+- `--greybox`: every car is the grey box (see above).
+- `--maxcontacts=N`: contacts each car reports to the impact system (default 48; for experiments).
+- `--pinned=S` (derby): how long a car may rock in place before it counts as immobilised (default 20 s; for experiments).
 - `--autobake=res://...` (editor only): bake the lightmaps, save the scene, quit.

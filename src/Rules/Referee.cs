@@ -20,8 +20,11 @@ public readonly record struct CarHit(
     float SpeedA,
     float SpeedB);
 
-/// <summary>Per-step state of one car that the referee needs.</summary>
-public readonly record struct CarSample(float YawRate, float Speed, bool WantsToMove);
+/// <summary>
+/// Per-step state of one car that the referee needs. <paramref name="X"/>/<paramref name="Z"/> (ground-plane position,
+/// optional) let the immobilised rule also catch a car that rocks in place without getting anywhere.
+/// </summary>
+public readonly record struct CarSample(float YawRate, float Speed, bool WantsToMove, float X = float.NaN, float Z = float.NaN);
 
 public enum RefereeEventKind
 {
@@ -69,6 +72,8 @@ public sealed class Referee
         public required WreckAttribution Attribution;
         public required EventScore Score;
         public float ImmobileTime;
+        // Where the car was when it last got clear of its surroundings, and how long it has tried to move since.
+        public float AnchorX = float.NaN, AnchorZ = float.NaN, PinnedTime;
         /// <summary>Whether this car led at the moment each attacker last hit it (×2 for that attacker's spin).</summary>
         public readonly Dictionary<int, bool> LeaderAtHit = new();
     }
@@ -236,7 +241,20 @@ public sealed class Referee
             if (c.Damage.IsWrecked) continue;
             if (s.WantsToMove && s.Speed < 0.5f) c.ImmobileTime += dt;
             else c.ImmobileTime = 0f;
-            if (c.ImmobileTime >= _rules.ImmobilisedWreckTime)
+            // Pinned: trying to move but still within a small circle (locked into another car, rocking on a wreck).
+            if (!float.IsNaN(s.X))
+            {
+                float dx = s.X - c.AnchorX, dz = s.Z - c.AnchorZ;
+                float r = _rules.ImmobilisedRadius;
+                if (float.IsNaN(c.AnchorX) || dx * dx + dz * dz > r * r)
+                {
+                    c.AnchorX = s.X;
+                    c.AnchorZ = s.Z;
+                    c.PinnedTime = 0f;
+                }
+                else if (s.WantsToMove) c.PinnedTime += dt;
+            }
+            if (c.ImmobileTime >= _rules.ImmobilisedWreckTime || c.PinnedTime >= _rules.PinnedWreckTime)
             {
                 if (!leaderKnown) { leader = Leader; leaderKnown = true; }
                 c.Damage.ForceWreck();

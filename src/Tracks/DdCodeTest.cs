@@ -125,11 +125,11 @@ public partial class DdCodeTest : Node3D
                 break;
             case "T1":
                 A = Spawn(root, 1, new Vector3(0f, 0.62f, 0f), Vector3.Right, Colors.Red);          // brake-checker
-                B = Spawn(root, 2, new Vector3(-(4.6f + 6.5f + Jitter(1f)), 0.62f, Jitter(0.25f)), Vector3.Right, Colors.Blue); // tailgater
+                B = Spawn(root, 2, new Vector3(-(2f * HalfLength + 6.5f + Jitter(1f)), 0.62f, Jitter(0.25f)), Vector3.Right, Colors.Blue); // tailgater
                 break;
             default: // T2
                 A = Spawn(root, 1, new Vector3(0f, 0.62f, 0f), Vector3.Right, Colors.Red);          // defender
-                B = Spawn(root, 2, new Vector3(-7f, 0.62f, -3.1f + Jitter(0.25f)), Vector3.Right, Colors.Blue); // overtaker on the left
+                B = Spawn(root, 2, new Vector3(-7f, 0.62f, -(2f * HalfWidth + 1.3f) + Jitter(0.25f)), Vector3.Right, Colors.Blue); // overtaker on the left
                 break;
         }
 
@@ -170,6 +170,12 @@ public partial class DdCodeTest : Node3D
         root.AddChild(wall);
     }
 
+    /// <summary>--model=nordvik runs the tactics with a generated car's collider and axles (no visuals).</summary>
+    private static string Model => DevTools.Instance?.Arg("model") ?? "";
+    /// <summary>Half length and half width of the test cars (the grey box's, or the model's).</summary>
+    private static float HalfLength => Model == "" ? Car.DefaultHalfExtents.Z : CarSpec.For(Model).ZoneHalfExtents.Z;
+    private static float HalfWidth => Model == "" ? Car.DefaultHalfExtents.X : CarSpec.For(Model).ZoneHalfExtents.X;
+
     private static Car Spawn(Node3D root, int id, Vector3 position, Vector3 heading, Color paint)
     {
         var car = new Car
@@ -177,6 +183,8 @@ public partial class DdCodeTest : Node3D
             Id = id,
             Number = id,
             PaintColor = paint,
+            ModelId = Model,
+            BuildVisuals = false,
             Transform = new Transform3D(Basis.LookingAt(heading.Normalized(), Vector3.Up), position),
         };
         root.AddChild(car);
@@ -268,10 +276,12 @@ public partial class DdCodeTest : Node3D
                 // B overtakes on A's left; A turns into B's rear corner.
                 float vA = 70f * Kmh * jv, vB = 84f * Kmh * jv;
                 if (launch) { Launch(A, vA); Launch(B, vB); }
-                Vector3 bRear = B.GlobalPosition - Fwd(B) * 2.3f;
-                Vector3 aFront = A.GlobalPosition + Fwd(A) * 2.3f;
-                // Turn in as the overtaker's rear wheel comes alongside the defender's front.
-                if (!tr.Values.ContainsKey("turn") && t > 0.5f && bRear.X > aFront.X - 2.0f + jt * 5f) tr.Values["turn"] = t;
+                // Turn in as the overtaker's rear wheels come alongside the defender's front wheels, so the hit lands
+                // behind B's rear axle (what spins a car). Axle-anchored so it holds for every car size; for the
+                // grey box this is the original trigger (B's centre 2.6 m ahead of A's).
+                Vector3 bRearAxle = B.GlobalPosition + Fwd(B) * -B.RearAxleZ;
+                Vector3 aFrontAxle = A.GlobalPosition + Fwd(A) * -A.FrontAxleZ;
+                if (!tr.Values.ContainsKey("turn") && t > 0.5f && bRearAxle.X > aFrontAxle.X - 0.1f + jt * 5f) tr.Values["turn"] = t;
                 float turnAt = tr.Values.TryGetValue("turn", out float ta) ? ta : float.MaxValue;
                 // Turn in until contact (or 0.9 s), then straighten up.
                 bool touched = tr.ImpactLog.Any(i => i.B != null);
@@ -318,7 +328,7 @@ public partial class DdCodeTest : Node3D
                 // Head-on; A turns at the last moment and takes the hit on its side.
                 float v = 50f * Kmh * jv;
                 if (launch) { Launch(A, v); Launch(B, v); }
-                float gap = B.GlobalPosition.X - A.GlobalPosition.X - 4.6f;
+                float gap = B.GlobalPosition.X - A.GlobalPosition.X - 2f * HalfLength;
                 float closing = MathF.Max(A.ForwardSpeed + B.ForwardSpeed, 1f);
                 if (!tr.Values.ContainsKey("turn") && t > 0.5f && gap / closing < 0.7f + jt) tr.Values["turn"] = t;
                 bool turning = tr.Values.ContainsKey("turn");

@@ -89,6 +89,31 @@ public partial class ImpactSystem : Node
 
     private readonly List<(Car Car, Vector3 Point, Vector3 Normal)> _wallContacts = new();
 
+    private struct Contact
+    {
+        public GodotObject? Collider;
+        public int OtherId;           // the other car's id, -1 for the world
+        public Vector3 Point, Normal;
+    }
+
+    private readonly List<Contact> _contacts = new();
+
+    // Jolt reports a body's contacts in the order its worker threads found them, which differs from run to run.
+    // Sorted, the sums and "first contact" picks below are the same every time, so sims stay reproducible.
+    private static int CompareContacts(Contact a, Contact b)
+    {
+        int c = a.OtherId.CompareTo(b.OtherId);
+        if (c == 0) c = a.Point.X.CompareTo(b.Point.X);
+        if (c == 0) c = a.Point.Y.CompareTo(b.Point.Y);
+        if (c == 0) c = a.Point.Z.CompareTo(b.Point.Z);
+        if (c == 0) c = a.Normal.X.CompareTo(b.Normal.X);
+        if (c == 0) c = a.Normal.Y.CompareTo(b.Normal.Y);
+        if (c == 0) c = a.Normal.Z.CompareTo(b.Normal.Z);
+        return c;
+    }
+
+    private static readonly Comparison<Contact> ContactOrder = CompareContacts;
+
     private void DetectHits(double time, float dt)
     {
         _pairs.Clear();
@@ -101,17 +126,32 @@ public partial class ImpactSystem : Node
             var state = PhysicsServer3D.BodyGetDirectState(car.GetRid());
             if (state == null) continue;
             int count = state.GetContactCount();
+            _contacts.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                var obj = state.GetContactColliderObject(i);
+                if (obj is Fx.DebrisPiece) continue;     // parts that came off are not hits
+                _contacts.Add(new Contact
+                {
+                    Collider = obj,
+                    OtherId = obj is Car oc ? oc.Id : -1,
+                    Point = state.GetContactLocalPosition(i),
+                    Normal = state.GetContactLocalNormal(i).Normalized(),
+                });
+            }
+            _contacts.Sort(ContactOrder);
+            count = _contacts.Count;
 
             HitResult bestWall = default;
             Vector3 wallPoint = Vector3.Zero, wallNormal = Vector3.Zero, wallPointSum = Vector3.Zero;
             int wallPoints = 0;
             for (int i = 0; i < count; i++)
             {
-                var collider = state.GetContactColliderObject(i);
-                Vector3 point = state.GetContactLocalPosition(i);
-                Vector3 normal = state.GetContactLocalNormal(i).Normalized();
+                var collider = _contacts[i].Collider;
+                Vector3 point = _contacts[i].Point;
+                Vector3 normal = _contacts[i].Normal;
                 if (DebugContacts)
-                    GD.Print($"[Impacts] t={time:0.000} car#{car.Id} contact {i}/{count} with {(collider as Node)?.Name ?? collider?.ToString()} p={point} n={normal}");
+                    GD.Print($"[Impacts] t={time:0.000} car#{car.Id} contact {i}/{count} with {(collider as Node)?.Name.ToString() ?? collider?.ToString() ?? "null"} p={point} n={normal}");
 
                 if (collider is Car other)
                 {
@@ -160,9 +200,9 @@ public partial class ImpactSystem : Node
                     // No closing contact this step (pure sliding): take the normal of the first wall contact.
                     for (int i = 0; i < count && wallNormal == Vector3.Zero; i++)
                     {
-                        Vector3 n = state.GetContactLocalNormal(i).Normalized();
-                        if (MathF.Abs(n.Y) >= WallMaxNormalY || state.GetContactColliderObject(i) is Car) continue;
-                        if (n.Dot(state.GetContactLocalPosition(i) - car.PreCenterOfMass) < 0f) n = -n;
+                        Vector3 n = _contacts[i].Normal;
+                        if (MathF.Abs(n.Y) >= WallMaxNormalY || _contacts[i].OtherId >= 0) continue;
+                        if (n.Dot(_contacts[i].Point - car.PreCenterOfMass) < 0f) n = -n;
                         n.Y = 0f;
                         if (n.LengthSquared() > 1e-4f) wallNormal = n.Normalized();
                     }
@@ -173,6 +213,7 @@ public partial class ImpactSystem : Node
             {
                 _lastWallHit[car.Id] = time;
                 Referee?.OnWallHit(time, car.Id, bestWall.Energy, SideOf(car, wallPoint, wallNormal));
+                car.OnVisualHit(wallPoint, -wallNormal, bestWall.Energy);
                 Impacted?.Invoke(new Impact(time, car, null, wallPoint, wallNormal, bestWall.ClosingSpeed, bestWall.Energy, HitAttacker.A));
             }
         }
@@ -192,6 +233,8 @@ public partial class ImpactSystem : Node
             Vector3 impulseOnB = c.Normal * (reducedMass * c.Result.ClosingSpeed);
             c.B.ApplyHitReaction(c.Point, impulseOnB);
             c.A.ApplyHitReaction(c.Point, -impulseOnB);
+            c.A.OnVisualHit(c.Point, -c.Normal, c.Result.Energy);
+            c.B.OnVisualHit(c.Point, c.Normal, c.Result.Energy);
 
             Impacted?.Invoke(new Impact(time, c.A, c.B, c.Point, c.Normal, c.Result.ClosingSpeed, c.Result.Energy, c.Result.Attacker));
         }
@@ -214,6 +257,7 @@ public partial class ImpactSystem : Node
                 if (other != null && !other.IsWrecked) squeezer = other;
             }
             Referee!.OnScrape(time, car.Id, SideOf(car, point, normal).Zone, slide, dt, squeezer?.Id, "wall scrape");
+            car.OnVisualScrape(point, -normal, v - normal * v.Dot(normal), dt);
         }
         foreach (var c in _pairs.Values)
         {
@@ -222,6 +266,9 @@ public partial class ImpactSystem : Node
             if (slide <= (Referee!.Rules.ScrapeMinSpeed)) continue;
             Referee.OnScrape(time, c.A.Id, SideOf(c.A, c.Point, c.Normal).Zone, slide, dt, c.B.IsWrecked ? null : c.B.Id, "car scrape");
             Referee.OnScrape(time, c.B.Id, SideOf(c.B, c.Point, -c.Normal).Zone, slide, dt, c.A.IsWrecked ? null : c.A.Id, "car scrape");
+            Vector3 slideVel = rel - c.Normal * rel.Dot(c.Normal);
+            c.A.OnVisualScrape(c.Point, c.Normal, slideVel, dt);
+            c.B.OnVisualScrape(c.Point, -c.Normal, -slideVel, dt);
         }
     }
 
@@ -239,9 +286,9 @@ public partial class ImpactSystem : Node
         var xf = car.GlobalTransform;
         Vector3 local = xf.AffineInverse() * worldPoint;
         Vector3 localNormal = xf.Basis.Inverse() * normalOut;
-        var he = Car.HalfExtents;
+        var he = car.HalfExtents;
         var zone = DamageMath.ZoneFromContact(new NVector3(local.X, local.Y, local.Z), N(localNormal), N(he));
-        var wheel = DamageMath.NearestWheel(new NVector3(local.X, local.Y, local.Z), N(he), car.Tuning.FrontAxleZ, car.Tuning.RearAxleZ);
+        var wheel = DamageMath.NearestWheel(new NVector3(local.X, local.Y, local.Z), N(he), car.FrontAxleZ, car.RearAxleZ);
         return new HitSide(zone, wheel);
     }
 }

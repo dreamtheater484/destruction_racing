@@ -24,16 +24,55 @@ public sealed class CarDamageVisual
     /// <summary>Bumped whenever the dent volume changes (attachments that follow the metal re-sample then).</summary>
     public int DentVersion { get; private set; }
 
+    /// <summary>
+    /// Cars that may upload their volumes in one frame (plan §6.2: amortised). A car that has waited
+    /// <see cref="MaxUploadDelay"/> frames uploads anyway, so a busy pileup never leaves a dent behind for long.
+    /// </summary>
+    public const int UploadsPerFrame = 4, MaxUploadDelay = 3;
+
     private readonly float[] _dent = new float[NX * NY * NZ * 4];
     private readonly float[] _wear = new float[NX * NY * NZ * 4];
+    // One image per Z slice, kept between uploads; only the slices a change touched are re-encoded.
+    private readonly Godot.Collections.Array<Image> _dentImages = new(), _wearImages = new();
+    private readonly byte[] _dentBytes = new byte[NX * NY * 4 * 2], _wearBytes = new byte[NX * NY * 4];
+    private int _dentK0 = NZ, _dentK1 = -1, _wearK0 = NZ, _wearK1 = -1;
     private bool _dentDirty, _wearDirty;
+    private ulong _dirtySince;
+    private static ulong _uploadFrame;
+    private static int _uploadsThisFrame;
 
     public CarDamageVisual(Aabb bounds)
     {
         Min = bounds.Position;
         Size = bounds.Size;
-        DentTexture.Create(Image.Format.Rgbah, NX, NY, NZ, false, DentSlices());
-        WearTexture.Create(Image.Format.Rgba8, NX, NY, NZ, false, WearSlices());
+        for (int k = 0; k < NZ; k++)
+        {
+            _dentImages.Add(Image.CreateFromData(NX, NY, false, Image.Format.Rgbah, _dentBytes));
+            _wearImages.Add(Image.CreateFromData(NX, NY, false, Image.Format.Rgba8, _wearBytes));
+        }
+        DentTexture.Create(Image.Format.Rgbah, NX, NY, NZ, false, _dentImages);
+        WearTexture.Create(Image.Format.Rgba8, NX, NY, NZ, false, _wearImages);
+    }
+
+    private void MarkDent(int k0, int k1)
+    {
+        _dentK0 = Math.Min(_dentK0, k0);
+        _dentK1 = Math.Max(_dentK1, k1);
+        MarkDirty();
+        _dentDirty = true;
+    }
+
+    private void MarkWear(int k0, int k1)
+    {
+        _wearK0 = Math.Min(_wearK0, k0);
+        _wearK1 = Math.Max(_wearK1, k1);
+        MarkDirty();
+        _wearDirty = true;
+    }
+
+    private void MarkDirty()
+    {
+        if (!_dentDirty && !_wearDirty) _dirtySince = Engine.GetProcessFrames();
     }
 
     private Vector3 VoxelCentre(int i, int j, int k) =>
@@ -82,8 +121,18 @@ public sealed class CarDamageVisual
             _dent[o + 3] = MathF.Min(1f, _dent[o + 3] + depth * w / FullCrumpleDepth);
             _wear[o] = MathF.Min(1f, _wear[o] + w * w * MathF.Min(1f, depth / 0.2f) * 0.45f);
         }
-        _dentDirty = _wearDirty = true;
+        MarkDent(k0, k1);
+        MarkWear(k0, k1);
         DentVersion++;
+    }
+
+    /// <summary>A copy of the dent volume as it is now (for parts that come off).</summary>
+    public ImageTexture3D SnapshotDentTexture()
+    {
+        EncodeDent();
+        var t = new ImageTexture3D();
+        t.Create(Image.Format.Rgbah, NX, NY, NZ, false, _dentImages);
+        return t;
     }
 
     /// <summary>Dent displacement (m) at a car-local point: trilinear and edge-clamped, like the GPU sampler.</summary>
@@ -114,7 +163,7 @@ public sealed class CarDamageVisual
     {
         for (int o = 0; o < _wear.Length; o += 4)
             if (_wear[o] > 0.3f) _wear[o + 1] = MathF.Min(1f, _wear[o + 1] + amount * (_wear[o] - 0.3f) * 1.4f);
-        _wearDirty = true;
+        MarkWear(0, NZ - 1);
     }
 
     private void AddWear(Vector3 point, float radius, int channel, float amount)
@@ -129,53 +178,63 @@ public sealed class CarDamageVisual
             int o = ((k * NY + j) * NX + i) * 4 + channel;
             _wear[o] = MathF.Min(1f, _wear[o] + w * amount);
         }
-        _wearDirty = true;
+        MarkWear(k0, k1);
     }
 
     public void Clear()
     {
         Array.Clear(_dent);
         Array.Clear(_wear);
-        _dentDirty = _wearDirty = true;
+        MarkDent(0, NZ - 1);
+        MarkWear(0, NZ - 1);
         DentVersion++;
     }
 
-    /// <summary>Uploads changed volumes (call once per frame).</summary>
-    public void Flush()
+    /// <summary>
+    /// Uploads changed volumes; call once per frame. <paramref name="budgeted"/> shares
+    /// <see cref="UploadsPerFrame"/> between all cars (the in-game path); stills and tools upload at once.
+    /// </summary>
+    public void Flush(bool budgeted = false)
     {
-        if (_dentDirty) DentTexture.Update(DentSlices());
-        if (_wearDirty) WearTexture.Update(WearSlices());
+        if (!_dentDirty && !_wearDirty) return;
+        if (budgeted)
+        {
+            ulong frame = Engine.GetProcessFrames();
+            if (frame != _uploadFrame) { _uploadFrame = frame; _uploadsThisFrame = 0; }
+            if (_uploadsThisFrame >= UploadsPerFrame && frame - _dirtySince < MaxUploadDelay) return;
+            _uploadsThisFrame++;
+        }
+        if (_dentDirty) { EncodeDent(); DentTexture.Update(_dentImages); }
+        if (_wearDirty) { EncodeWear(); WearTexture.Update(_wearImages); }
         _dentDirty = _wearDirty = false;
     }
 
-    private Godot.Collections.Array<Image> DentSlices()
+    private void EncodeDent()
     {
-        var slices = new Godot.Collections.Array<Image>();
-        var bytes = new byte[NX * NY * 4 * 2];
-        for (int k = 0; k < NZ; k++)
+        for (int k = _dentK0; k <= _dentK1; k++)
         {
             int baseIndex = k * NX * NY * 4;
             for (int n = 0; n < NX * NY * 4; n++)
             {
                 ushort h = BitConverter.HalfToUInt16Bits((Half)_dent[baseIndex + n]);
-                bytes[n * 2] = (byte)h;
-                bytes[n * 2 + 1] = (byte)(h >> 8);
+                _dentBytes[n * 2] = (byte)h;
+                _dentBytes[n * 2 + 1] = (byte)(h >> 8);
             }
-            slices.Add(Image.CreateFromData(NX, NY, false, Image.Format.Rgbah, bytes));
+            _dentImages[k].SetData(NX, NY, false, Image.Format.Rgbah, _dentBytes);
         }
-        return slices;
+        _dentK0 = NZ;
+        _dentK1 = -1;
     }
 
-    private Godot.Collections.Array<Image> WearSlices()
+    private void EncodeWear()
     {
-        var slices = new Godot.Collections.Array<Image>();
-        var bytes = new byte[NX * NY * 4];
-        for (int k = 0; k < NZ; k++)
+        for (int k = _wearK0; k <= _wearK1; k++)
         {
             int baseIndex = k * NX * NY * 4;
-            for (int n = 0; n < NX * NY * 4; n++) bytes[n] = (byte)(Math.Clamp(_wear[baseIndex + n], 0f, 1f) * 255f + 0.5f);
-            slices.Add(Image.CreateFromData(NX, NY, false, Image.Format.Rgba8, bytes));
+            for (int n = 0; n < NX * NY * 4; n++) _wearBytes[n] = (byte)(Math.Clamp(_wear[baseIndex + n], 0f, 1f) * 255f + 0.5f);
+            _wearImages[k].SetData(NX, NY, false, Image.Format.Rgba8, _wearBytes);
         }
-        return slices;
+        _wearK0 = NZ;
+        _wearK1 = -1;
     }
 }

@@ -67,6 +67,7 @@ public partial class DerbySim : Node
     {
         var r = mode.MetricsResult;
         _results.Add(r);
+        GD.Print("[Sim]   damage by source: " + string.Join(", ", mode.Referee.DamageBySource.OrderByDescending(kv => kv.Value).Select(kv => $"{kv.Key} {kv.Value:0}")));
         GD.Print(string.Create(CultureInfo.InvariantCulture,
             $"[Sim] #{r.Seed}: length {r.EventLength:0}s, first contact {r.FirstContactTime:0.0}s, longest idle {r.LongestIdle:0.0}s, " +
             $"player {(r.PlayerWrecked ? $"wrecked at {r.PlayerSurvival:0}s" : "survived")} place {r.PlayerPlace} pts {r.PlayerPoints}, " +

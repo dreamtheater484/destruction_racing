@@ -887,7 +887,7 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A6 | Promotion threshold | 1st in the division | DD1 FAQ |
 | A7 | Hitting a wrecked car in DD1 | 0 | DD2 rule |
 | A8 | Bowl time limit | None | None found |
-| A9 | Immobilised = wrecked after 10 s | Yes | Prevents stalls |
+| A9 | Immobilised = wrecked after 10 s | Yes: below 0.5 m/s, or trying to move but still within 1.5 m of where it was (M3: two cars locked together rocked in place for minutes) | Prevents stalls; the derby always ends |
 | A10 | Championship tie‑break | More wrecks, then best finish | Not documented |
 | A11 | DD2 race end | Continues until the player finishes or is wrecked | Fandom only |
 | ~~A12~~ | DD2 pit limits | **Resolved:** Wreckin' once, Stock Car as often as you like, 5 s each | DD2 PC manual |

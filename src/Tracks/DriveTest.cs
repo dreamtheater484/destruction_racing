@@ -9,9 +9,10 @@ using Godot;
 namespace DestructionRacing.Tracks;
 
 /// <summary>
-/// M1 driving test: the grey-box Bowl, the player's car, a few parked cars to bump into,
-/// the camera rig, the HUD and the tuning panel. With --scenario=NAME it instead runs a scripted
-/// handling test headlessly, prints the measurements and quits (accel, brake, circle, slalom, turnaround).
+/// M1 driving test: the grey-box Bowl, the player's car (the Kitsune, or --car=brougham|nordvik), a few parked
+/// cars to bump into, the camera rig, the HUD and the tuning panel. With --scenario=NAME it instead runs a scripted
+/// handling test headlessly, prints the measurements and quits (accel, brake, circle, slalom, turnaround); the
+/// scenarios drive the grey box their reference values were measured with, or --model=NAME.
 /// </summary>
 public partial class DriveTest : Node3D
 {
@@ -40,14 +41,15 @@ public partial class DriveTest : Node3D
         ICarInput driver = DevTools.Instance?.Arg("demo") != null
             ? new Autopilot { Script = t => new CarControls { Throttle = t < 1f ? 0f : 0.75f, Steer = t < 2.2f ? 0f : -0.55f } }
             : input;
-        _player = Spawn(new Vector3(0f, 1.0f, 26f), Vector3.Right, new Color(0.80f, 0.08f, 0.06f), 7, driver);
+        string model = DevTools.Instance?.Arg("car") ?? "kitsune";
+        _player = Spawn(new Vector3(0f, 1.0f, 26f), Vector3.Right, new Color(0.80f, 0.08f, 0.06f), 7, driver, model);
         _player.ApplyTuning(CarTuning.LoadOrDefault(TuningPanel.TuningPath));
 
         for (int i = 0; i < 6; i++)
         {
             float a = Mathf.Tau * i / 6f + 0.4f;
             var pos = new Vector3(Mathf.Cos(a) * 24f, 1.0f, Mathf.Sin(a) * 16f);
-            Spawn(pos, new Vector3(Mathf.Sin(a * 3f), 0f, Mathf.Cos(a * 3f)), Paints[i], 11 + i * 7, null);
+            Spawn(pos, new Vector3(Mathf.Sin(a * 3f), 0f, Mathf.Cos(a * 3f)), Paints[i], 11 + i * 7, null, Car.Roster[(i + 1) % Car.Roster.Length]);
         }
 
         var rig = new CameraRig { Target = _player };
@@ -64,10 +66,11 @@ public partial class DriveTest : Node3D
             _player.RightCar();
     }
 
-    private Car Spawn(Vector3 position, Vector3 heading, Color paint, int number, ICarInput? driver)
+    private Car Spawn(Vector3 position, Vector3 heading, Color paint, int number, ICarInput? driver, string model = "")
     {
         var car = new Car
         {
+            ModelId = model,
             PaintColor = paint,
             RoofColor = new Color(0.95f, 0.80f, 0.10f),
             Number = number,
@@ -103,7 +106,7 @@ public partial class DriveTest : Node3D
         _scenario = name;
         _pilot = new Autopilot();
         // Outside the bowl: a long flat runway from x = -180 heading +X.
-        _player = Spawn(new Vector3(-180f, 0.9f, -150f), Vector3.Right, Colors.Red, 1, _pilot);
+        _player = Spawn(new Vector3(-180f, 0.9f, -150f), Vector3.Right, Colors.Red, 1, _pilot, DevTools.Instance?.Arg("model") ?? "");
         _pilot.Script = name switch
         {
             "accel" => _ => new CarControls { Throttle = 1f },

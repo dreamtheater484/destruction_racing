@@ -9,6 +9,9 @@ uniform float min_opacity : hint_range(0.0, 1.0) = 0.58;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.03;
 uniform float dirt : hint_range(0.0, 1.0) = 0.0;
 uniform float shatter : hint_range(0.0, 1.0) = 0.0;     // 0 intact .. 1 crazed white
+// Per window (GeometryInstance3D.SetInstanceShaderParameter): cracks from hits, and a pane knocked out.
+instance uniform float pane_crack = 0.0;
+instance uniform float pane_gone = 0.0;
 
 float hash12(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -50,12 +53,13 @@ void vertex() {
 }
 
 void fragment() {
+	if (pane_gone > 0.5) discard;
 	float nv = clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 	float fres = pow(1.0 - nv, 4.0);
 	vec3 c = tint;
 	float a = mix(min_opacity, 1.0, fres);
 	float crack = 0.0;
-	float shatter_now = max(shatter, smoothstep(0.3, 0.65, crumple_amount));   // only where the frame really folded
+	float shatter_now = max(max(shatter, pane_crack), smoothstep(0.3, 0.65, crumple_amount));   // hits, or where the frame folded
 	if (shatter_now > 0.0) {
 		vec2 q = obj_pos.xz * 24.0 + obj_pos.yy * 24.0;
 		float e = min(cracks(q), cracks(q * 2.7 + 5.0) * 1.6);

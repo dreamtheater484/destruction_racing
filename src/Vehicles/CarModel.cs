@@ -13,8 +13,12 @@ public sealed record Livery(
     float Roughness = 0.38f,
     float Wear = 0f,
     float Dirt = 0f,
-    int Number = -1)
+    int Number = -1,
+    Color? Roof = null)
 {
+    /// <summary>DD division roof colour (plan §4.5); a vinyl roof is painted over when it is set.</summary>
+    public bool HasRoofColour => Roof != null;
+
     public static readonly Livery KitsuneRed = new(new Color(0.62f, 0.05f, 0.035f), new Color(0.93f, 0.93f, 0.9f), 0, Number: 12);
     public static readonly Livery BroughamBlue = new(new Color(0.08f, 0.12f, 0.26f), new Color(0.8f, 0.8f, 0.82f), 0, Metallic: 0.7f, Roughness: 0.4f, Number: 1);
     public static readonly Livery NordvikBeige = new(new Color(0.62f, 0.55f, 0.40f), new Color(0.1f, 0.1f, 0.1f), 0, Number: 5);
@@ -24,12 +28,13 @@ public sealed record Livery(
 /// Where a car's race number goes, in model space (X right, Y up, -Z forward): front-door roundel centre and
 /// digit height, roof roundel centre z, the lowest y that counts as roof, and digit height (0 = none).
 /// </summary>
-public readonly record struct NumberPlacement(float DoorZ, float DoorY, float DoorHeight, float RoofZ, float RoofMinY, float RoofHeight)
+public readonly record struct NumberPlacement(float DoorZ, float DoorY, float DoorHeight, float RoofZ, float RoofMinY, float RoofHeight,
+    bool VinylRoof = false)
 {
     public static readonly Dictionary<string, NumberPlacement> ByCar = new()
     {
         ["kitsune"] = new(0.12f, 0.61f, 0.28f, 0.58f, 1.15f, 0.36f),
-        ["brougham"] = new(-0.165f, 0.60f, 0.40f, 0.70f, 1.30f, 0f),    // vinyl roof: doors only
+        ["brougham"] = new(-0.165f, 0.60f, 0.40f, 0.70f, 1.30f, 0.50f, VinylRoof: true),   // no roof number on the vinyl
         ["nordvik"] = new(-0.07f, 0.74f, 0.28f, 0.74f, 1.33f, 0.50f),
     };
 }
@@ -48,6 +53,7 @@ public sealed class CarModel
     /// <summary>Zone crush shapes (front, rear, left, right; 0..1), see <see cref="SetCrush"/>.</summary>
     public Vector4 Crush { get; private set; }
     private readonly Dictionary<string, Node3D> _nodes = new();
+    private Dictionary<string, Material> _materials = new();
     private readonly List<ShaderMaterial> _deforming = new();
     private readonly List<(Label3D Label, Vector3 RestPosition)> _attached = new();
     private Vector3 _crushLo, _crushHi;
@@ -72,7 +78,8 @@ public sealed class CarModel
         if (NumberPlacement.ByCar.TryGetValue(carId, out var np))
         {
             Paint.SetShaderParameter("door_number", new Vector3(np.DoorZ, np.DoorY, np.DoorHeight));
-            Paint.SetShaderParameter("roof_number", new Vector3(np.RoofZ, np.RoofMinY, np.RoofHeight));
+            bool onVinyl = np.VinylRoof && !livery.HasRoofColour;
+            Paint.SetShaderParameter("roof_number", new Vector3(np.RoofZ, np.RoofMinY, onVinyl ? 0f : np.RoofHeight));
         }
         Glass = Deforming(new ShaderMaterial { Shader = _glassShader });
         TailLens = Lens(new Color(0.55f, 0.015f, 0.01f), 2);
@@ -93,12 +100,14 @@ public sealed class CarModel
             ["wheel_well"] = Surface(new Color(0.018f, 0.018f, 0.018f), 0.95f),
             ["underbody"] = Surface(new Color(0.025f, 0.024f, 0.022f), 0.95f),
             ["interior"] = Surface(new Color(0.07f, 0.065f, 0.06f), 0.9f),
-            ["vinyl"] = Surface(new Color(0.045f, 0.03f, 0.026f), 0.55f, clearcoat: 0.15f),
+            // A derby car with a division roof colour gets its vinyl painted over.
+            ["vinyl"] = livery.HasRoofColour ? Paint : Surface(new Color(0.045f, 0.03f, 0.026f), 0.55f, clearcoat: 0.15f),
             ["chrome"] = Surface(new Color(0.9f, 0.9f, 0.92f), 0.05f, 1f),
             ["tyre"] = Std(new Color(0.028f, 0.028f, 0.03f), 0.88f),
             ["rim"] = Std(new Color(0.72f, 0.73f, 0.74f), 0.32f, 1f),
             ["hubcap"] = Std(new Color(0.62f, 0.63f, 0.65f), 0.22f, 1f),
         };
+        _materials = shared;
         foreach (var mi in Descendants<MeshInstance3D>(root))
         {
             if (mi.Mesh == null) continue;
@@ -144,12 +153,33 @@ public sealed class CarModel
     }
 
     /// <summary>
-    /// Uploads damage changes and keeps attachments the shader cannot move (the plate text) on the metal.
-    /// Call once per frame.
+    /// Copies of the deforming materials frozen with the damage as it is now (a dent-volume snapshot and the
+    /// current crush), for parts that come off: they keep their dents however the car is bashed afterwards.
     /// </summary>
-    public void Flush()
+    public Dictionary<Material, Material> FreezeMaterials()
     {
-        Damage.Flush();
+        var snapshot = Damage.SnapshotDentTexture();
+        var map = new Dictionary<Material, Material>();
+        foreach (var m in _deforming)
+        {
+            var copy = (ShaderMaterial)m.Duplicate();
+            copy.SetShaderParameter("dent_volume", snapshot);
+            copy.SetShaderParameter("crush", Crush);
+            map[m] = copy;
+        }
+        return map;
+    }
+
+    /// <summary>Stops tracking attachments (plate text) under a node that left the car.</summary>
+    public void Forget(Node subtree) => _attached.RemoveAll(a => !GodotObject.IsInstanceValid(a.Label) || subtree.IsAncestorOf(a.Label));
+
+    /// <summary>
+    /// Uploads damage changes and keeps attachments the shader cannot move (the plate text) on the metal.
+    /// Call once per frame; <paramref name="budgeted"/> shares the per-frame upload budget between cars.
+    /// </summary>
+    public void Flush(bool budgeted = false)
+    {
+        Damage.Flush(budgeted);
         if (!_attachedDirty && _attachedVersion == Damage.DentVersion) return;
         _attachedDirty = false;
         _attachedVersion = Damage.DentVersion;
@@ -263,6 +293,10 @@ public sealed class CarModel
 
     public Node3D? Node(string name) => _nodes.TryGetValue(name, out var n) ? n : null;
 
+    /// <summary>The car's game material for a glb material name ("underbody", "chrome" ...): extra meshes built in
+    /// model space with it dent and crush with the car.</summary>
+    public Material? Material(string name) => _materials.TryGetValue(name, out var m) ? m : null;
+
     public void ApplyLivery(Livery l)
     {
         Paint.SetShaderParameter("paint_color", l.Paint);
@@ -273,6 +307,8 @@ public sealed class CarModel
         Paint.SetShaderParameter("wear", l.Wear);
         Paint.SetShaderParameter("dirt", l.Dirt);
         Paint.SetShaderParameter("race_number", l.Number);
+        Paint.SetShaderParameter("roof_paint", l.HasRoofColour ? 1f : 0f);
+        if (l.Roof is { } roof) Paint.SetShaderParameter("roof_color", roof);
     }
 
     /// <summary>0 = normal, 1 = zebra reflections, 2 = clay.</summary>

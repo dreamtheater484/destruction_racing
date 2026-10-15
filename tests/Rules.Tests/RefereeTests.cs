@@ -187,6 +187,26 @@ public class RefereeTests
     }
 
     [Fact]
+    public void Car_rocking_in_place_is_wrecked_but_a_driving_car_is_not()
+    {
+        var r = Make();
+        RefereeEvent? wreck = null;
+        for (int i = 0; i < (int)((Std.PinnedWreckTime + 0.5f) / Dt) && wreck == null; i++)
+        {
+            float t = i * Dt;
+            // Car 3 shuffles back and forth at up to 1 m/s within half a metre; the others drive in circles.
+            var samples = r.CarIds.ToDictionary(id => id, id => id == 3
+                ? new CarSample(0f, 1f, true, 0.5f * MathF.Sin(t * 2f), 0f)
+                : new CarSample(0.4f, 8f, true, 20f * MathF.Cos(t * 0.4f + id), 20f * MathF.Sin(t * 0.4f + id)));
+            r.Step(t, Dt, samples);
+            wreck = r.DrainEvents().Cast<RefereeEvent?>().FirstOrDefault(e => e!.Value.Kind == RefereeEventKind.Wrecked);
+        }
+        Assert.NotNull(wreck);
+        Assert.Equal(3, wreck!.Value.Car);
+        Assert.InRange(wreck.Value.Time, Std.PinnedWreckTime - 0.1, Std.PinnedWreckTime + 0.1);
+    }
+
+    [Fact]
     public void Corner_hits_damage_the_nearest_wheel_and_heavy_rear_damage_loses_it()
     {
         var r = Make();

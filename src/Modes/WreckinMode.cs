@@ -33,6 +33,8 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
     /// <summary>The player's grid slot (0 = pole).</summary>
     public int PlayerGridSlot { get; set; } = 12;
     public bool Headless { get; set; }
+    /// <summary>The player's model (--car=kitsune|brougham|nordvik); the AI cycle through <see cref="Car.Roster"/>.</summary>
+    public string PlayerModel { get; set; } = "kitsune";
     public bool ProxyPlayer { get; set; }
     public Personality ProxyProfile { get; set; } = Personality.AverageFan;
     public int Seed { get; set; } = 1;
@@ -141,6 +143,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
             if (dev.Arg("proxy") != null) ProxyPlayer = true;
             if (int.TryParse(dev.Arg("seed"), out int seed)) Seed = seed;
             if (int.TryParse(dev.Arg("laps"), out int laps)) Laps = Math.Max(1, laps);
+            if (dev.Arg("car") is { } car) PlayerModel = car;
         }
         _rng = new Random(Seed);
         _countdown = CountdownTime;
@@ -208,6 +211,8 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
                 Number = isPlayer ? 7 : numbers[aiIndex],
                 PaintColor = isPlayer ? Liveries[0] : Liveries[1 + aiIndex % (Liveries.Length - 1)],
                 RoofColor = DerbyMode.RoofColor(division),
+                ModelId = isPlayer ? PlayerModel : Car.Roster[(aiIndex + 1) % Car.Roster.Length],
+                BuildVisuals = !Headless,
                 Transform = _track.GridSlot(slot),
             };
             AddChild(car);
@@ -296,7 +301,8 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
         foreach (var c in _cars)
         {
             var lc = c.LastControls;
-            _samples[c.Id] = new CarSample(c.AngularVelocity.Y, c.LinearVelocity.Length(), lc.Throttle > 0.3f || lc.Reverse);
+            _samples[c.Id] = new CarSample(c.AngularVelocity.Y, c.LinearVelocity.Length(), lc.Throttle > 0.3f || lc.Reverse,
+                c.GlobalPosition.X, c.GlobalPosition.Z);
             if (!_referee.IsWrecked(c.Id) && c.GlobalPosition.Y < -5f) _referee.ForceWreck(_time, c.Id);
         }
         _referee.Step(_time, dt, _samples);
@@ -433,7 +439,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
             GD.Print($"[Race] wall hit t={i.Time:0.0} #{i.A.Number} s={_s[i.A.Id]:0} lat={_lateral[i.A.Id]:0.0} v={i.A.PreLinearVelocity.Length():0.0} " +
                      $"closing={i.ClosingSpeed:0.0} E={i.Energy / 1000f:0}kJ F{i.A.Health(DamageZone.Front) * 100:0} L{i.A.Health(DamageZone.Left) * 100:0} Rt{i.A.Health(DamageZone.Right) * 100:0}");
         if (Headless) return;
-        if (i.Energy > 6_000f) SpawnSparks(i.Point, i.Energy);
+        if (i.Energy > 6_000f && i.A.Visual == null) SpawnSparks(i.Point, i.Energy);
         if (_rig != null && (i.A == _rig.Target || i.B == _rig.Target))
             _rig.AddShake(Mathf.Clamp(i.Energy / 150_000f, 0.05f, 0.8f));
     }

@@ -125,6 +125,13 @@ public sealed record RulesConfig
     public float WreckAttributionWindow { get; init; } = 5f;
     /// <summary>A car that cannot move for this long counts as wrecked (✱ A9).</summary>
     public float ImmobilisedWreckTime { get; init; } = 10f;
+    /// <summary>
+    /// A car that tries to move for <see cref="ImmobilisedWreckTime"/> without getting further than this (m) from
+    /// where it was also counts as immobilised (two cars locked together rock in place for ever otherwise).
+    /// </summary>
+    public float ImmobilisedRadius { get; init; } = 1.5f;
+    /// <summary>How long a car may rock in place (see <see cref="ImmobilisedRadius"/>) before it counts as immobilised.</summary>
+    public float PinnedWreckTime { get; init; } = 20f;
 
     public SpinTuning Spin { get; init; } = new();
 

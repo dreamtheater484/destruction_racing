@@ -20,7 +20,8 @@ namespace DestructionRacing.Modes;
 /// </summary>
 public partial class DerbyMode : Node3D, IArenaView, IHudMode
 {
-    private static readonly Color[] Liveries =
+    /// <summary>The paint colours of the field (the player's red first).</summary>
+    public static readonly Color[] Liveries =
     {
         new(0.80f, 0.08f, 0.06f), new(0.05f, 0.25f, 0.70f), new(0.95f, 0.70f, 0.05f), new(0.10f, 0.50f, 0.20f),
         new(0.90f, 0.40f, 0.05f), new(0.55f, 0.10f, 0.55f), new(0.90f, 0.90f, 0.88f), new(0.12f, 0.12f, 0.13f),
@@ -37,6 +38,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     };
 
     public int CarCount { get; set; } = 20;
+    /// <summary>The player's model (--car=kitsune|brougham|nordvik); the AI cycle through <see cref="Car.Roster"/>.</summary>
+    public string PlayerModel { get; set; } = "kitsune";
     public bool Headless { get; set; }
     /// <summary>Drive the player's car with the PlayerProxy bot (sims).</summary>
     public bool ProxyPlayer { get; set; }
@@ -134,7 +137,11 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         {
             if (dev.Arg("proxy") != null) ProxyPlayer = true;
             if (int.TryParse(dev.Arg("seed"), out int seed)) Seed = seed;
+            if (dev.Arg("car") is { } car) PlayerModel = car;
         }
+        // --pinned=S (experiments): how long a car may rock in place before it counts as immobilised.
+        if (float.TryParse(DevTools.Instance?.Arg("pinned"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float pinned))
+            Rules = Rules with { PinnedWreckTime = pinned };
         _rng = new Random(Seed);
         _countdown = CountdownTime;
         if (!Headless) Controls.Apply(Controls.Current);
@@ -188,6 +195,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
                 // The player's red is unique; the AI cycle through the other liveries.
                 PaintColor = i == 0 ? Liveries[0] : Liveries[1 + (i - 1) % (Liveries.Length - 1)],
                 RoofColor = RoofColor(division),
+                ModelId = i == 0 ? PlayerModel : Car.Roster[i % Car.Roster.Length],
+                BuildVisuals = !Headless,
                 Transform = new Transform3D(Basis.LookingAt(heading, Vector3.Up), pos),
             };
             AddChild(car);
@@ -277,7 +286,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         foreach (var c in _cars)
         {
             var lc = c.LastControls;
-            _samples[c.Id] = new CarSample(c.AngularVelocity.Y, c.LinearVelocity.Length(), lc.Throttle > 0.3f || lc.Reverse);
+            _samples[c.Id] = new CarSample(c.AngularVelocity.Y, c.LinearVelocity.Length(), lc.Throttle > 0.3f || lc.Reverse,
+                c.GlobalPosition.X, c.GlobalPosition.Z);
             // A car that fell out of the world or is stuck far from the floor is out.
             if (!_referee.IsWrecked(c.Id) && c.GlobalPosition.Y < -5f) _referee.ForceWreck(_time, c.Id);
         }
@@ -348,7 +358,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     {
         _metrics.OnImpact(i);
         if (Headless) return;
-        if (i.Energy > 6_000f) SpawnSparks(i.Point, i.Energy);
+        if (i.Energy > 6_000f && i.A.Visual == null) SpawnSparks(i.Point, i.Energy);
         if (_rig != null && (i.A == _rig.Target || i.B == _rig.Target))
             _rig.AddShake(Mathf.Clamp(i.Energy / 150_000f, 0.05f, 0.8f));
     }
@@ -392,7 +402,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
             string brain = c == _player ? "player" : _brains.TryGetValue(c.Id, out var b)
                 ? $"{b.Personality.Archetype,-8} {b.Current,-10} target #{b.Target?.Number}" : "?";
             var p = c.GlobalPosition;
-            GD.Print($"[Derby]   #{c.Number,-3} {brain}  v={c.LinearVelocity.Length():0.0} pos=({p.X:0},{p.Z:0}) " +
+            GD.Print($"[Derby]   #{c.Number,-3} {brain}  v={c.LinearVelocity.Length():0.0} pos=({p.X:0},{p.Y:0.0},{p.Z:0}) " +
                      $"F{c.Health(DamageZone.Front) * 100:0} R{c.Health(DamageZone.Rear) * 100:0} L{c.Health(DamageZone.Left) * 100:0} Rt{c.Health(DamageZone.Right) * 100:0} " +
                      $"wheels lost {c.Damage?.WheelsLost} up={c.GlobalTransform.Basis.Y.Y:0.00} ctl t{c.LastControls.Throttle:0.0} b{c.LastControls.Brake:0.0} r{(c.LastControls.Reverse ? 1 : 0)} s{c.LastControls.Steer:0.0}");
         }

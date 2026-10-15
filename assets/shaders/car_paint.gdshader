@@ -25,6 +25,8 @@ uniform vec3 number_color : source_color = vec3(0.02);
 uniform vec3 roundel_color : source_color = vec3(0.88, 0.88, 0.84);
 uniform vec3 door_number = vec3(0.0, 0.55, 0.0);   // centre z, centre y, digit height (0 = none)
 uniform vec3 roof_number = vec3(0.6, 1.1, 0.0);    // centre z, lowest y, digit height (0 = none)
+uniform vec3 roof_color : source_color = vec3(0.95, 0.8, 0.1);   // DD division colour (Div 4 yellow ... Div 1 black)
+uniform float roof_paint = 0.0;
 
 group_uniforms finish;
 uniform float metallic_paint : hint_range(0.0, 1.0) = 0.0;
@@ -192,6 +194,10 @@ void fragment() {
 		vec3 p = rest_pos;
 		vec3 n = normalize(rest_normal);
 		vec3 base = livery(p, n);
+		if (roof_paint > 0.0) {
+			float roof = smoothstep(roof_number.y - 0.012, roof_number.y + 0.012, p.y) * smoothstep(0.4, 0.6, n.y);
+			base = mix(base, roof_color, roof * roof_paint);
+		}
 		float decal = race_number_paint(base, p, n);
 		float metal = metallic_paint * (1.0 - decal);
 		float rough = paint_roughness;

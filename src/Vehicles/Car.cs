@@ -8,7 +8,9 @@ namespace DestructionRacing.Vehicles;
 /// Arcade raycast vehicle on a Jolt rigid body (plan §15.3): spring-damper suspension per wheel,
 /// slip-angle tyre curve with a friction ellipse, power-limited drive, DD-style reverse and turn-around.
 /// Mechanical damage (plan §6.1) comes from the referee's <see cref="DamageState"/>; spin assist and post-hit
-/// grip loss reproduce DD's "tap the rear, watch it spin". The grey-box visuals are replaced in M2.
+/// grip loss reproduce DD's "tap the rear, watch it spin". With a <see cref="ModelId"/> the car is a generated
+/// model (M3): its collider, axles and track come from the model (<see cref="CarSpec"/>) and a <see cref="CarVisual"/>
+/// shows the damage; without one it is the grey box (tests, headless sims).
 /// </summary>
 public partial class Car : RigidBody3D
 {
@@ -18,9 +20,26 @@ public partial class Car : RigidBody3D
     [Export] public Color PaintColor { get; set; } = new(0.80f, 0.08f, 0.06f);
     [Export] public Color RoofColor { get; set; } = new(0.95f, 0.80f, 0.10f);
     [Export] public int Number { get; set; } = 7;
+    /// <summary>Generated model (assets/cars/&lt;id&gt;); empty = grey box.</summary>
+    [Export] public string ModelId { get; set; } = "";
+    /// <summary>Paint scheme of the model (default: <see cref="PaintColor"/>, <see cref="Number"/> and <see cref="RoofColor"/>).</summary>
+    public Livery? Livery { get; set; }
+    /// <summary>False in headless sims: the model's size still sets the physics, but nothing is drawn.</summary>
+    public bool BuildVisuals { get; set; } = true;
+    public CarSpec? Spec { get; private set; }
+    public CarVisual? Visual { get; private set; }
 
-    /// <summary>Car-local half extents of the body box (forward = -Z), used for damage zones.</summary>
-    public static readonly Vector3 HalfExtents = new(0.9f, 0.35f, 2.3f);
+    /// <summary>The generated cars of the M2/M3 roster (AI cycle through them; plan §9 grows this in M5).</summary>
+    public static readonly string[] Roster = { "kitsune", "brougham", "nordvik" };
+
+    /// <summary>Car-local half extents of the grey-box body (forward = -Z).</summary>
+    public static readonly Vector3 DefaultHalfExtents = new(0.9f, 0.35f, 2.3f);
+    /// <summary>Car-local half extents used for the damage zones (the model's body with a model).</summary>
+    public Vector3 HalfExtents { get; private set; } = DefaultHalfExtents;
+    /// <summary>Height of the ground below the chassis origin at static ride height (the model sits on it).</summary>
+    public float GroundY { get; private set; } = -0.585f;
+    public float FrontAxleZ => _wheels[0].Mount.Z;
+    public float RearAxleZ => _wheels[2].Mount.Z;
 
     /// <summary>Prints every hit reaction (scenario debugging).</summary>
     public static bool DebugHits;
@@ -72,8 +91,12 @@ public partial class Car : RigidBody3D
     private bool _wreckShown;
     private StandardMaterial3D _paint = null!;
     private readonly System.Collections.Generic.List<StandardMaterial3D> _lights = new();
-    private CpuParticles3D _smoke = null!;
-    private CpuParticles3D _fire = null!;
+    private CpuParticles3D? _smoke;
+    private CpuParticles3D? _fire;
+    private float _wheelRadius = 0.33f;
+    private float _steerRad;
+    private CollisionShape3D? _nose, _tail;
+    private float _noseLength, _tailLength, _noseZ, _tailZ;
 
     private sealed class Wheel
     {
@@ -100,7 +123,8 @@ public partial class Car : RigidBody3D
         CanSleep = false;
         // Contacts feed the ImpactSystem. Car-on-car friction is low so cars glance off each other, as in DD.
         ContactMonitor = true;
-        MaxContactsReported = 12;
+        // The model collider is four boxes: a pileup reports many points per car (--maxcontacts=N for experiments).
+        MaxContactsReported = int.TryParse(DestructionRacing.Core.DevTools.Instance?.Arg("maxcontacts"), out int mc) ? mc : 48;
         PhysicsMaterialOverride = new PhysicsMaterial { Friction = 0.35f, Bounce = 0.12f };
         // Drag and rolling resistance are modelled explicitly; the engine's default damping would act as a hidden brake.
         LinearDampMode = DampMode.Replace;
@@ -110,12 +134,96 @@ public partial class Car : RigidBody3D
         _exclude = new Godot.Collections.Array<Rid> { GetRid() };
         _rayQuery = new PhysicsRayQueryParameters3D { CollisionMask = WorldLayer, Exclude = _exclude };
 
-        BuildBody();
         for (int i = 0; i < 4; i++) _wheels[i] = new Wheel { Front = i < 2, Left = i % 2 == 0, Index = (Rules.Wheel)i };
-        BuildWheelVisuals();
-        BuildDamageEffects();
-        ApplyTuning(Tuning);
+        // --greybox (sims, tests): every car is the grey box, for comparing tuning against the M1 baselines.
+        if (DestructionRacing.Core.DevTools.Instance?.Arg("greybox") != null) ModelId = "";
+        if (ModelId != "")
+        {
+            Spec = CarSpec.For(ModelId);
+            ApplyTuning(Tuning);
+            BuildModelCollider(Spec);
+            if (BuildVisuals)
+            {
+                var livery = Livery ?? new Livery(PaintColor, new Color(0.93f, 0.93f, 0.9f), 0, Wear: 0.15f, Dirt: 0.25f, Number: Number, Roof: RoofColor);
+                Visual = new CarVisual(this, ModelId, livery, $"DD {Number:00}");
+                AddChild(Visual);
+            }
+        }
+        else
+        {
+            BuildBody();
+            BuildWheelVisuals();
+            BuildDamageEffects();
+            ApplyTuning(Tuning);
+        }
     }
+
+    /// <summary>
+    /// Collider from the model: a lower body in three boxes (nose, middle, tail; the end boxes shorten as the
+    /// car is crushed) and a cabin box, all in car-local space (model space shifted down by <see cref="GroundY"/>).
+    /// </summary>
+    private void BuildModelCollider(CarSpec spec)
+    {
+        var b = spec.Body;
+        float y0 = GroundY + b.Position.Y + 0.04f;
+        float belt = GroundY + b.Position.Y + b.Size.Y * 0.55f;
+        float halfW = Mathf.Max(Mathf.Abs(b.Position.X), Mathf.Abs(b.End.X));
+        float front = b.Position.Z, rear = b.End.Z;
+        float noseEnd = spec.FrontAxleZ + 0.15f, tailStart = spec.RearAxleZ - 0.15f;
+        _noseLength = noseEnd - front;
+        _tailLength = rear - tailStart;
+        _noseZ = noseEnd;
+        _tailZ = tailStart;
+        float h = belt - y0, yc = 0.5f * (belt + y0);
+        _nose = new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(halfW * 2f, h, _noseLength) }, Position = new Vector3(0f, yc, noseEnd - _noseLength * 0.5f) };
+        _tail = new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(halfW * 2f, h, _tailLength) }, Position = new Vector3(0f, yc, tailStart + _tailLength * 0.5f) };
+        AddChild(_nose);
+        AddChild(_tail);
+        AddChild(new CollisionShape3D
+        {
+            Shape = new BoxShape3D { Size = new Vector3(halfW * 2f, h, tailStart - noseEnd) },
+            Position = new Vector3(0f, yc, 0.5f * (noseEnd + tailStart)),
+        });
+        // Cabin: from the windscreen base to the back of the roof, a little narrower than the body.
+        float cabFront = spec.TryPart("Glass_Front", out var ws) ? ws.Position.Z : -0.4f;
+        float cabRear = spec.TryPart("Glass_Rear", out var bw) ? bw.End.Z : 1.4f;
+        float roof = GroundY + b.End.Y;
+        AddChild(new CollisionShape3D
+        {
+            Shape = new BoxShape3D { Size = new Vector3(halfW * 1.7f, roof - belt, cabRear - cabFront) },
+            Position = new Vector3(0f, 0.5f * (roof + belt), 0.5f * (cabFront + cabRear)),
+        });
+        HalfExtents = new Vector3(halfW, 0.5f * (roof - y0), Mathf.Max(-front, rear));
+    }
+
+    /// <summary>Shortens the nose and tail boxes by the crush depth (m): crushed cars really get shorter.</summary>
+    public void SetCrushCollider(float frontDepth, float rearDepth)
+    {
+        if (_nose?.Shape is BoxShape3D nb)
+        {
+            float len = Mathf.Max(0.2f, _noseLength - frontDepth);
+            nb.Size = new Vector3(nb.Size.X, nb.Size.Y, len);
+            _nose.Position = new Vector3(0f, _nose.Position.Y, _noseZ - len * 0.5f);
+        }
+        if (_tail?.Shape is BoxShape3D tb)
+        {
+            float len = Mathf.Max(0.2f, _tailLength - rearDepth);
+            tb.Size = new Vector3(tb.Size.X, tb.Size.Y, len);
+            _tail.Position = new Vector3(0f, _tail.Position.Y, _tailZ + len * 0.5f);
+        }
+    }
+
+    /// <summary>A hit from the ImpactSystem, for the visuals (<paramref name="intoCar"/> points into this car).</summary>
+    public void OnVisualHit(Vector3 point, Vector3 intoCar, float energy) => Visual?.OnHit(point, intoCar, energy);
+
+    /// <summary>Sustained sliding contact, for the visuals (scrape streaks and sparks).</summary>
+    public void OnVisualScrape(Vector3 point, Vector3 normalOut, Vector3 slideVelocity, float dt) =>
+        Visual?.OnScrape(point, normalOut, slideVelocity, dt);
+
+    /// <summary>Wheel centre in car-local space (follows the suspension).</summary>
+    public Vector3 WheelCentre(int i) => _wheels[i].Mount + Vector3.Down * (Tuning.RestLength - _wheels[i].Compression);
+    public float WheelSteer(int i) => _wheels[i].Front ? -_steerRad : 0f;
+    public float WheelSpin(int i) => _wheels[i].Spin;
 
     public void ApplyTuning(CarTuning t)
     {
@@ -129,10 +237,28 @@ public partial class Car : RigidBody3D
             t.Mass / 12f * (w * w + l * l) * t.YawInertiaScale,
             t.Mass / 12f * (w * w + h * h));
 
+        // With a model, the axles, track and wheels are the model's; the chassis origin keeps the grey box's
+        // height above the ground (so spawn heights and the centre of mass stay as tuned).
+        float staticCompression = t.Mass * 9.81f / (4f * t.SpringRate);
+        float halfTrack = t.HalfTrack, frontZ = t.FrontAxleZ, rearZ = t.RearAxleZ, mountY = t.MountHeight;
+        _wheelRadius = t.WheelRadius;
+        if (Spec != null)
+        {
+            GroundY = -0.585f;
+            _wheelRadius = Spec.WheelRadius;
+            halfTrack = Spec.HalfTrack;
+            frontZ = Spec.FrontAxleZ;
+            rearZ = Spec.RearAxleZ;
+            mountY = GroundY + Spec.WheelCentreY + t.RestLength - staticCompression;
+        }
+        else
+        {
+            GroundY = t.MountHeight - t.RestLength + staticCompression - t.WheelRadius;
+        }
         for (int i = 0; i < 4; i++)
         {
             var wheel = _wheels[i];
-            wheel.Mount = new Vector3(wheel.Left ? -t.HalfTrack : t.HalfTrack, t.MountHeight, wheel.Front ? t.FrontAxleZ : t.RearAxleZ);
+            wheel.Mount = new Vector3(wheel.Left ? -halfTrack : halfTrack, mountY, wheel.Front ? frontZ : rearZ);
         }
     }
 
@@ -200,6 +326,7 @@ public partial class Car : RigidBody3D
         steerDeg = Mathf.Clamp(steerDeg, -maxSteer * 1.25f, maxSteer * 1.25f);
         SteerAngleDeg = steerDeg;
         float steerRad = Mathf.DegToRad(steerDeg);
+        _steerRad = steerRad;
 
         // Drive, brake, reverse (DD2: holding brake at a standstill reverses; DD1 PS: dedicated reverse).
         float brake = c.Brake;
@@ -236,7 +363,7 @@ public partial class Car : RigidBody3D
 
         // Pass 1: suspension raycasts.
         var space = GetWorld3D().DirectSpaceState;
-        float rayLength = t.RestLength + t.WheelRadius;
+        float rayLength = t.RestLength + _wheelRadius;
         int grounded = 0, drivenGrounded = 0;
         foreach (var w in _wheels)
         {
@@ -349,7 +476,7 @@ public partial class Car : RigidBody3D
             Vector3 applyAt = w.ContactPoint + up * (comHeight * t.LateralForceHeight);
             ApplyForce(wheelFwd * fx + wheelSide * fy, applyAt - xf.Origin);
 
-            w.Spin += vLong / t.WheelRadius * dt;
+            w.Spin += vLong / _wheelRadius * dt;
         }
 
         // Aero drag and rolling resistance.
@@ -371,7 +498,8 @@ public partial class Car : RigidBody3D
 
         UpdateGearbox(reversing);
         UpdateUpsideDown(up, v, dt);
-        UpdateWheelVisuals(steerRad);
+        UpdateRidingOff(grounded, up, c, dt);
+        if (Spec == null) UpdateWheelVisuals(steerRad);
     }
 
     private bool IsDriven(Wheel w) => Tuning.RearWheelDrive ? !w.Front : w.Front;
@@ -440,6 +568,35 @@ public partial class Car : RigidBody3D
         {
             _upsideDownTime = 0f;
         }
+    }
+
+    private float _ridingTime;
+
+    /// <summary>
+    /// A car that ended up on another car's hood or boot (wheels off the ground, resting on its body) slides off it
+    /// while its driver tries to get going. The wheels only touch the ground, so without this it has no grip up
+    /// there and rides along for good. Parked cars and wrecks stay put (a pile settles).
+    /// </summary>
+    private void UpdateRidingOff(int grounded, Vector3 up, CarControls c, float dt)
+    {
+        bool trying = !IsWrecked && (c.Throttle > 0.1f || c.Reverse || (c.Brake > 0.1f && !c.Hold));
+        if (grounded >= 3 || up.Y < 0.5f || !trying) { _ridingTime = 0f; return; }
+        Car? below = null;
+        foreach (var body in GetCollidingBodies())
+            if (body is Car other && other.GlobalPosition.Y < GlobalPosition.Y - 0.15f && (below == null || other.Id < below.Id))
+                below = other;       // lowest id: the same choice every run, whatever order the contacts come in
+        // Only a car being carried (moving with the one below) for a while: a car climbing over another in a
+        // crash, or sliding across it, is left to the physics.
+        if (below == null) { _ridingTime = 0f; return; }
+        Vector3 relative = LinearVelocity - below.LinearVelocity;
+        relative.Y = 0f;
+        if (relative.Length() > 2f) { _ridingTime = 0f; return; }
+        _ridingTime += dt;
+        if (_ridingTime < 1.5f) return;
+        Vector3 away = GlobalPosition - below.GlobalPosition;
+        away.Y = 0f;
+        if (away.LengthSquared() < 0.01f) away = GlobalBasis.X;
+        ApplyCentralForce(away.Normalized() * Mass * 6f);
     }
 
     // ---------------------------------------------------------------- grey-box visuals
@@ -549,7 +706,7 @@ public partial class Car : RigidBody3D
 
     public override void _Process(double delta)
     {
-        if (Damage == null) return;
+        if (Damage == null || _smoke == null || _fire == null) return;
         float front = Health(DamageZone.Front);
         bool wrecked = IsWrecked;
         _smoke.Emitting = front < 0.6f || wrecked;

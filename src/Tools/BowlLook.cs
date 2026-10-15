@@ -40,23 +40,26 @@ public partial class BowlLook : Node3D
         new(0.92f, 0.38f, 0.04f), new(0.85f, 0.85f, 0.83f), new(0.12f, 0.12f, 0.13f), new(0.48f, 0.10f, 0.48f),
     };
 
+    /// <summary>Just the arena (no parked cars or pileup): a backdrop for other test scenes.</summary>
+    public bool Empty { get; set; }
+
     private Camera3D _camera = null!;
     private readonly List<CarModel> _cars = new();
     private int _view;
 
     public override void _Ready()
     {
-        _camera = new Camera3D { Current = true, Near = 0.05f, Far = 2000f };
+        _camera = new Camera3D { Current = !Empty, Near = 0.05f, Far = 2000f };
         AddChild(_camera);
         GetViewport().Msaa3D = Viewport.Msaa.Msaa4X;
         GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAEnum.Smaa;
         BuildTyreBarrier();
         BuildFencePosts();
-        SpawnCars();
+        if (!Empty) SpawnCars();
         ApplyView(Views[0]);
         var dev = DevTools.Instance;
         if (dev?.Arg("nolightmap") != null && GetNodeOrNull<LightmapGI>("LightmapGI") is { } lm) lm.LightData = null;
-        if (dev?.Arg("shots") is { } dir) RunShots(dir, dev);
+        if (!Empty && dev?.Arg("shots") is { } dir) RunShots(dir, dev);
         else if (GetTree().CurrentScene == this) KeyGuide.Add(this, "The Bowl, afternoon (baked lighting)\nV next view   W/S move   arrows turn   P photo (out/bowl)   Esc quit");
     }
 

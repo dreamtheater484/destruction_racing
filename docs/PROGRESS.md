@@ -9,7 +9,51 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M2 Art and audio spike — waiting for your rating (the kill criterion)
+## M3 Full damage and VFX — ready for you to look at
+- **Look at it yourself:**
+  - **Damage Lab.cmd**: a parked car in the Bowl takes real hits from ram cars, so the whole chain runs (impact → referee damage → crush, dents, parts, glass, smoke, fire). 1 = front ram, 2 = rear ram, 3/4 = left/right T-bone, 5 = corner (Shift = harder), 6 = wall scrape, 7 = roll it, 8 = wreck it, 9 = knock a wheel off, R = fresh car, Tab = next model, Space = slow motion. The keys are on screen.
+  - **Pileup Test.cmd**: the 20-car stress scene with all effects; shows the frame rate and the PASS/FAIL checks on screen. R = again.
+  - **Play Derby.cmd** and **Play Wreckin.cmd**: all 20 cars are now the generated Kitsune, Brougham and Nordvik with full damage (you drive the Kitsune; `--car=brougham|nordvik` picks another). **Play Driving Test.cmd** also uses the models now.
+  - Renders: `out/lab/sheet_<car>.png` (made by `tools/dev/lab.ps1 -Model <car>`).
+- **Parts that come off** (plan §6.2), driven by the zone health of the rules library:
+
+  | Part | Works loose | Comes off |
+  |---|---|---|
+  | Front / rear bumper | below 55% / 45%: hangs by one end and swings | below 30% / 20% |
+  | Hood | front below 20%: flips up and flaps | front below 8%, or wrecked: blown off |
+  | Boot lid | rear below 25% | rear below 10% |
+  | Doors (front / rear) | side below 35% / 25%: swing open | side below 12% / 5% |
+  | Mirrors | – | side below 40%, or a hard hit next to them |
+  | Wheels | – | when the rules say the wheel is lost |
+
+  - Loose panels swing on their hinges, shaken by the car's accelerations and flapping at speed.
+  - A part that comes off becomes physics debris that keeps its dents and paint wear (a frozen copy of the dent volume). At most 150 pieces live at once (the oldest go first); a piece at rest turns static, and cars drive over it.
+- **Glass and lights:** panes near a hit crack, then shatter into a shard burst (also from heavy crush or a roll). Lamps break: dark, crazed lens.
+- **Smoke and fire** (plan §6.1): steam below 60% front, grey smoke below 35%, black below 15%; fire below 8% front and for 9 s after a wreck, with a flickering light (no volumetric fog, plan §8.1). The flames ride with the car and lean back in the draught.
+- **Sparks, chips and dust:** impact sparks, a spark stream while metal grinds along a wall or another car, hub sparks from a corner that lost its wheel, paint chips, glass shards, dust where parts land. All are pooled GPU particles with our own shaders (no textures).
+- **Engine bay:** a block, rocker covers, air cleaner and radiator under the hood, so a car that lost its hood shows an engine instead of a hole. It dents and crushes with the front.
+- **Crushed cars get shorter** (plan §6.2): the nose and tail boxes of the collider shrink with the crush. The collider is four boxes (nose, middle, tail, cabin) sized from each car's model.
+- **Rollover:** the roof caves in and some glass bursts.
+- **Fixes found on the way:**
+  - **Sims are reproducible again.** Jolt reports a body's contacts in the order its worker threads find them; the impact system now sorts them, and a car reports up to 48 contacts (the model collider produces more than the old 12). Two identical runs now match race for race.
+  - **Cars riding on cars:** in one derby the player's car climbed onto another car's nose and rode there for five minutes (the wheels only touch the ground, so it had no grip up there), and the derby timed out. A car resting on another car now slides off while its driver tries to drive. And a car that tries to move but stays within 1.5 m for 10 s now counts as immobilised (✱ A9), so a derby always ends (plan §6.0). **85 unit tests.**
+  - **Hitches:** dent volumes upload only the slices a hit touched, at most 4 cars per frame (plan §6.2); the effect and debris pools are made while the arena loads instead of at the first crash.
+- **Checks** (plan §17.1, all headless and reproducible):
+  - **DD Code T1–T5** for every car size: grey box 10/10 on all five; Kitsune, Brougham and Nordvik 9–10/10 (target ≥ 6/10).
+  - **Handling scenarios:** the grey box is unchanged from M1 (0–100 km/h 2.36 s, 179→0 km/h in 103 m, 0.84 g). The models match it within 1%, except the turn-around: the short Kitsune swings 279°, the long Brougham 234° (grey box 255°).
+  - **Pileup** (plan §16): passes headless (top speed 17.6 m/s, settled to 0.02 m/s, no cars inside each other, 0.90 ms per physics tick against the 3.5 ms budget) and with rendering, effects and debris (176–240 fps).
+  - **Derby sims**, 40 derbies with the model cars: every plan §17.4 derby target but one is met: first contact 1.7 s, longest idle 6.6 s, 19.1 player hits per minute, events of 145 s, survival 116 s, player wrecked within 30 / 60 s 0% / 11%, wrecked by ≥ 3 attackers 2%, stuck 3.5% (was 6.2% before the fixes), no time-outs. Still missed: 63% of the player's points come from deliberate hits (target ≥ 70%; M1b 55%). That one is for your derby playtest in M4.
+  - **Wreckin' sims**, 20 races with the model cars: all targets met: 7.6 spins per lap, 20.5 crossover incidents per race, 37 position changes, the leader spun twice, 87% of the race with cars within 3 s, 0% wrecked before half distance, 0.6% stuck, no time-outs.
+  - 85 unit tests pass.
+- **Performance** (plan §16, RTX 5090 at 1080p): a 20-car derby driven by the PlayerProxy runs at 235–238 fps on average (the 240 Hz vsync cap); 1% lows are 136 fps in the opening crunch and 220–240 fps after it; at most 2.7k draw calls and 2.5 M triangles; 600 MB VRAM. Earlier in M3, before the upload budget and the pool warm-up, it was 175–190 fps with 1% lows of 44–107. The first run after a shader changes hitches while Godot compiles it (1% lows of 40–65 fps in the pileup); the release build will precompile shaders (Godot's shader baker, M8).
+- **Changed from the plan:**
+  - **The scrape mask** is the 3D wear volume from M2 (paint → primer → bare steel → rust, plus soot), not a 1024² UV texture. It works on every car without UVs and already holds the scrapes.
+  - **Hubcaps and exhaust** do not come off: the generated wheels have only a small centre cap, and the cars have no exhaust part yet. Both come with the roster in M5.
+  - **The oil trail** at critical front damage moves to M4, together with skid marks (both are pooled marks on the ground).
+  - **Crash sound** is M4 (audio v1).
+
+## M2 Art and audio spike — approved (2026‑10‑15: "It looks stunning and the sound is also pretty good")
+- **Kill criterion passed:** we keep our own car generator, damage system and synthesized engines. The purchased-model fallback is shelved.
 - **Look at it yourself:**
   - **Car Studio.cmd**: the three cars on a turntable. Tab = next car, B = derby damage, X = repair, Z = zebra check, 1/2/3 = studio, outdoor or arena light. The keys are on screen.
   - **Bowl Look.cmd**: the Bowl in its baked afternoon light, with a staged pileup. V = next view.
