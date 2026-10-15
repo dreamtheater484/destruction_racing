@@ -9,7 +9,7 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M5 Car roster — ready for your approval
+## M5 Car roster — approved (2026‑10‑15: "I follow your recommendation. Now continue")
 - **Look at it yourself:**
   - **Play Derby.cmd**: the set-up screen now has all nine cars. CAR shows the five ratings as bars, the engine and the drive, and three verdicts from the balance sims (DERBY, WRECKIN' and PACE, each from WEAK to BEST). COLOUR is a palette grid of 16, STYLE the six livery styles. Your car carries #7 and the roof colour of your division.
   - **Car Studio.cmd**: Tab = next car, L = next livery (showroom, test liveries, then the drivers' signature liveries), B = derby damage, X = repair, arrows orbit, W/S zoom, 1/2/3 lighting.
@@ -94,7 +94,8 @@
 - **Not done (deviations):**
   - The plan's livery compositing (a SubViewport baking one 2048² albedo per car) is done in the paint shader instead: the layers are computed per pixel, so there is nothing to bake and no texture memory per car.
   - Rust as pre-existing wear: age gives a faded, dull clear coat, dirt and primer panels, but rust only appears with damage so far. Rust patches from age could come with the M8 polish.
-- **Acceptance** (plan §18): "Balance targets met; roster approved". Your call on the roster, and on the top-3 question above: count Stock Car (then the target is met), or make Wreckin' reward finishing more (the finish bonus 25/15/10 is our own ✱ A1 assumption) and re-run.
+- **Acceptance** (plan §18): "Balance targets met; roster approved". You approved the roster on 2026‑10‑15 and chose to count Stock Car Racing as the third mode for "no car top 3 in every mode" (then no car is top 3 everywhere); the Wreckin' finish bonus stays 25/15/10.
+- **Carried to M6:** confirm the top-3 rule with real Stock Car sims (derby, Wreckin' and Stock Car points), and check the Volant's lead on pace (+41% in the estimate).
 
 ## M4 Vertical slice: Destruction Derby — approved (2026‑10‑15: "And it's good!")
 - **Play it yourself:** double-click **Play Derby.cmd**.
