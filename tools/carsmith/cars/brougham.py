@@ -14,7 +14,7 @@ CAR = Sedan(
     plan_front=0.06, plan_rear=0.06, shoulder=0.015, bottom_radius=0.06,
     crease_z=0.62, crease_up=0.02, crease_down=0.05, top_crown=0.02, front_lean=0.0, rear_lean=0.02,
     wheel_radius=0.355, wheel_width=0.215, track_front=1.59, track_rear=1.58, arch_radius=0.40,
-    rim_inch=15, rim_style="dish",
+    rim_inch=15, rim_style="cover",
     a_pillar=0.06, c_pillar=0.11, b_pillar_y=-0.20, b_pillar_w=0.04, door_split_y=-0.22,
     door_front_y=0.55, c_glass_y=-1.05, c_door_y=-1.10,
     headlights=[Rect(0.53, 0.70, 0.085, 0.055, 0.008), Rect(0.73, 0.70, 0.085, 0.055, 0.008)],
@@ -25,7 +25,7 @@ CAR = Sedan(
     tail_clear=[Rect(0.40, 0.70, 0.075, 0.09, 0.006)],
     bumper_material="chrome", bumper_z=0.47, bumper_half=0.085, bumper_proud=0.075, bumper_strip=True,
     side_trim="chrome", side_trim_z=0.905, vinyl_roof=True, mirror_material="chrome",
-    bezel_material="chrome", handle_z=0.84, plate_front_half=(0.155, 0.078), plate_rear_z=0.0,
+    bezel_material="chrome", handle_z=0.84, plate_front_half=(0.155, 0.078), plate_rear_z=0.0, exhaust=[-0.55], exhaust_radius=0.03,
     interior_seat_y=-0.02,
 )
 SPEC = CAR.spec()

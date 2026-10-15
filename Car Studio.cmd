@@ -1,5 +1,5 @@
 @echo off
-rem Builds and starts the M2 car photo studio: the three generated cars, damage, zebra and clay checks.
+rem Builds and starts the car photo studio: the nine roster cars, their liveries (L), damage, zebra and clay checks.
 rem Tab = next car, B = derby damage, X = repair, arrows orbit, W/S zoom, 1/2/3 lighting. Keys are on screen.
 cd /d "%~dp0"
 echo Building...

@@ -100,6 +100,9 @@ def build(car, voxel=0.012, log=print):
                               c.parent)
         log(f"  cut {c.name}: {len(region.T)} triangles")
     for name, splits in design.splits.items():
+        if name not in pieces:
+            log(f"  split {name}: nothing to split (empty cut)")
+            continue
         src = pieces.pop(name)
         rest = src.piece
         for i, entry in enumerate(splits):

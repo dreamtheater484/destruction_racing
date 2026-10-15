@@ -192,5 +192,6 @@ def design(fn):
         return (x, y, float(P["roof"](y)) - SPEC.roof_crown * x * x)
     details += [kit.wiper("Wiper_L", on_screen(-0.03, 0.27), on_screen(-0.60, 0.17)),
                 kit.wiper("Wiper_R", on_screen(0.06, 0.27), on_screen(0.62, 0.17))]
+    details.append(kit.exhaust("Exhaust", body, xs=[0.45], y_tip=TAIL - 0.01, z=0.31, radius=0.028))
     details += kit.wheels(SPEC.wheels, style="turbine")
     return Design(cuts, details, splits)

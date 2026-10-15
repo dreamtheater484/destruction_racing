@@ -71,7 +71,7 @@ public partial class EventHud : CanvasLayer
     private Label _countdown = null!, _spin = null!, _help = null!, _warning = null!;
     private PanelContainer _leaderTag = null!, _hunted = null!;
     private Label _huntedText = null!;
-    private VBoxContainer _popups = null!, _feed = null!;
+    private VBoxContainer _popups = null!, _feed = null!, _radio = null!;
     private DamageDiagram _diagram = null!;
     private Control _pause = null!, _wrecked = null!, _standings = null!, _results = null!, _banner = null!;
     private Label _bannerTitle = null!, _bannerSub = null!, _wreckedTitle = null!;
@@ -181,6 +181,12 @@ public partial class EventHud : CanvasLayer
         _feed = HudStyle.Place(new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore }, 1f, 0f, new Vector2(-420, 214), new Vector2(384, 0));
         _feed.AddThemeConstantOverride("separation", 6);
         _root.AddChild(_feed);
+
+        // Driver radio (taunts): bottom left, above the key guide.
+        _radio = HudStyle.Place(new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore, Alignment = BoxContainer.AlignmentMode.End },
+            0f, 1f, new Vector2(36, -230), new Vector2(640, 170));
+        _radio.AddThemeConstantOverride("separation", 6);
+        _root.AddChild(_radio);
     }
 
     private void BuildCentre()
@@ -335,6 +341,42 @@ public partial class EventHud : CanvasLayer
         tween.TweenProperty(panel, "modulate:a", 1.0, 0.15);
         tween.TweenInterval(6.0);
         tween.TweenProperty(panel, "modulate:a", 0.0, 0.8);
+        tween.TweenCallback(Callable.From(panel.QueueFree));
+    }
+
+    /// <summary>A driver on the radio (plan §10.2 taunts): their number on a badge in their paint, name, nation and line.</summary>
+    public void Radio(int number, string name, string nation, string line, Color paint)
+    {
+        var panel = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore, SizeFlagsHorizontal = Control.SizeFlags.ShrinkBegin };
+        var style = HudStyle.Panel(paint, 0.18f, 8, 0.85f);
+        style.ContentMarginTop = 4;
+        style.ContentMarginBottom = 6;
+        panel.AddThemeStyleboxOverride("panel", style);
+        var row = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        row.AddThemeConstantOverride("separation", 14);
+        var badge = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore, CustomMinimumSize = new Vector2(64, 0) };
+        badge.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+        {
+            BgColor = paint, BorderColor = new Color(0.95f, 0.95f, 0.9f), BorderWidthLeft = 3, BorderWidthRight = 3,
+            BorderWidthTop = 3, BorderWidthBottom = 3, CornerRadiusTopLeft = 6, CornerRadiusTopRight = 6,
+            CornerRadiusBottomLeft = 6, CornerRadiusBottomRight = 6,
+        });
+        badge.AddChild(HudStyle.Label($"{number}", 36, paint.Luminance > 0.45f ? new Color(0.05f, 0.05f, 0.05f) : HudStyle.White,
+            "ExtraBold", HorizontalAlignment.Center, 0));
+        row.AddChild(badge);
+        var text = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        text.AddThemeConstantOverride("separation", -4);
+        text.AddChild(HudStyle.Label($"{name.ToUpperInvariant()}  ·  {nation}", 20, HudStyle.Grey, "SemiBold", outline: 0));
+        text.AddChild(HudStyle.Label($"\u201C{line}\u201D", 30, HudStyle.White, "Bold", outline: 0));
+        row.AddChild(text);
+        panel.AddChild(row);
+        _radio.AddChild(panel);
+        if (_radio.GetChildCount() > 2) _radio.GetChild(0).QueueFree();
+        panel.Modulate = new Color(1, 1, 1, 0);
+        var tween = RealTimeTween(panel);
+        tween.TweenProperty(panel, "modulate:a", 1.0, 0.15);
+        tween.TweenInterval(3.8);
+        tween.TweenProperty(panel, "modulate:a", 0.0, 0.6);
         tween.TweenCallback(Callable.From(panel.QueueFree));
     }
 

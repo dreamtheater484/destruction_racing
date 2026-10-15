@@ -46,6 +46,7 @@ class BodySpec:
     crease_in_down: float = 0.14     # tuck-under below the crease (tan)
     crease_radius: float = 0.012
     top_crown: float = 0.0           # hood / deck drop per x^2
+    hood_bulge: tuple = ()           # (height, half width, y from, y to): a raised power bulge on the hood
     # Greenhouse ---------------------------------------------------------------
     roof: list = field(default_factory=list)      # [(y, z)] roofline incl. windscreen and backlight
     cabin_front: float = 0.6                      # cabin box ends (hidden inside the body if set wide)
@@ -90,7 +91,13 @@ def make_body_sdf(spec: BodySpec):
         return np.abs(x) - (W(y) - bulge)
 
     def top(x, y):
-        return T(y) - spec.top_crown * x * x
+        t = T(y) - spec.top_crown * x * x
+        if spec.hood_bulge:
+            h, bw, y0, y1 = spec.hood_bulge
+            u = np.clip(1.0 - (x / bw) ** 2, 0.0, 1.0)
+            v = np.clip(np.minimum(y - y0, y1 - y) / 0.18, 0.0, 1.0)
+            t = t + h * (u * u * (3 - 2 * u)) * (v * v * (3 - 2 * v))
+        return t
 
     def plan(x, y, z):
         """Plan-view distance at the point's own height (side, nose and tail faces with corner radius)."""

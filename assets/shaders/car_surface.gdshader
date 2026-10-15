@@ -14,10 +14,11 @@ uniform float emission_energy = 0.0;
 uniform float scuff : hint_range(0.0, 1.0) = 0.0;     // plastic greys out where it crumples
 uniform int lens_pattern = 0;                         // 0 none, 1 fluted headlamp glass, 2 prismatic lamp lens
 uniform float lens_pitch = 0.007;
-// Per lamp (SetInstanceShaderParameter): a smashed lamp goes dark and its lens crazes.
-instance uniform float lamp_broken = 0.0;
+// Per lamp (SetInstanceShaderParameter): a smashed lamp goes dark and its lens crazes. The car shaders' instance
+// uniforms each have their own slot (0-4): one mesh's surfaces share a block, so equal indices would collide.
+instance uniform float lamp_broken : instance_index(0) = 0.0;
 // Per lamp: 0 keeps a lamp dark while its lens material glows (a reversing lamp when not reversing).
-instance uniform float lamp_lit = 1.0;
+instance uniform float lamp_lit : instance_index(1) = 1.0;
 
 // Lens optics as a bump: flutes (vertical cylinders) or a prism grid, faded out before they alias.
 float lens_height(vec3 p) {

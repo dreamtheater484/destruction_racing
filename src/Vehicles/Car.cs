@@ -29,8 +29,8 @@ public partial class Car : RigidBody3D
     public CarSpec? Spec { get; private set; }
     public CarVisual? Visual { get; private set; }
 
-    /// <summary>The generated cars of the M2/M3 roster (AI cycle through them; plan §9 grows this in M5).</summary>
-    public static readonly string[] Roster = { "kitsune", "brougham", "nordvik" };
+    /// <summary>The generated cars of the v1 roster (plan §9.1, <see cref="CarCatalog"/>); the AI cycle through them.</summary>
+    public static readonly string[] Roster = CarCatalog.Ids;
 
     /// <summary>Car-local half extents of the grey-box body (forward = -Z).</summary>
     public static readonly Vector3 DefaultHalfExtents = new(0.9f, 0.35f, 2.3f);
@@ -45,6 +45,8 @@ public partial class Car : RigidBody3D
     public static bool DebugHits;
 
     public CarTuning Tuning { get; private set; } = new();
+    /// <summary>The referee's toughness for this car (plan §9.3): from its model's rating, 1 with --sametuning or the grey box.</summary>
+    public float RefereeToughness => DestructionRacing.Core.DevTools.Instance?.Arg("sametuning") != null ? 1f : CarCatalog.ToughnessOf(ModelId);
     public ICarInput? Driver { get; set; }
 
     /// <summary>Unique id in the event (the referee's car id).</summary>
@@ -162,6 +164,9 @@ public partial class Car : RigidBody3D
         if (ModelId != "")
         {
             Spec = CarSpec.For(ModelId);
+            // Each model handles to its ratings (M5); --sametuning gives every car the shared baseline (A/B sims).
+            if (CarCatalog.Find(ModelId) is { } info && DestructionRacing.Core.DevTools.Instance?.Arg("sametuning") == null)
+                Tuning = info.Tuning();
             ApplyTuning(Tuning);
             BuildModelCollider(Spec);
             if (BuildVisuals)

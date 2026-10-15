@@ -4,7 +4,12 @@ using Godot;
 
 namespace DestructionRacing.Vehicles;
 
-/// <summary>Paint scheme of one car (see assets/shaders/car_paint.gdshader for the livery modes).</summary>
+/// <summary>
+/// Paint scheme of one car (plan §9.4; see assets/shaders/car_paint.gdshader): base colour, a second colour by
+/// <see cref="Mode"/> (0 solid, 1 twin stripes, 2 lower two-tone, 3 side band, 4 cabin two-tone, 5 side flash),
+/// the race number, a fictional sponsor (assets/textures/sponsors.png cell, -1 none), wear and dirt, a panel
+/// in primer (a node name such as "Door_FL", or null) and the division roof colour.
+/// </summary>
 public sealed record Livery(
     Color Paint,
     Color Paint2,
@@ -14,8 +19,14 @@ public sealed record Livery(
     float Wear = 0f,
     float Dirt = 0f,
     int Number = -1,
-    Color? Roof = null)
+    Color? Roof = null,
+    int Sponsor = -1,
+    string? Primer = null)
 {
+    public const int Modes = 6;
+    public static readonly string[] ModeNames = { "SOLID", "TWIN STRIPES", "TWO-TONE", "SIDE BAND", "CABIN TWO-TONE", "SIDE FLASH" };
+    public const int Sponsors = 8;
+
     /// <summary>DD division roof colour (plan §4.5); a vinyl roof is painted over when it is set.</summary>
     public bool HasRoofColour => Roof != null;
 
@@ -25,17 +36,25 @@ public sealed record Livery(
 }
 
 /// <summary>
-/// Where a car's race number goes, in model space (X right, Y up, -Z forward): front-door roundel centre and
-/// digit height, roof roundel centre z, the lowest y that counts as roof, and digit height (0 = none).
+/// Where a car's livery decals go, in model space (X right, Y up, -Z forward): front-door roundel centre and
+/// digit height, roof roundel centre z, the lowest y that counts as roof, and digit height (0 = none); the window
+/// sill (cabin two-tone); the fender sponsor's centre z, y and height; the hood sponsor's centre z and height.
 /// </summary>
 public readonly record struct NumberPlacement(float DoorZ, float DoorY, float DoorHeight, float RoofZ, float RoofMinY, float RoofHeight,
-    bool VinylRoof = false)
+    float Belt, float SideZ, float SideY, float SideHeight, float HoodZ, float HoodHeight, bool VinylRoof = false)
 {
     public static readonly Dictionary<string, NumberPlacement> ByCar = new()
     {
-        ["kitsune"] = new(0.12f, 0.61f, 0.28f, 0.58f, 1.15f, 0.36f),
-        ["brougham"] = new(-0.165f, 0.60f, 0.40f, 0.70f, 1.30f, 0.50f, VinylRoof: true),   // no roof number on the vinyl
-        ["nordvik"] = new(-0.07f, 0.74f, 0.28f, 0.74f, 1.33f, 0.50f),
+        ["kitsune"] = new(0.12f, 0.61f, 0.28f, 0.58f, 1.15f, 0.36f, 0.82f, -1.21f, 0.725f, 0.07f, -1.31f, 0.13f),
+        // No roof number on the vinyl.
+        ["brougham"] = new(-0.165f, 0.60f, 0.40f, 0.70f, 1.30f, 0.50f, 0.93f, -1.475f, 0.835f, 0.065f, -1.50f, 0.18f, VinylRoof: true),
+        ["homestead"] = new(-0.165f, 0.60f, 0.40f, 1.00f, 1.35f, 0.55f, 0.94f, -1.475f, 0.835f, 0.065f, -1.50f, 0.18f),
+        ["interceptor"] = new(0.01f, 0.69f, 0.26f, 0.70f, 1.18f, 0.34f, 0.88f, -1.28f, 0.78f, 0.07f, -1.32f, 0.14f),
+        ["nordvik"] = new(-0.07f, 0.74f, 0.28f, 0.74f, 1.33f, 0.50f, 0.945f, -1.32f, 0.81f, 0.085f, -1.30f, 0.16f),
+        ["adler"] = new(-0.31f, 0.70f, 0.27f, 0.29f, 1.26f, 0.40f, 0.90f, -1.285f, 0.77f, 0.08f, -1.48f, 0.13f),
+        ["volant"] = new(-0.14f, 0.675f, 0.26f, 0.595f, 1.25f, 0.42f, 0.88f, -1.21f, 0.75f, 0.08f, -1.385f, 0.13f),
+        ["hikari"] = new(-0.06f, 0.69f, 0.22f, 0.56f, 1.20f, 0.36f, 0.86f, -1.20f, 0.74f, 0.075f, -1.31f, 0.14f),
+        ["ryujin"] = new(-0.40f, 0.735f, 0.25f, 0.37f, 1.28f, 0.45f, 0.92f, -1.31f, 0.78f, 0.09f, -1.545f, 0.14f),
     };
 }
 
@@ -47,6 +66,8 @@ public sealed class CarModel
 {
     public Node3D Root { get; }
     public ShaderMaterial Paint { get; }
+    /// <summary>Simulated wood (the Homestead's sides): the paint shader with grain, so decals and damage match.</summary>
+    public ShaderMaterial Wood { get; }
     public ShaderMaterial Glass { get; }
     public ShaderMaterial TailLens { get; }
     public CarDamageVisual Damage { get; }
@@ -60,6 +81,7 @@ public sealed class CarModel
     private float _crushSeed;
     private int _attachedVersion = -1;
     private bool _attachedDirty;
+    private MeshInstance3D? _primed;
     private static int _cars;
 
     private static readonly Dictionary<string, Texture2D> TextureCache = new();
@@ -75,20 +97,27 @@ public sealed class CarModel
         Paint.SetShaderParameter("rust_albedo", Tex("rust_coarse_01/rust_coarse_01_diff_2k.jpg"));
         Paint.SetShaderParameter("dirt_albedo", Tex("brown_mud_dry/brown_mud_dry_diff_2k.jpg"));
         Paint.SetShaderParameter("number_atlas", GD.Load<Texture2D>("res://assets/textures/race_digits_sdf.png"));
+        Paint.SetShaderParameter("sponsor_atlas", GD.Load<Texture2D>("res://assets/textures/sponsors.png"));
         if (NumberPlacement.ByCar.TryGetValue(carId, out var np))
         {
             Paint.SetShaderParameter("door_number", new Vector3(np.DoorZ, np.DoorY, np.DoorHeight));
             bool onVinyl = np.VinylRoof && !livery.HasRoofColour;
             Paint.SetShaderParameter("roof_number", new Vector3(np.RoofZ, np.RoofMinY, onVinyl ? 0f : np.RoofHeight));
+            Paint.SetShaderParameter("belt_line", np.Belt);
+            Paint.SetShaderParameter("side_sponsor", new Vector3(np.SideZ, np.SideY, np.SideHeight));
+            Paint.SetShaderParameter("hood_sponsor", new Vector2(np.HoodZ, np.HoodHeight));
         }
+        ApplyLivery(livery);
+        Wood = Deforming((ShaderMaterial)Paint.Duplicate());
+        Wood.SetShaderParameter("wood_grain", 1f);
         Glass = Deforming(new ShaderMaterial { Shader = _glassShader });
         TailLens = Lens(new Color(0.55f, 0.015f, 0.01f), 2);
-        ApplyLivery(livery);
 
         // Wheels live in their own node space and do not dent: plain materials.
         var shared = new Dictionary<string, Material>
         {
             ["paint"] = Paint,
+            ["wood"] = Wood,
             ["glass"] = Glass,
             ["lens_red"] = TailLens,
             ["lens_amber"] = Lens(new Color(0.9f, 0.38f, 0.02f), 2),
@@ -103,6 +132,7 @@ public sealed class CarModel
             // A derby car with a division roof colour gets its vinyl painted over.
             ["vinyl"] = livery.HasRoofColour ? Paint : Surface(new Color(0.045f, 0.03f, 0.026f), 0.55f, clearcoat: 0.15f),
             ["chrome"] = Surface(new Color(0.9f, 0.9f, 0.92f), 0.05f, 1f),
+            ["exhaust"] = Surface(new Color(0.16f, 0.15f, 0.14f), 0.5f, 0.85f, scuff: 0.3f),
             ["tyre"] = Std(new Color(0.028f, 0.028f, 0.03f), 0.88f),
             ["rim"] = Std(new Color(0.72f, 0.73f, 0.74f), 0.32f, 1f),
             ["hubcap"] = Std(new Color(0.62f, 0.63f, 0.65f), 0.22f, 1f),
@@ -135,9 +165,13 @@ public sealed class CarModel
             m.SetShaderParameter("crush_hi", _crushHi);
             m.SetShaderParameter("crush_seed", _crushSeed);
         }
-        Paint.SetShaderParameter("damage_volume", Damage.WearTexture);
-        Paint.SetShaderParameter("volume_min", Damage.Min);
-        Paint.SetShaderParameter("volume_size", Damage.Size);
+        foreach (var m in new[] { Paint, Wood })
+        {
+            m.SetShaderParameter("damage_volume", Damage.WearTexture);
+            m.SetShaderParameter("volume_min", Damage.Min);
+            m.SetShaderParameter("volume_size", Damage.Size);
+        }
+        ApplyPrimer(livery.Primer);
         AddContactShadow();
     }
 
@@ -299,16 +333,30 @@ public sealed class CarModel
 
     public void ApplyLivery(Livery l)
     {
-        Paint.SetShaderParameter("paint_color", l.Paint);
-        Paint.SetShaderParameter("paint_color_2", l.Paint2);
-        Paint.SetShaderParameter("livery_mode", l.Mode);
-        Paint.SetShaderParameter("metallic_paint", l.Metallic);
-        Paint.SetShaderParameter("paint_roughness", l.Roughness);
-        Paint.SetShaderParameter("wear", l.Wear);
-        Paint.SetShaderParameter("dirt", l.Dirt);
-        Paint.SetShaderParameter("race_number", l.Number);
-        Paint.SetShaderParameter("roof_paint", l.HasRoofColour ? 1f : 0f);
-        if (l.Roof is { } roof) Paint.SetShaderParameter("roof_color", roof);
+        // Wood is still null when the constructor applies the first livery (it is copied from the paint after).
+        foreach (var m in Wood == null ? new[] { Paint } : new[] { Paint, Wood })
+        {
+            m.SetShaderParameter("paint_color", l.Paint);
+            m.SetShaderParameter("paint_color_2", l.Paint2);
+            m.SetShaderParameter("livery_mode", l.Mode);
+            m.SetShaderParameter("metallic_paint", l.Metallic);
+            m.SetShaderParameter("paint_roughness", l.Roughness);
+            m.SetShaderParameter("wear", l.Wear);
+            m.SetShaderParameter("dirt", l.Dirt);
+            m.SetShaderParameter("race_number", l.Number);
+            m.SetShaderParameter("sponsor", l.Sponsor);
+            m.SetShaderParameter("roof_paint", l.HasRoofColour ? 1f : 0f);
+            if (l.Roof is { } roof) m.SetShaderParameter("roof_color", roof);
+        }
+        if (_nodes.Count > 0) ApplyPrimer(l.Primer);
+    }
+
+    /// <summary>One panel in grey primer (a junkyard replacement door or fender), or none.</summary>
+    private void ApplyPrimer(string? node)
+    {
+        _primed?.SetInstanceShaderParameter("primer", 0f);
+        _primed = node != null ? Node(node) as MeshInstance3D : null;
+        _primed?.SetInstanceShaderParameter("primer", 1f);
     }
 
     /// <summary>0 = normal, 1 = zebra reflections, 2 = clay.</summary>

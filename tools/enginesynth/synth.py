@@ -38,17 +38,24 @@ class Engine:
     jitter_deg: float = 0.8           # combustion timing scatter
     lope: float = 0.0                 # idle lope (cam overlap): extra variation at low rpm
     drive: float = 1.3                # soft saturation of the summed exhaust
+    whistle: float = 0.0              # turbo whistle level (on throttle, rising with rpm)
+    whistle_hz: tuple = (1900.0, 5200.0)
     seed: int = 1
 
 
-def v8_crossplane(name="v8", **kw):
+def v8_crossplane(name="v8", pipes=(2.6, 2.75), **kw):
     order = [1, 8, 4, 3, 6, 5, 7, 2]
     firings = [(i * 90.0, 0 if c % 2 else 1) for i, c in enumerate(order)]
-    return Engine(name, 720.0, firings, [2.6, 2.75], **kw)
+    return Engine(name, 720.0, firings, list(pipes), **kw)
 
 
-def inline4(name="i4", **kw):
-    return Engine(name, 720.0, [(i * 180.0, 0) for i in range(4)], [2.2], **kw)
+def inline4(name="i4", pipes=(2.2,), **kw):
+    return Engine(name, 720.0, [(i * 180.0, 0) for i in range(4)], list(pipes), **kw)
+
+
+def inline6(name="i6", **kw):
+    # Firing order 1-5-3-6-2-4, one every 120 degrees into one manifold (two 3-into-1s joined).
+    return Engine(name, 720.0, [(i * 120.0, 0) for i in range(6)], [2.4], **kw)
 
 
 def twin_rotor(name="rotary", **kw):
@@ -63,6 +70,22 @@ ENGINES = {
                        mode_q=6.5, muffler_hz=2200, intake=0.16, tick=0.05, cyl_spread=0.1, drive=1.4),
     "kitsune": twin_rotor("kitsune", idle_rpm=900, redline_rpm=8500, pulse_ms=1.0, roughness=0.55,
                           mode_q=7.0, muffler_hz=3200, intake=0.2, tick=0.0, cyl_spread=0.05, drive=1.8),
+    # M5 roster
+    "homestead": v8_crossplane("homestead", pipes=(2.95, 3.1), idle_rpm=600, redline_rpm=4500,
+                        pulse_ms=2.7, roughness=0.28, mode_q=4.5, muffler_hz=1250, intake=0.08, tick=0.02,
+                        lope=0.2, drive=1.15, seed=2),
+    "interceptor": v8_crossplane("interceptor", pipes=(2.4, 2.5), idle_rpm=750, redline_rpm=6000,
+                          pulse_ms=1.8, roughness=0.35, mode_q=5.5, muffler_hz=2100, intake=0.16, tick=0.03,
+                          lope=0.45, drive=1.55, seed=3),
+    "adler": inline6("adler", idle_rpm=800, redline_rpm=7000, pulse_ms=1.3, roughness=0.3, mode_q=6.5,
+                     muffler_hz=2800, intake=0.18, tick=0.04, cyl_spread=0.06, drive=1.4, seed=4),
+    "volant": inline4("volant", idle_rpm=900, redline_rpm=7000, pulse_ms=1.3, roughness=0.45, mode_q=6.0,
+                      muffler_hz=2800, intake=0.22, tick=0.05, cyl_spread=0.09, drive=1.6, seed=5),
+    "hikari": inline4("hikari", pipes=(1.9,), idle_rpm=950, redline_rpm=7800, pulse_ms=1.15,
+                     roughness=0.4, mode_q=6.5, muffler_hz=3000, intake=0.24, tick=0.06, cyl_spread=0.07,
+                     drive=1.5, seed=6),
+    "ryujin": inline6("ryujin", idle_rpm=800, redline_rpm=7000, pulse_ms=1.5, roughness=0.35, mode_q=6.0,
+                      muffler_hz=2000, intake=0.12, tick=0.03, cyl_spread=0.06, drive=1.35, whistle=0.05, seed=7),
 }
 
 
@@ -167,6 +190,14 @@ def render(engine: Engine, rpm: float, load: float, cycles: int, rng: np.random.
             if i0 + 64 < len(clicks):
                 clicks[i0:i0 + 64] += rng.standard_normal(64) * np.exp(-np.arange(64) / 8.0)
         out += engine.tick * resonator_bank(clicks, [3800.0, 5200.0], 8.0, [1.0, 0.6])
+    if engine.whistle > 0 and on:
+        # A turbo's whistle, kept a whole number of periods per cycle so the grains loop seamlessly.
+        frac = (rpm - engine.idle_rpm) / (engine.redline_rpm - engine.idle_rpm)
+        f_want = engine.whistle_hz[0] + (engine.whistle_hz[1] - engine.whistle_hz[0]) * frac
+        k = max(1, round(f_want * cycle_s))
+        ts = np.arange(len(out)) / SR
+        level = engine.whistle * np.std(out[:n]) * (0.3 + 0.7 * frac)
+        out += level * np.sin(2 * np.pi * k / (n_cycle / SR) * ts)
     out = out - onepole_lp(out, 28.0)                    # DC blocker (pulses are one-sided)
     out = soft_clip(out / (np.std(out[: n]) * 3.0 + 1e-9), engine.drive)
     out = out - onepole_lp(out, 18.0)                    # the clipper's asymmetry
@@ -226,6 +257,9 @@ def write_wav(path, x):
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "assets/audio/engines"
+    only = sys.argv[2].split(",") if len(sys.argv) > 2 else None
     for name, eng in ENGINES.items():
+        if only and name not in only:
+            continue
         blob, meta = write_bank(eng, out)
         print(f"{name}: {len(meta['rpms'])} rpm x 2 loads, {len(blob) / SR:.1f} s of grains")

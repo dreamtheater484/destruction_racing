@@ -50,11 +50,12 @@ def bumper(name, body, P, z, half_height, proud, y_from, front, **kw):
     return band(name, body, P, z, half_height, proud, y_range, **kw)
 
 
-def wiper(name, a, b, lift=0.012, material="trim_black"):
-    """A parked wiper lying along a-b (points on the glass): blade plus a thinner arm to the pivot at a."""
+def wiper(name, a, b, lift=0.012, material="trim_black", normal=(0.0, 0.25, 1.0)):
+    """A parked wiper lying along a-b (points on the glass): blade plus a thinner arm to the pivot at a.
+    `normal` is the glass's outward direction (the default suits a windscreen)."""
     a = np.asarray(a, float)
     b = np.asarray(b, float)
-    n = np.array([0.0, 0.25, 1.0]) / np.linalg.norm([0.0, 0.25, 1.0])
+    n = np.asarray(normal, float) / np.linalg.norm(normal)
 
     def sdf(x, y, z):
         blade = sd_capsule(x, y, z, a + n * lift + (b - a) * 0.08, b + n * lift, 0.0055)
@@ -209,6 +210,136 @@ def grille(name, rect, P, style="vertical", material="chrome", pitch=0.028):
     return Detail(name, sdf, (lo, hi), material, voxel=0.0025, target=14000)
 
 
+def lamp_pods(base, rects, P, proud=0.09, round_lamp=True, lens_material="lens_clear", housing_material="trim_black"):
+    """Fog or driving lamps standing in front of the face (in or under the bumper): one node per side,
+    Light_<base>_R / _L, with a lens (first material, so the game treats it as a lamp) and a housing."""
+    F = P["F"]
+    out = []
+    for sname, mirror in (("R", False), ("L", True)):
+        node = f"{base}_{sname}"
+
+        def lens_sdf(x, y, z):
+            d = np.full(np.shape(x), np.inf)
+            for r in rects:
+                cy = float(F(np.array([r.z]))[0]) + proud
+                if round_lamp:
+                    q = np.sqrt((x - r.x) ** 2 + (z - r.z) ** 2) - (min(r.hx, r.hz) - 0.006)
+                else:
+                    q = rounded_rect_2d(x, z, r.x, r.z, r.hx - 0.006, r.hz - 0.006, max(r.r - 0.006, 0.002))
+                d = np.minimum(d, round_max(q, np.abs(y - (cy + 0.004)) - 0.006, 0.003))
+            return d
+
+        def housing_sdf(x, y, z):
+            d = np.full(np.shape(x), np.inf)
+            for r in rects:
+                face = float(F(np.array([r.z]))[0])
+                cy = 0.5 * (face - 0.02 + face + proud)
+                hy = 0.5 * (proud + 0.02)
+                if round_lamp:
+                    q = np.sqrt((x - r.x) ** 2 + (z - r.z) ** 2) - min(r.hx, r.hz)
+                    q = round_max(q, np.abs(y - cy) - hy, 0.008)
+                else:
+                    q = sd_box(x, y, z, r.x, cy, r.z, r.hx, hy, r.hz, r=min(r.r, 0.012))
+                # The open front holds the lens.
+                cup = np.sqrt((x - r.x) ** 2 + (z - r.z) ** 2) - (min(r.hx, r.hz) - 0.008) if round_lamp else \
+                    rounded_rect_2d(x, z, r.x, r.z, r.hx - 0.008, r.hz - 0.008, 0.004)
+                q = round_sub(q, np.maximum(cup, (cy + hy - 0.004) - y), 0.002)
+                d = np.minimum(d, q)
+            return d
+        xs = [r.x for r in rects]
+        zs = [r.z for r in rects]
+        ext = max(max(r.hx, r.hz) for r in rects) + 0.03
+        face = F(np.array(zs))
+        lo = np.array([min(xs) - ext, float(face.min()) - 0.06, min(zs) - ext])
+        hi = np.array([max(xs) + ext, float(face.max()) + proud + 0.03, max(zs) + ext])
+        out.append(Detail(node, lens_sdf, (lo, hi), lens_material, voxel=0.0025,
+                          placements=[("", (0.0, 0.0, 0.0), mirror)], target=1500))
+        out.append(Detail(f"{base}_Housing_{sname}", housing_sdf, (lo, hi), housing_material, voxel=0.0025,
+                          placements=[(node, (0.0, 0.0, 0.0), mirror)], target=2500))
+    return out
+
+
+def wing(name, body, y, z, deck_z, half_span, stalk_x, chord=0.17, thickness=0.026, material="paint", parent="Trunk"):
+    """A rear wing on two stalks standing on the boot lid; parented to the lid so it comes off with it."""
+    def sdf(x, yy, zz):
+        # A cambered blade: a rounded slab whose trailing edge kicks up a little.
+        lift = 0.10 * np.clip((y - yy) / chord + 0.5, 0, 1)
+        blade = sd_box(x, yy, zz - lift * 0.15, 0.0, y, z, half_span, 0.5 * chord, 0.5 * thickness, r=0.011)
+        plates = sd_box(np.abs(x), yy, zz, half_span - 0.006, y - 0.005, z + 0.005, 0.007, 0.5 * chord + 0.012,
+                        0.5 * thickness + 0.035, r=0.006)
+        h = 0.5 * (z - deck_z + 0.04)
+        stalks = sd_box(np.abs(x), yy, zz, stalk_x, y + 0.01, deck_z - 0.04 + h, 0.016, 0.05, h, r=0.008)
+        d = np.minimum(np.minimum(blade, plates), stalks)
+        return np.maximum(d, -(body(x, yy, zz) + 0.002))
+    lo = np.array([-half_span - 0.03, y - chord, deck_z - 0.08])
+    hi = np.array([half_span + 0.03, y + chord, z + 0.08])
+    return Detail(name, sdf, (lo, hi), material, voxel=0.004, placements=[(parent, (0.0, 0.0, 0.0), False)],
+                  target=5000)
+
+
+def lip(name, body, y, z, half_span, height=0.04, depth=0.10, material="paint", parent="Trunk"):
+    """A ducktail lip along the boot lid's rear edge."""
+    def sdf(x, yy, zz):
+        d = sd_box(x, yy, zz, 0.0, y, z + 0.5 * height - 0.01, half_span, 0.5 * depth, 0.5 * height, r=0.014)
+        # Sloped front so it rises out of the lid.
+        d = round_max(d, (z + 0.01) + (yy - (y - 0.5 * depth)) * 0.6 - zz - 0.02, 0.01)
+        return np.maximum(d, -(body(x, yy, zz) + 0.002))
+    lo = np.array([-half_span - 0.03, y - depth, z - 0.06])
+    hi = np.array([half_span + 0.03, y + depth, z + height + 0.04])
+    return Detail(name, sdf, (lo, hi), material, voxel=0.004, placements=[(parent, (0.0, 0.0, 0.0), False)],
+                  target=3000)
+
+
+def roof_flap(name, body, y, z, half_span, chord=0.17, thickness=0.022, tilt_deg=9.0, material="paint",
+              parent="Trunk"):
+    """A hatch spoiler: a flap from the roof's rear edge out over the top of the rear glass."""
+    ang = np.radians(tilt_deg)
+
+    def sdf(x, yy, zz):
+        cy = y - 0.5 * chord
+        ry, rz = _rot_x(yy, zz, y, z, -ang)
+        d = sd_box(x, ry, rz, 0.0, cy, z, half_span, 0.5 * chord, 0.5 * thickness, r=0.010)
+        d = round_max(d, np.abs(x) - half_span + 0.02 * np.clip((y - yy) / chord, 0, 1), 0.01)
+        # a root that fills down to the roof under the flap's leading edge (the body trims it)
+        root = sd_box(x, yy, zz, 0.0, y - 0.02, z - 0.06, half_span - 0.01, 0.05, 0.06, r=0.01)
+        d = smooth_min(d, root, 0.015)
+        return np.maximum(d, -(body(x, yy, zz) + 0.002))
+    lo = np.array([-half_span - 0.03, y - chord - 0.06, z - 0.14])
+    hi = np.array([half_span + 0.03, y + 0.06, z + 0.06])
+    return Detail(name, sdf, (lo, hi), material, voxel=0.004, placements=[(parent, (0.0, 0.0, 0.0), False)],
+                  target=3500)
+
+
+def roof_rack(name, body, x, y0, y1, z, material="chrome"):
+    """Two rails along the roof on three feet each (a wagon's roof rack)."""
+    def sdf(xx, yy, zz):
+        ax = np.abs(xx)
+        rail = sd_capsule(ax, yy, zz, (x, y1, z), (x, y0, z), 0.011)
+        d = rail
+        for fy in (y0 + 0.03, 0.5 * (y0 + y1), y1 - 0.03):
+            foot = sd_box(ax, yy, zz, x, fy, z - 0.04, 0.016, 0.03, 0.045, r=0.008)
+            d = smooth_min(d, foot, 0.01)
+        return np.maximum(d, -(body(xx, yy, zz) + 0.002))
+    lo = np.array([-x - 0.06, min(y0, y1) - 0.06, z - 0.12])
+    hi = np.array([x + 0.06, max(y0, y1) + 0.06, z + 0.04])
+    return Detail(name, sdf, (lo, hi), material, voxel=0.003, target=3000)
+
+
+def exhaust(name, body, xs, y_tip, z, radius=0.025, length=0.42, material="exhaust"):
+    """Tail pipes under the rear: open tubes ending just behind the tail (one node, so they come off as one)."""
+    def sdf(x, y, zz):
+        d = np.full(np.shape(x), np.inf)
+        hole = np.full(np.shape(x), np.inf)
+        for x0 in xs:
+            d = np.minimum(d, sd_capsule(x, y, zz, (x0, y_tip + length, z + 0.03), (x0, y_tip, z), radius))
+            hole = np.minimum(hole, sd_capsule(x, y, zz, (x0, y_tip + 0.06, z), (x0, y_tip - 0.06, z), radius - 0.005))
+        d = round_sub(d, hole, 0.002)
+        return np.maximum(d, -(body(x, y, zz) + 0.003))
+    lo = np.array([min(xs) - 0.06, y_tip - 0.05, z - 0.06])
+    hi = np.array([max(xs) + 0.06, y_tip + length + 0.05, z + 0.08])
+    return Detail(name, sdf, (lo, hi), material, voxel=0.0025, target=2500)
+
+
 # ----------------------------------------------------------------------------- wheels
 
 def _tyre_sdf(R, width, rim_r, sidewall_bulge=0.012, shoulder=0.036):
@@ -258,7 +389,10 @@ def _rim_sdf(rim_r, width, style="turbine", spokes=8):
             win = rounded_rect_2d(u, v, 0.103, 0.0, 0.036, 0.0125, 0.010)
         elif style == "slot":
             win = rounded_rect_2d(u, v, 0.105, 0.0, 0.034, 0.016, 0.012)
-        else:  # "dish": round holes
+        elif style == "mesh":    # a cross-spoke "mesh" alloy: many small windows on two rings
+            win = np.minimum(rounded_rect_2d(u, v, 0.085, 0.0, 0.016, 0.0085, 0.006),
+                             rounded_rect_2d(u, v, 0.128, 0.0, 0.020, 0.0105, 0.006))
+        else:  # "dish" (and the plain rim under a wheel cover): round holes
             win = np.sqrt((u - 0.105) ** 2 + v * v) - 0.022
         face = round_sub(face, np.maximum(win, -(r - 0.055)), 0.003)
         hub = round_max(r - 0.058, np.abs(x - (face_x + 0.006)) - 0.014, 0.008)
@@ -271,6 +405,28 @@ def _rim_sdf(rim_r, width, style="turbine", spokes=8):
         nu, nv = r * np.cos(b) - 0.050, r * np.sin(b)
         nut = round_max(np.sqrt(nu * nu + nv * nv) - 0.0085, np.abs(x - (face_x + 0.022)) - 0.007, 0.002)
         return np.minimum(d, nut)
+    return sdf
+
+
+def _cover_sdf(width, rim_r, ribs=12):
+    """A full wheel cover (US style): a shallow chrome dish over the whole rim face with radial ribs and a
+    centre cap. It is the wheel's Hubcap node, so it can pop off."""
+    half = 0.5 * width - 0.012
+
+    def sdf(x, y, z):
+        r = np.sqrt(y * y + z * z)
+        t = np.clip(r / rim_r, 0, 1)
+        face_x = half + 0.004 - 0.026 * t * t
+        disc = round_max(x - face_x, r - (rim_r + 0.004), 0.006)
+        disc = round_max(disc, (half - 0.036) - x, 0.004)
+        phi = np.arctan2(z, y)
+        sect = 2 * np.pi / ribs
+        a = (phi + 0.5 * sect) % sect - 0.5 * sect
+        rib = np.maximum(np.maximum(np.abs(a * r) - 0.006, 0.055 - r), r - (rim_r - 0.022))
+        rib = np.maximum(rib, (face_x - 0.004) - x)
+        disc = round_sub(disc, rib, 0.002)
+        cap = round_max(r - 0.048, x - (face_x + 0.010), 0.010)
+        return smooth_min(disc, np.maximum(cap, (half - 0.02) - x), 0.004)
     return sdf
 
 
@@ -297,9 +453,14 @@ def wheels(spec_wheels, style="turbine", rim_inch=13, tyre_target=14000, rim_tar
     e = 0.5 * W + 0.03
     tyre = Detail("Tyre", _tyre_sdf(R, W, rim_r), (np.array([-e, -R - 0.01, -R - 0.01]), np.array([e, R + 0.01, R + 0.01])),
                   "tyre", voxel=0.0025, placements=places, target=tyre_target)
-    rim = Detail("Rim", _rim_sdf(rim_r, W, style), (np.array([-e, -rim_r - 0.02, -rim_r - 0.02]),
+    rim = Detail("Rim", _rim_sdf(rim_r, W, "dish" if style == "cover" else style), (np.array([-e, -rim_r - 0.02, -rim_r - 0.02]),
                                                     np.array([e, rim_r + 0.02, rim_r + 0.02])),
                  "rim", voxel=0.002, placements=places, target=rim_target)
-    cap = Detail("Hubcap", _cap_sdf(W, rim_r), (np.array([-0.02, -0.05, -0.05]), np.array([e, 0.05, 0.05])),
-                 "hubcap", voxel=0.002, placements=places, target=1500)
+    if style == "cover":
+        cap = Detail("Hubcap", _cover_sdf(W, rim_r), (np.array([0.0, -rim_r - 0.02, -rim_r - 0.02]),
+                                                      np.array([e, rim_r + 0.02, rim_r + 0.02])),
+                     "hubcap", voxel=0.002, placements=places, target=9000)
+    else:
+        cap = Detail("Hubcap", _cap_sdf(W, rim_r), (np.array([-0.02, -0.05, -0.05]), np.array([e, 0.05, 0.05])),
+                     "hubcap", voxel=0.002, placements=places, target=1500)
     return [tyre, rim, cap]

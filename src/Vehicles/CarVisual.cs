@@ -16,7 +16,7 @@ namespace DestructionRacing.Vehicles;
 public partial class CarVisual : Node3D
 {
     private enum PartState { Attached, Loose, Off }
-    private enum PartKind { Hood, Trunk, Door, Bumper, Mirror, Wheel }
+    private enum PartKind { Hood, Trunk, Door, Bumper, Mirror, Wheel, Hubcap, Exhaust }
 
     private sealed class Part
     {
@@ -63,7 +63,7 @@ public partial class CarVisual : Node3D
 
     /// <summary>
     /// Damage moments for sound and commentary (glass, lamp, part off with its kind, rollover): the visual, what
-    /// happened ("glass", "lamp", "hood", "trunk", "door", "bumper", "mirror", "wheel", "roll") and where.
+    /// happened ("glass", "lamp", "hood", "trunk", "door", "bumper", "mirror", "wheel", "hubcap", "exhaust", "roll") and where.
     /// </summary>
     public static event System.Action<CarVisual, string, Vector3>? Moment;
 
@@ -168,7 +168,8 @@ public partial class CarVisual : Node3D
             trunk.Sign = -1f;
             trunk.RestAngle = 0.45f;
             trunk.MaxAngle = 1.2f;
-            Adopt(trunk, "Plate_R", "Light_Tail");
+            // A hatch's or wagon's tailgate carries its glass and wiper (a spoiler is part of the lid's mesh).
+            Adopt(trunk, "Plate_R", "Light_Tail", "Wiper_Rear", "Glass_Rear");
         }
         foreach (var side in new[] { "L", "R" })
         {
@@ -187,7 +188,7 @@ public partial class CarVisual : Node3D
         foreach (var end in new[] { "F", "R" })
         {
             if (Add($"Bumper_{end}", PartKind.Bumper, end == "F" ? DamageZone.Front : DamageZone.Rear, 14f) is not { } bumper) continue;
-            Adopt(bumper, $"Bumper_{end}_Strip", $"Plate_{end}", "Light_Indicator_" + end);
+            Adopt(bumper, $"Bumper_{end}_Strip", $"Plate_{end}", "Light_Indicator_" + end, "Light_Fog");
             bumper.HingeAxis = Vector3.Back;
             bumper.RestAngle = 0.5f;
             bumper.MaxAngle = 1.1f;
@@ -208,7 +209,16 @@ public partial class CarVisual : Node3D
             p.Box = new Aabb(Spec.WheelCentres[i] - new Vector3(Spec.WheelWidth * 0.5f, Spec.WheelRadius, Spec.WheelRadius),
                 new Vector3(Spec.WheelWidth, Spec.WheelRadius * 2f, Spec.WheelRadius * 2f));
             _parts.Add(p);
+            // Hubcaps and wheel covers fly off on their own (M5): a child of the wheel node, in wheel space.
+            string cap = WheelNames[i] + "_Hubcap";
+            if (Model.Node(cap) is Node3D capNode && Box(cap, out var capBox))
+            {
+                var c = new Part { Name = cap, Kind = PartKind.Hubcap, Mass = 1.2f, Wheel = i, Zone = p.Zone, Box = capBox };
+                c.Nodes.Add(capNode);
+                _parts.Add(c);
+            }
         }
+        Add("Exhaust", PartKind.Exhaust, DamageZone.Rear, 6f);
     }
 
     private void BuildGlassAndLamps()
@@ -230,7 +240,8 @@ public partial class CarVisual : Node3D
             {
                 string material = mi.Mesh.SurfaceGetMaterial(0)?.ResourceName ?? "";
                 bool front = box.GetCenter().Z < 0f, clear = material.StartsWith("lens_clear");
-                _lamps.Add(new Lamp { Mesh = mi, Box = box, Front = front, Head = clear && front, Reverse = clear && !front });
+                bool fog = name.StartsWith("Light_Fog");      // fog lamps glow with the lights but do not aim the beam
+                _lamps.Add(new Lamp { Mesh = mi, Box = box, Front = front, Head = clear && front && !fog, Reverse = clear && !front });
                 if (clear && !front) mi.SetInstanceShaderParameter("lamp_lit", 0f);
             }
         }
@@ -467,6 +478,10 @@ public partial class CarVisual : Node3D
             float d = Distance(part.Box, p);
             if (part.Kind == PartKind.Mirror && part.State == PartState.Attached && d < 0.55f && e > 0.12f)
                 Detach(part, -intoCar * 2f + Vector3.Up * 1.5f);
+            else if (part.Kind == PartKind.Hubcap && d < 0.5f && e > 0.15f && Rand() < 0.35f + e)
+                Detach(part, ToWorldDir(new Vector3(part.Wheel % 2 == 0 ? -3f : 3f, 1.2f, 0f)));
+            else if (part.Kind == PartKind.Exhaust && d < 0.45f && e > 0.35f && Rand() < 0.5f)
+                Detach(part, Vector3.Down - intoCar);
             else if (part.State == PartState.Loose && d < 1.2f)
             {
                 part.Velocity += (2f + 8f * e) * (Rand() - 0.3f);
@@ -520,7 +535,7 @@ public partial class CarVisual : Node3D
     private void Loosen(Part part)
     {
         if (part.State != PartState.Attached) return;
-        if (part.Kind == PartKind.Mirror || part.Kind == PartKind.Wheel) { Detach(part, Vector3.Up); return; }
+        if (part.Kind is PartKind.Mirror or PartKind.Wheel or PartKind.Hubcap or PartKind.Exhaust) { Detach(part, Vector3.Up); return; }
         if (part.Kind == PartKind.Bumper)
         {
             // Hangs by the end that took less of the hits (or either, by chance).
@@ -542,7 +557,11 @@ public partial class CarVisual : Node3D
         if (part.State == PartState.Off) return;
         part.State = PartState.Off;
         Moment?.Invoke(this, part.Kind.ToString().ToLowerInvariant(), ToWorld(part.Box.GetCenter()));
-        if (part.Kind != PartKind.Wheel) _frozenThisFrame ??= Model.FreezeMaterials();
+        if (part.Kind is not (PartKind.Wheel or PartKind.Hubcap)) _frozenThisFrame ??= Model.FreezeMaterials();
+        // A wheel takes its hubcap with it.
+        if (part.Kind == PartKind.Wheel)
+            foreach (var cap in _parts)
+                if (cap.Kind == PartKind.Hubcap && cap.Wheel == part.Wheel) cap.State = PartState.Off;
         foreach (var n in part.Nodes)
         {
             Model.Forget(n);
@@ -572,6 +591,14 @@ public partial class CarVisual : Node3D
             basis = wheel.GlobalBasis * new Basis(Vector3.Back, Mathf.Pi * 0.5f);   // cylinder axis = axle
             shape = new CylinderShape3D { Radius = Spec.WheelRadius, Height = Spec.WheelWidth };
         }
+        else if (part.Kind == PartKind.Hubcap && part.Nodes[0] is MeshInstance3D capMesh)
+        {
+            // The cap's mesh is in its wheel's space (which steers and spins), not in model space.
+            var local = capMesh.GetAabb();
+            centre = capMesh.GlobalTransform * local.GetCenter();
+            basis = capMesh.GlobalBasis * new Basis(Vector3.Back, Mathf.Pi * 0.5f);
+            shape = new CylinderShape3D { Radius = Mathf.Max(local.Size.Y * 0.5f, 0.05f), Height = Mathf.Max(local.Size.X, 0.03f) };
+        }
         else
         {
             // Part meshes hold model-space vertices, so a node's global transform maps the rest box to the world
@@ -584,7 +611,7 @@ public partial class CarVisual : Node3D
         }
         Vector3 v = Car.LinearVelocity + Car.AngularVelocity.Cross(centre - Car.GlobalPosition) + extraVelocity;
         Vector3 w = new Vector3(Rand() - 0.5f, Rand() - 0.5f, Rand() - 0.5f) * 8f;
-        if (part.Kind == PartKind.Wheel) w = Car.GlobalBasis.X * (-Car.ForwardSpeed / Mathf.Max(Spec.WheelRadius, 0.1f));
+        if (part.Kind is PartKind.Wheel or PartKind.Hubcap) w = Car.GlobalBasis.X * (-Car.ForwardSpeed / Mathf.Max(Spec.WheelRadius, 0.1f));
         DebrisPool.Get(this).Spawn(part.Kind.ToString(), part.Nodes, centre, basis, shape, part.Mass, v, w);
         part.Pivot?.QueueFree();
         part.Pivot = null;
@@ -627,6 +654,13 @@ public partial class CarVisual : Node3D
                 case PartKind.Wheel:
                     if (Car.Damage != null && Car.Damage.IsWheelLost((Rules.Wheel)part.Wheel))
                         Detach(part, ToWorldDir(new Vector3(part.Wheel % 2 == 0 ? -2.5f : 2.5f, 1.5f, 0f)));
+                    break;
+                case PartKind.Hubcap:
+                    if (Car.Damage != null && Car.Damage.WheelHealth((Rules.Wheel)part.Wheel) < 0.45f * DamageState.MaxHealth)
+                        Detach(part, ToWorldDir(new Vector3(part.Wheel % 2 == 0 ? -2.5f : 2.5f, 1f, 0f)));
+                    break;
+                case PartKind.Exhaust:
+                    if (h < 0.3f) Detach(part, Vector3.Down);
                     break;
             }
         }

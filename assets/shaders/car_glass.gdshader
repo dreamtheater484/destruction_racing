@@ -9,9 +9,10 @@ uniform float min_opacity : hint_range(0.0, 1.0) = 0.58;
 uniform float roughness_value : hint_range(0.0, 1.0) = 0.03;
 uniform float dirt : hint_range(0.0, 1.0) = 0.0;
 uniform float shatter : hint_range(0.0, 1.0) = 0.0;     // 0 intact .. 1 crazed white
-// Per window (GeometryInstance3D.SetInstanceShaderParameter): cracks from hits, and a pane knocked out.
-instance uniform float pane_crack = 0.0;
-instance uniform float pane_gone = 0.0;
+// Per window (GeometryInstance3D.SetInstanceShaderParameter): cracks from hits, and a pane knocked out. Slots 2-3
+// (car_surface.gdshader has 0-1): the panes share their mesh with a rubber seal surface.
+instance uniform float pane_crack : instance_index(2) = 0.0;
+instance uniform float pane_gone : instance_index(3) = 0.0;
 
 float hash12(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);

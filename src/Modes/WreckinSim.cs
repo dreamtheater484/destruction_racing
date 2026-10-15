@@ -86,6 +86,13 @@ public partial class WreckinSim : Node
             DumpEvery = double.TryParse(DevTools.Instance?.Arg("dump"), out double dump) ? dump : 0,
         };
         if (_laps > 0) _current.Laps = _laps;
+        // Balance sims (M5): --randomcars puts every driver, the proxy too, in a random model; --car=<id> fixes the proxy's.
+        if (DevTools.Instance?.Arg("randomcars") != null)
+        {
+            _current.RandomCars = true;
+            _current.PlayerModel = Vehicles.CarCatalog.Ids[(seed * 7 + 3) % Vehicles.CarCatalog.Ids.Length];
+        }
+        if (DevTools.Instance?.Arg("car") is { } car) _current.PlayerModel = car;
         _current.DebugWallHits = DevTools.Instance?.Arg("wallhits") != null;
         _current.DebugPlayerHits = DevTools.Instance?.Arg("playerhits") != null;
         if (int.TryParse(DevTools.Instance?.Arg("cars"), out int cars)) _current.CarCount = Math.Clamp(cars, 1, 20);

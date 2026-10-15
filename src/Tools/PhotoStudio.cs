@@ -84,29 +84,40 @@ public partial class PhotoStudio : Node3D
         }
     }
 
-    private static readonly string[] Cars = { "kitsune", "brougham", "nordvik" };
-    private static readonly Dictionary<string, (string Name, string Plate, int Number)> CarInfo = new()
+    private static string[] Cars => Vehicles.CarCatalog.Ids;
+
+    /// <summary>Showroom paint per model (L then cycles the test liveries and the drivers' signature liveries).</summary>
+    private static Livery Showroom(string carId) => carId switch
     {
-        ["kitsune"] = ("#12 Kitsune Rotary GS", "KTS 12", 12),
-        ["brougham"] = ("#1 Aldridge Brougham 400", "ALD 400", 1),
-        ["nordvik"] = ("#5 Nordvik Fjord DL", "FJD 805", 5),
+        "brougham" => Livery.BroughamBlue,
+        "nordvik" => Livery.NordvikBeige,
+        "homestead" => new(new Color(0.12f, 0.2f, 0.14f), new Color(0.9f, 0.9f, 0.88f), 0, Metallic: 0.6f, Roughness: 0.4f, Number: 2),
+        "interceptor" => new(new Color(0.03f, 0.03f, 0.035f), new Color(0.78f, 0.6f, 0.22f), 1, Number: 3),
+        "adler" => new(new Color(0.9f, 0.9f, 0.88f), new Color(0.1f, 0.25f, 0.6f), 0, Number: 6),
+        "volant" => new(new Color(0.72f, 0.06f, 0.05f), new Color(0.93f, 0.93f, 0.9f), 0, Number: 7),
+        "hikari" => new(new Color(0.92f, 0.92f, 0.9f), new Color(0.03f, 0.03f, 0.035f), 2, Number: 9),
+        "ryujin" => new(new Color(0.42f, 0.43f, 0.46f), new Color(0.12f, 0.12f, 0.13f), 2, Metallic: 0.7f, Roughness: 0.4f, Number: 11),
+        _ => Liveries[0],
     };
+
+    private List<Livery> LiveriesFor(string carId)
+    {
+        var list = new List<Livery> { Showroom(carId) };
+        list.AddRange(Liveries.Skip(1).Select(l => l with { Number = _number }));
+        list.AddRange(AI.Drivers.All.Where(d => d.Car == carId).Select(d => d.LiveryFor(DestructionRacing.Modes.DerbyMode.RoofColor(2))));
+        return list;
+    }
 
     private void LoadCar(string carId)
     {
         _carId = carId;
         _car?.Root.QueueFree();
-        _car = CarModel.Load(carId, carId switch
-        {
-            "brougham" => Livery.BroughamBlue,
-            "nordvik" => Livery.NordvikBeige,
-            _ => Liveries[0],
-        });
+        var info = Vehicles.CarCatalog.Find(carId);
+        _number = info?.Number ?? 1;
+        _car = CarModel.Load(carId, Showroom(carId) with { Number = _number });
         _turntable.AddChild(_car.Root);
-        var info = CarInfo.TryGetValue(carId, out var i) ? i : (Name: carId, Plate: "DD 01", Number: 1);
-        _number = info.Number;
         _livery = 0;
-        _car.SetPlate(info.Plate);
+        _car.SetPlate(info != null ? $"{info.Make[..3].ToUpperInvariant()} {info.Number:00}" : "DD 01");
         _car.SetDebugMode(_mode);
         UpdateHelp();
     }
@@ -116,7 +127,7 @@ public partial class PhotoStudio : Node3D
         if (_help == null) return;
         string mode = _mode switch { 1 => "zebra", 2 => "clay", _ => "paint" };
         _help.Text = string.Join(KeyGuide.NewLine,
-            $"{CarInfo.GetValueOrDefault(_carId).Name}    light: {_preset}    view: {mode}",
+            $"#{_number} {Vehicles.CarCatalog.Find(_carId)?.FullName ?? _carId}    livery {_livery}    light: {_preset}    view: {mode}",
             "Tab next car   1/2/3 studio/outdoor/arena light   arrows orbit   W/S zoom   T turntable",
             "B derby damage   D random dent   X repair   L livery   N/Z/C paint/zebra/clay   P photo (out/studio)   H hide   Esc quit");
     }
@@ -262,8 +273,10 @@ public partial class PhotoStudio : Node3D
 
     private void SetLivery(int i)
     {
-        _livery = ((i % Liveries.Length) + Liveries.Length) % Liveries.Length;
-        _car.ApplyLivery(Liveries[_livery] with { Number = _number });
+        var list = LiveriesFor(_carId);
+        _livery = ((i % list.Count) + list.Count) % list.Count;
+        _car.ApplyLivery(_livery == 0 || _livery >= Liveries.Length ? list[_livery] : list[_livery] with { Number = _number });
+        UpdateHelp();
     }
 
     /// <summary>Scripted damage for look-dev: "derby" = a car after a hard derby, "light" = a few knocks.</summary>

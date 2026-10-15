@@ -20,21 +20,17 @@ namespace DestructionRacing.Modes;
 /// </summary>
 public partial class WreckinMode : Node3D, IRaceView, IHudMode
 {
-    private static readonly Color[] Liveries =
-    {
-        new(0.80f, 0.08f, 0.06f), new(0.05f, 0.25f, 0.70f), new(0.95f, 0.70f, 0.05f), new(0.10f, 0.50f, 0.20f),
-        new(0.90f, 0.40f, 0.05f), new(0.55f, 0.10f, 0.55f), new(0.90f, 0.90f, 0.88f), new(0.12f, 0.12f, 0.13f),
-        new(0.20f, 0.65f, 0.80f), new(0.70f, 0.55f, 0.35f),
-    };
-
     public int CarCount { get; set; } = 20;
     /// <summary>Laps per race, data-driven per layout (plan §4.2: 6–10).</summary>
     public int Laps { get; set; } = 6;
     /// <summary>The player's grid slot (0 = pole).</summary>
     public int PlayerGridSlot { get; set; } = 12;
     public bool Headless { get; set; }
-    /// <summary>The player's model (--car=kitsune|brougham|nordvik); the AI cycle through <see cref="Car.Roster"/>.</summary>
+    /// <summary>The player's model (--car=&lt;id&gt;, see <see cref="CarCatalog"/>); the AI drive their own (<see cref="Drivers"/>).</summary>
     public string PlayerModel { get; set; } = "kitsune";
+    public Livery? PlayerLivery { get; set; }
+    /// <summary>Balance sims (--randomcars): every AI driver gets a random model, so each car meets every archetype.</summary>
+    public bool RandomCars { get; set; }
     public bool ProxyPlayer { get; set; }
     public Personality ProxyProfile { get; set; } = Personality.AverageFan;
     public int Seed { get; set; } = 1;
@@ -93,7 +89,17 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
     public bool IsOver => _phase == Phase.Over;
     public bool PlayerOut => _referee.IsWrecked(_player.Id);
     public double CountdownLeft => _countdown;
-    public string DriverName(Car car) => car == _player ? "You" : _brains.TryGetValue(car.Id, out var b) ? b.Personality.Archetype : "?";
+    public string DriverName(Car car) => car == _player ? "You" : _drivers.TryGetValue(car.Id, out var d) ? d.Short : "?";
+    private readonly Dictionary<int, DriverInfo> _drivers = new();
+    private Taunts? _taunts;
+
+    /// <summary>A driver's radio taunt for this event, if any (plan §10.2).</summary>
+    private void Taunt(RefereeEvent e)
+    {
+        _taunts ??= new Taunts(Seed);
+        if (_taunts.For(e, _player.Id, id => _drivers.GetValueOrDefault(id)) is var (d, line))
+            _hud?.Radio(d.Number, d.Name, Taunts.NationCode(d.Nation), line, d.Livery.Paint);
+    }
     public float ProgressOf(Car car) => _progress[car.Id];
 
     // ------------------------------------------------------------------ IRaceView
@@ -146,6 +152,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
             if (int.TryParse(dev.Arg("seed"), out int seed)) Seed = seed;
             if (int.TryParse(dev.Arg("laps"), out int laps)) Laps = Math.Max(1, laps);
             if (dev.Arg("car") is { } car) PlayerModel = car;
+            if (dev.Arg("randomcars") != null) RandomCars = true;
         }
         // --attackshare=X (experiments): the attacker's share of contact damage.
         if (float.TryParse(DevTools.Instance?.Arg("attackshare"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float share))
@@ -164,7 +171,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
         Car.DebugHits = DevTools.Instance?.Arg("hits") != null;
 
         SpawnField();
-        _referee = new Referee(Rules, GameMode.WreckinRacing, _cars.Select(c => (c.Id, 1f))) { DamageScale = Rules.RaceDamageScale };
+        _referee = new Referee(Rules, GameMode.WreckinRacing, _cars.Select(c => (c.Id, c.RefereeToughness))) { DamageScale = Rules.RaceDamageScale };
         foreach (var c in _cars)
         {
             c.Damage = _referee.Damage(c.Id);
@@ -200,8 +207,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
 
     private void SpawnField()
     {
-        var numbers = Enumerable.Range(2, 60).Where(n => n != 7).OrderBy(_ => _rng.Next()).ToList();
-        var mix = Personality.FieldMix().OrderBy(_ => _rng.Next()).ToList();
+        var field = Drivers.Field(_rng, RandomCars);
         int playerSlot = Math.Clamp(PlayerGridSlot, 0, CarCount - 1);
         int aiIndex = 0;
 
@@ -210,16 +216,21 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
             bool isPlayer = slot == playerSlot;
             int id = isPlayer ? 1 : 2 + aiIndex;
             int division = isPlayer ? 4 : 4 - (aiIndex % 4);
+            var driver = isPlayer ? null : field[aiIndex % field.Count];
+            var roof = DerbyMode.RoofColor(division);
+            var livery = driver?.LiveryFor(roof) ?? (PlayerLivery ?? DerbyMode.DefaultPlayerLivery) with { Number = 7, Roof = roof };
             var car = new Car
             {
                 Id = id,
-                Number = isPlayer ? 7 : numbers[aiIndex],
-                PaintColor = isPlayer ? Liveries[0] : Liveries[1 + aiIndex % (Liveries.Length - 1)],
-                RoofColor = DerbyMode.RoofColor(division),
-                ModelId = isPlayer ? PlayerModel : Car.Roster[(aiIndex + 1) % Car.Roster.Length],
+                Number = livery.Number,
+                PaintColor = livery.Paint,
+                RoofColor = roof,
+                Livery = livery,
+                ModelId = driver?.Car ?? PlayerModel,
                 BuildVisuals = !Headless,
                 Transform = _track.GridSlot(slot),
             };
+            if (driver != null) _drivers[id] = driver;
             AddChild(car);
             _cars.Add(car);
             _byId[id] = car;
@@ -237,7 +248,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
             }
             else
             {
-                var brain = new RaceBrain(mix[aiIndex % mix.Count], Seed * 1000 + id) { PaceScale = AiPaceScale };
+                var brain = new RaceBrain(driver!.Personality, Seed * 1000 + id) { PaceScale = AiPaceScale };
                 _brains[id] = brain;
                 car.Driver = new RaceDriver(brain, this);
                 aiIndex++;
@@ -395,6 +406,7 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
 
     private void HandleEvent(RefereeEvent e)
     {
+        if (_hud != null) Taunt(e);
         switch (e.Kind)
         {
             case RefereeEventKind.SpinTier when e.Other == _player.Id:
@@ -489,11 +501,28 @@ public partial class WreckinMode : Node3D, IRaceView, IHudMode
         }
         _referee.DrainEvents();
         _metrics.Finish(_time, _standings, _referee, timedOut);
+        if (Headless || DevTools.Instance?.Arg("carresults") != null) PrintCarResults(order);
         foreach (var c in _cars) c.InputLocked = true;
         Engine.TimeScale = 1.0;
         _skipping = false;
         _hud?.ShowResults("WRECKIN' RACING  –  RESULTS", "Finish", BuildResults());
         Finished?.Invoke(this);
+    }
+
+    /// <summary>Balance sims: one line per car (model, driver, place, points, finish) for tools/dev/balance_report.py.</summary>
+    private void PrintCarResults(IReadOnlyList<int> order)
+    {
+        for (int i = 0; i < order.Count; i++)
+        {
+            var c = _byId[order[i]];
+            var score = _referee.Score(c.Id);
+            string who = c == _player ? (ProxyPlayer ? "Proxy" : "Player") : _drivers.TryGetValue(c.Id, out var d) ? d.Archetype : "?";
+            double finish = _standings.FinishTime(c.Id) ?? -1;
+            GD.Print(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"[CarResult] mode=race seed={Seed} car={c.ModelId} driver={who} place={i + 1} points={score.Total} " +
+                $"spin={score.Get(ScoreCategory.Spin)} wreck={score.Get(ScoreCategory.Wreck)} finish={finish:0.0} " +
+                $"retired={(_standings.IsRetired(c.Id) ? 1 : 0)} length={_time:0.0}"));
+        }
     }
 
     public IReadOnlyList<EventHud.ResultRow> BuildResults()

@@ -39,8 +39,12 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     };
 
     public int CarCount { get; set; } = 20;
-    /// <summary>The player's model (--car=kitsune|brougham|nordvik); the AI cycle through <see cref="Car.Roster"/>.</summary>
+    /// <summary>The player's model (--car=&lt;id&gt;, see <see cref="CarCatalog"/>); the AI drive their own (<see cref="Drivers"/>).</summary>
     public string PlayerModel { get; set; } = "kitsune";
+    /// <summary>The player's paint (DerbySetup's palette); null = the default red #7.</summary>
+    public Livery? PlayerLivery { get; set; }
+    /// <summary>Balance sims (--randomcars): every AI driver gets a random model, so each car meets every archetype.</summary>
+    public bool RandomCars { get; set; }
     public bool Headless { get; set; }
     /// <summary>Drive the player's car with the PlayerProxy bot (sims).</summary>
     public bool ProxyPlayer { get; set; }
@@ -76,6 +80,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     private readonly List<Car> _cars = new();
     private readonly Dictionary<int, Car> _byId = new();
     private readonly Dictionary<int, DerbyBrain> _brains = new();
+    private readonly Dictionary<int, DriverInfo> _drivers = new();
+    private Taunts? _taunts;
     private readonly Dictionary<int, (Car? Attacker, double Time)> _lastHitBy = new();
     private readonly Dictionary<int, (float Boost, double Until)> _boost = new();
     private readonly Dictionary<int, double> _lastAttackTime = new();
@@ -122,7 +128,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     public Audio.DerbyAudio? Sound { get; private set; }
     public Car? CarById(int id) => _byId.GetValueOrDefault(id);
     public double CountdownLeft => _countdown;
-    public string DriverName(Car car) => car == _player ? "You" : _brains.TryGetValue(car.Id, out var b) ? b.Personality.Archetype : "?";
+    public string DriverName(Car car) => car == _player ? "You" : _drivers.TryGetValue(car.Id, out var d) ? d.Short : "?";
+    public DriverInfo? DriverOf(Car car) => _drivers.GetValueOrDefault(car.Id);
 
     // ------------------------------------------------------------------ IHudMode
 
@@ -195,10 +202,12 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
                 Preset = chosen.Preset;
                 PlayerModel = chosen.Car;
                 Division = chosen.Division;
+                PlayerLivery = chosen.Livery;
             }
             if (dev.Arg("proxy") != null) ProxyPlayer = true;
             if (int.TryParse(dev.Arg("seed"), out int seed)) Seed = seed;
             if (dev.Arg("car") is { } car) PlayerModel = car;
+            if (dev.Arg("randomcars") != null) RandomCars = true;
             if (dev.Arg("preset") is { } preset) Preset = Bowl.Parse(preset);
             if (int.TryParse(dev.Arg("division"), out int division)) Division = Math.Clamp(division, 1, 4);
         }
@@ -226,7 +235,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         AddChild(_impacts);
 
         SpawnField();
-        _referee = new Referee(Rules, GameMode.DestructionDerby, _cars.Select(c => (c.Id, 1f)));
+        _referee = new Referee(Rules, GameMode.DestructionDerby, _cars.Select(c => (c.Id, c.RefereeToughness)));
         foreach (var c in _cars)
         {
             c.Damage = _referee.Damage(c.Id);
@@ -244,6 +253,9 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
             AddChild(_rig);
             _hud = new EventHud { Mode = this, PlayerCar = _player, ViewName = () => _rig.Mode.ToString() };
             AddChild(_hud);
+            // --radiotest (captures): a taunt from the first driver during the countdown, to check the radio banner.
+            if (DevTools.Instance?.Arg("radiotest") != null && _drivers.Values.FirstOrDefault() is { } d)
+                _hud.Radio(d.Number, d.Name, Taunts.NationCode(d.Nation), "Out of my way!", d.Livery.Paint);
             _beacon = BuildBeacon();
             AddChild(_beacon);
             AddChild(new Fx.GroundMarks { Cars = _cars, Floor = _arena.Floor });
@@ -271,8 +283,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
 
     private void SpawnField()
     {
-        var numbers = Enumerable.Range(2, 60).Where(n => n != 7).OrderBy(_ => _rng.Next()).ToList();
-        var mix = Personality.FieldMix().OrderBy(_ => _rng.Next()).ToList();
+        // The 19 named drivers in a seeded order, each in their own car and signature livery (plan §10.2).
+        var field = Drivers.Field(_rng, RandomCars);
         float ringX = Bowl.SemiAxisX * 0.78f, ringZ = Bowl.SemiAxisZ * 0.78f;
 
         for (int i = 0; i < CarCount; i++)
@@ -281,17 +293,21 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
             var pos = new Vector3(ringX * Mathf.Cos(a), 0.62f, ringZ * Mathf.Sin(a));
             var heading = new Vector3(-pos.X, 0f, -pos.Z).Normalized();
             int division = i == 0 ? 4 : 4 - (i % 4);
+            var driver = i == 0 ? null : field[(i - 1) % field.Count];
+            var roof = RoofColor(division);
+            var livery = driver?.LiveryFor(roof) ?? (PlayerLivery ?? DefaultPlayerLivery) with { Number = 7, Roof = roof };
             var car = new Car
             {
                 Id = i + 1,
-                Number = i == 0 ? 7 : numbers[i],
-                // The player's red is unique; the AI cycle through the other liveries.
-                PaintColor = i == 0 ? Liveries[0] : Liveries[1 + (i - 1) % (Liveries.Length - 1)],
-                RoofColor = RoofColor(division),
-                ModelId = i == 0 ? PlayerModel : Car.Roster[i % Car.Roster.Length],
+                Number = livery.Number,
+                PaintColor = livery.Paint,
+                RoofColor = roof,
+                Livery = livery,
+                ModelId = driver?.Car ?? PlayerModel,
                 BuildVisuals = !Headless,
                 Transform = new Transform3D(Basis.LookingAt(heading, Vector3.Up), pos),
             };
+            if (driver != null) _drivers[car.Id] = driver;
             AddChild(car);
             _cars.Add(car);
             _byId[car.Id] = car;
@@ -311,7 +327,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
             }
             else
             {
-                var brain = new DerbyBrain(mix[(i - 1) % mix.Count], Seed * 1000 + i + 1);
+                var brain = new DerbyBrain(driver!.Personality, Seed * 1000 + i + 1);
                 _brains[car.Id] = brain;
                 car.Driver = new AIDriver(brain, this);
             }
@@ -426,6 +442,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
 
     private void HandleEvent(RefereeEvent e)
     {
+        if (_hud != null) Taunt(e);
         switch (e.Kind)
         {
             case RefereeEventKind.Hit:
@@ -592,6 +609,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         }
         _referee.DrainEvents();
         _metrics.Finish(_time, _standings, _referee, timedOut);
+        if (Headless || DevTools.Instance?.Arg("carresults") != null) PrintCarResults();
         foreach (var c in _cars) c.InputLocked = true;
         Engine.TimeScale = 1.0;
         _skipping = false;
@@ -604,6 +622,32 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         if (!Headless && DevTools.Instance?.Arg("autoreplay") != null)
             GetTree().CreateTimer(1.5, true, false, true).Timeout += () => { if (_replay == null) StartReplay(); };
         Finished?.Invoke(this);
+    }
+
+    /// <summary>A driver's radio taunt for this event, if any (plan §10.2).</summary>
+    private void Taunt(RefereeEvent e)
+    {
+        _taunts ??= new Taunts(Seed);
+        if (_taunts.For(e, _player.Id, id => _drivers.GetValueOrDefault(id)) is var (d, line))
+            _hud?.Radio(d.Number, d.Name, Taunts.NationCode(d.Nation), line, d.Livery.Paint);
+    }
+
+    /// <summary>The player's car without a chosen livery: red #7 with a white second colour.</summary>
+    public static Livery DefaultPlayerLivery => new(Liveries[0], new Color(0.93f, 0.93f, 0.9f), 0, Wear: 0.15f, Dirt: 0.25f, Number: 7);
+
+    /// <summary>Balance sims: one line per car (model, driver, place, points, survival) for tools/dev/balance_report.py.</summary>
+    private void PrintCarResults()
+    {
+        foreach (var c in _cars)
+        {
+            var score = _referee.Score(c.Id);
+            double survival = _standings.EliminatedAt(c.Id) ?? _time;
+            string who = c == _player ? (ProxyPlayer ? "Proxy" : "Player") : _drivers.TryGetValue(c.Id, out var d) ? d.Archetype : "?";
+            GD.Print(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"[CarResult] mode=derby seed={Seed} car={c.ModelId} driver={who} place={_standings.PlaceOf(c.Id) ?? 0} " +
+                $"points={score.Total} spin={score.Get(ScoreCategory.Spin)} wreck={score.Get(ScoreCategory.Wreck)} " +
+                $"survival={survival:0.0} wrecked={(_referee.IsWrecked(c.Id) ? 1 : 0)} length={_time:0.0}"));
+        }
     }
 
     private static string Ordinal(int n) => n + (n % 100 is 11 or 12 or 13 ? "TH" : (n % 10) switch { 1 => "ST", 2 => "ND", 3 => "RD", _ => "TH" });

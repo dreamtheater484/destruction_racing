@@ -36,12 +36,6 @@ public partial class BowlLook : Node3D
         new("overview", new Vector3(0f, 46f, 78f), new Vector3(0f, 0f, 2f), 50f),
     };
 
-    private static readonly Color[] Paints =
-    {
-        new(0.75f, 0.06f, 0.04f), new(0.05f, 0.22f, 0.62f), new(0.95f, 0.70f, 0.05f), new(0.08f, 0.42f, 0.18f),
-        new(0.92f, 0.38f, 0.04f), new(0.85f, 0.85f, 0.83f), new(0.12f, 0.12f, 0.13f), new(0.48f, 0.10f, 0.48f),
-    };
-
     /// <summary>Just the arena (no parked cars or pileup): a backdrop for other test scenes.</summary>
     public bool Empty { get; set; }
 
@@ -126,19 +120,18 @@ public partial class BowlLook : Node3D
 
     private void SpawnCars()
     {
-        string[] models = { "kitsune", "brougham", "nordvik" };
+        // The M5 field: one driver per model of the roster, then three more, in their signature liveries.
+        var drivers = CarCatalog.Ids.Select(id => AI.Drivers.All.First(d => d.Car == id)).ToList();
+        drivers.AddRange(AI.Drivers.All.Where(d => !drivers.Contains(d)).Take(3));
         var rng = new RandomNumberGenerator { Seed = 1977 };
-        const int count = 12;
+        int count = drivers.Count;
         for (int i = 0; i < count; i++)
         {
             float t = Mathf.Tau * i / count + 0.2f;
             var pos = new Vector3(55f * 0.74f * Mathf.Cos(t), 0f, 38f * 0.74f * Mathf.Sin(t));
-            string id = models[i % models.Length];
-            var paint = Paints[i % Paints.Length];
-            var livery = new Livery(paint, new Color(0.95f, 0.95f, 0.93f), (i / 3) % 4,
-                Metallic: i % 4 == 2 ? 0.7f : 0f, Wear: 0.25f + 0.1f * (i % 3), Dirt: 0.3f + 0.15f * (i % 4), Number: i + 1);
-            var car = CarModel.Load(id, livery);
-            car.SetPlate($"DD {i + 1:00}");
+            var driver = drivers[i];
+            var car = CarModel.Load(driver.Car, driver.LiveryFor(Modes.DerbyMode.RoofColor(4 - i % 4)));
+            car.SetPlate($"DD {driver.Number:00}");
             AddChild(car.Root);
             car.Root.Position = pos;
             car.Root.LookAt(new Vector3(0f, 0f, 0f), Vector3.Up);

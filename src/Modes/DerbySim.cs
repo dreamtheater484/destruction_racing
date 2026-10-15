@@ -83,6 +83,13 @@ public partial class DerbySim : Node
             CountdownTime = 0.5f,
             DumpEvery = double.TryParse(DevTools.Instance?.Arg("dump"), out double dump) ? dump : 0,
         };
+        // Balance sims (M5): --randomcars puts every driver, the proxy too, in a random model; --car=<id> fixes the proxy's.
+        if (DevTools.Instance?.Arg("randomcars") != null)
+        {
+            _current.RandomCars = true;
+            _current.PlayerModel = Vehicles.CarCatalog.Ids[(seed * 7 + 3) % Vehicles.CarCatalog.Ids.Length];
+        }
+        if (DevTools.Instance?.Arg("car") is { } car) _current.PlayerModel = car;
         _current.Finished += OnFinished;
         AddChild(_current);
     }

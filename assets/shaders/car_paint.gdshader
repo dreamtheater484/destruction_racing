@@ -11,12 +11,27 @@ group_uniforms livery;
 uniform vec3 paint_color : source_color = vec3(0.55, 0.06, 0.04);
 uniform vec3 paint_color_2 : source_color = vec3(0.92, 0.92, 0.9);
 uniform vec3 pinstripe_color : source_color = vec3(0.03);
-uniform int livery_mode = 0;              // 0 solid, 1 twin top stripes, 2 lower two-tone, 3 side band
+uniform int livery_mode = 0;              // 0 solid, 1 twin top stripes, 2 lower two-tone, 3 side band,
+                                          // 4 cabin two-tone (above the belt), 5 side flash (a raked band)
 uniform float stripe_inner = 0.10;        // twin stripes: |x| from inner to outer
 uniform float stripe_outer = 0.24;
 uniform float band_low = 0.36;            // two-tone / side band heights (m)
 uniform float band_high = 0.62;
 uniform float pinstripe = 0.006;          // pinstripe width at colour edges (0 = none)
+uniform float belt_line = 0.9;            // cabin two-tone: the window sill height (m)
+// Simulated wood (a wagon's side panels): the same paint, decals and damage, with grain for a base.
+uniform float wood_grain = 0.0;
+uniform vec3 wood_light : source_color = vec3(0.50, 0.31, 0.16);
+uniform vec3 wood_dark : source_color = vec3(0.22, 0.11, 0.05);
+
+group_uniforms sponsors;
+// Fictional sponsor decals (assets/textures/sponsors.png: 2 x 4 cells of 4:1), on the front fenders and the hood.
+uniform sampler2D sponsor_atlas : source_color, hint_default_transparent, filter_linear_mipmap;
+uniform int sponsor = -1;                 // atlas cell, -1 = none
+uniform vec3 side_sponsor = vec3(0.0);    // centre z, centre y, height (0 = none)
+uniform vec2 hood_sponsor = vec2(0.0);    // centre z, height (0 = none); reads from the front
+// Pre-existing wear (plan §9.4): a whole panel in grey primer, set per panel. Slot 4 (see car_surface.gdshader).
+instance uniform float primer : instance_index(4) = 0.0;
 
 group_uniforms race_number;
 uniform sampler2D number_atlas : hint_default_black, filter_linear_mipmap;   // race_digits_sdf.png
@@ -99,7 +114,7 @@ vec2 edge(float d) {
 // Returns (roundel coverage, digit coverage). The atlas holds 10 digit cells (1 x 1.5) of signed distance.
 vec2 race_number_mask(vec2 uv, float h) {
 	int count = race_number >= 10 ? 2 : 1;
-	float k = 0.92;                                    // digit advance, in cell widths
+	float k = 1.06;                                    // digit slot, in cell widths (the glyphs fill their cells)
 	float s = 1.5 / h;                                 // metres -> cell units
 	vec2 c = uv * s + vec2(float(count) * k * 0.5, 0.75);
 	vec2 gx = dFdx(c) / vec2(10.0, -1.5);
@@ -114,7 +129,8 @@ vec2 race_number_mask(vec2 uv, float h) {
 	if (i >= 0.0 && i < float(count) && c.y > 0.0 && c.y < 1.5) {
 		int d = count == 2 ? (i < 0.5 ? race_number / 10 : race_number % 10) : race_number;
 		float lx = c.x - i * k + (1.0 - k) * 0.5;
-		float v = textureGrad(number_atlas, vec2((float(d) + lx) / 10.0, 1.0 - c.y / 1.5), gx, gy).r;
+		// Only inside the glyph's own atlas cell: past its edges lies the next digit.
+		float v = lx > 0.0 && lx < 1.0 ? textureGrad(number_atlas, vec2((float(d) + lx) / 10.0, 1.0 - c.y / 1.5), gx, gy).r : 0.0;
 		float sd = (0.5 - v) * 0.5 / s;                // metres (atlas: 0.5 = edge, spread 0.25 cells)
 		float a2 = max(length(vec2(gx.x * 10.0, gx.y * 1.5)), length(vec2(gy.x * 10.0, gy.y * 1.5))) / s + 1e-5;
 		digit = 1.0 - smoothstep(-a2, a2, sd);
@@ -144,7 +160,42 @@ float race_number_paint(inout vec3 base, vec3 p, vec3 n) {
 	return m.x;
 }
 
+// Sponsor decal at local (u right, v up) metres from its centre, height h: rgba (a = coverage).
+vec4 sponsor_decal(vec2 uv, float h) {
+	vec2 q = vec2(uv.x / (4.0 * h) + 0.5, 0.5 - uv.y / h);
+	if (q.x <= 0.0 || q.x >= 1.0 || q.y <= 0.0 || q.y >= 1.0) return vec4(0.0);
+	vec2 cell = vec2(float(sponsor % 2), float(sponsor / 2));
+	return texture(sponsor_atlas, (cell + q) / vec2(2.0, 4.0));
+}
+
+float sponsor_paint(inout vec3 base, vec3 p, vec3 n) {
+	if (sponsor < 0) return 0.0;
+	float cover = 0.0;
+	if (side_sponsor.z > 0.0) {
+		float side = smoothstep(0.55, 0.8, abs(n.x));
+		vec4 d = sponsor_decal(vec2((side_sponsor.x - p.z) * sign(p.x), p.y - side_sponsor.y), side_sponsor.z);
+		base = mix(base, d.rgb, d.a * side);
+		cover = max(cover, d.a * side);
+	}
+	if (hood_sponsor.y > 0.0) {
+		float top = smoothstep(0.6, 0.85, n.y);
+		vec4 d = sponsor_decal(vec2(-p.x, p.z - hood_sponsor.x), hood_sponsor.y);
+		base = mix(base, d.rgb, d.a * top);
+		cover = max(cover, d.a * top);
+	}
+	return cover;
+}
+
+vec3 wood(vec3 p) {
+	// Grain runs along the car; rings wander with a low-frequency warp, fine pores across them.
+	float w = p.y * 26.0 + 5.0 * fbm(vec3(p.z * 0.7, p.y * 5.0, p.x * 3.0)) + 0.7 * sin(p.z * 1.4);
+	float ring = smoothstep(0.15, 0.85, abs(fract(w) - 0.5) * 2.0);
+	float pores = vnoise(vec3(p.z * 3.0, p.y * 240.0, p.x * 3.0));
+	return mix(wood_dark, wood_light, 0.15 + 0.65 * ring + 0.2 * pores);
+}
+
 vec3 livery(vec3 p, vec3 n) {
+	if (wood_grain > 0.5) return wood(p);
 	vec2 e = vec2(0.0);
 	if (livery_mode == 1) {
 		float top = smoothstep(0.15, 0.35, n.y) + smoothstep(0.55, 0.75, abs(n.z));
@@ -157,6 +208,12 @@ vec3 livery(vec3 p, vec3 n) {
 	} else if (livery_mode == 3) {
 		float side = smoothstep(0.35, 0.6, abs(n.x));
 		e = edge(min(p.y - band_low, band_high - p.y)) * side;
+	} else if (livery_mode == 4) {
+		e = edge(p.y - belt_line);
+	} else if (livery_mode == 5) {
+		float side = smoothstep(0.35, 0.6, abs(n.x));
+		float mid = 0.5 * (band_low + band_high) + 0.09 * p.z;      // rises toward the tail (+z)
+		e = edge(0.055 - abs(p.y - mid)) * side;
 	}
 	vec3 c = mix(paint_color, paint_color_2, e.x);
 	return mix(c, pinstripe_color, e.y);
@@ -198,10 +255,11 @@ void fragment() {
 			float roof = smoothstep(roof_number.y - 0.012, roof_number.y + 0.012, p.y) * smoothstep(0.4, 0.6, n.y);
 			base = mix(base, roof_color, roof * roof_paint);
 		}
-		float decal = race_number_paint(base, p, n);
-		float metal = metallic_paint * (1.0 - decal);
-		float rough = paint_roughness;
-		float coat = clearcoat_amount;
+		if (primer > 0.0) base = mix(base, vec3(0.30, 0.295, 0.28), primer);
+		float decal = max(race_number_paint(base, p, n), sponsor_paint(base, p, n));
+		float metal = metallic_paint * (1.0 - decal) * (1.0 - wood_grain) * (1.0 - primer);
+		float rough = mix(mix(paint_roughness, 0.45, wood_grain), 0.82, primer);
+		float coat = clearcoat_amount * (1.0 - 0.5 * wood_grain) * (1.0 - 0.9 * primer);
 		float coat_rough = clearcoat_roughness;
 
 		// Metallic flake: per-flake brightness and roughness jitter under the clear coat.

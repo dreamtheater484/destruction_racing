@@ -148,6 +148,7 @@ public partial class DerbyAudio : Node
                 Pool.Play3D("part_off", at, -4f, Jitter(0.08f));
                 GetTree().CreateTimer(0.45).Timeout += () => Pool.Play3D("wheel_bounce", at, -3f, Jitter(0.1f));
                 break;
+            case "hubcap": Pool.Play3D("wheel_bounce", at, -9f, 1.7f * Jitter(0.1f)); break;
             case "roll": Pool.Play3D("hit_metal_heavy", at, -2f, 0.85f); break;
             default: Pool.Play3D("part_off", at, -4f, Jitter(0.08f)); break;
         }
