@@ -1,0 +1,15 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/concrete_wall_008/concrete_wall_008_diff_2k.jpg" id="1_f1y3l"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/concrete_wall_008/concrete_wall_008_nor_gl_2k.jpg" id="2_waq5c"]
+
+[resource]
+resource_name = "concrete_dark"
+albedo_color = Color(0.62, 0.62, 0.62, 1)
+albedo_texture = ExtResource("1_f1y3l")
+normal_enabled = true
+normal_texture = ExtResource("2_waq5c")
+uv1_scale = Vector3(0.45, 0.45, 0.45)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_world_triplanar = true

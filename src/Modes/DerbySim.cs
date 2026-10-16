@@ -181,7 +181,7 @@ public partial class DerbySim : Node
 
         string dir = ProjectSettings.GlobalizePath("res://out/sims");
         DirAccess.MakeDirRecursiveAbsolute(dir);
-        string stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", ci);
+        string stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", ci) + $"_s{_seed}"; // parallel batches finish in the same second
         using (var f = FileAccess.Open($"{dir}/derby_{_profile}_{stamp}.md", FileAccess.ModeFlags.Write)) f?.StoreString(text);
         using (var f = FileAccess.Open($"{dir}/derby_{_profile}_{stamp}.json", FileAccess.ModeFlags.Write))
             f?.StoreString(JsonSerializer.Serialize(r, new JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals }));

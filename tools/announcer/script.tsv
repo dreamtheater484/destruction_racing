@@ -200,6 +200,68 @@ results_01	results	What a night of destruction! Let's look at the scores!
 results_02	results	That's the derby done! Here are your results!
 results_03	results	Thank you, derby fans! See you next time in the Bowl!
 
+race_intro_01	race_intro	Welcome, race fans, to the Crossroads Speedway!
+race_intro_02	race_intro	Twenty cars, one checkered flag! Welcome to Crossroads!
+race_intro_03	race_intro	Good evening, Crossroads! Are you ready to race?
+
+race_intro_fig8_01	race_intro_fig8	The figure eight tonight! Watch that crossover!
+race_intro_fig8_02	race_intro_fig8	It's the figure eight! Every lap, they cross in the middle!
+
+race_intro_oval_01	race_intro_oval	The oval tonight! Flat out, three wide!
+race_intro_oval_02	race_intro_oval	It's the oval! Banked turns and long straights!
+
+race_intro_stock_01	race_intro_stock	Stock car racing! Clean racing, or so they say!
+race_intro_stock_02	race_intro_stock	Stock cars tonight! Only the finish counts!
+
+race_start_01	race_start	Green flag! Green flag!
+race_start_02	race_start	And they're away!
+race_start_03	race_start	Here they come into turn one!
+race_start_04	race_start	Go, go, go! The race is on!
+
+race_final_lap_01	race_final_lap	White flag! Final lap!
+race_final_lap_02	race_final_lap	One lap to go!
+race_final_lap_03	race_final_lap	Last lap! Give it everything!
+
+race_crossover_01	race_crossover	Crash at the crossover!
+race_crossover_02	race_crossover	T-boned in the crossover!
+race_crossover_03	race_crossover	Chaos at the crossover!
+race_crossover_04	race_crossover	Right in the middle of the crossover!
+
+race_leader_spun_01	race_leader_spun	The leader is spun!
+race_leader_spun_02	race_leader_spun	The leader goes around!
+race_leader_spun_03	race_leader_spun	Down goes the leader!
+
+race_pit_01	race_pit	Into the pits!
+race_pit_02	race_pit	Coming in for repairs!
+race_pit_03	race_pit	Pit stop for that one!
+
+player_pit_01	player_pit	Number seven is in the pits!
+player_pit_02	player_pit	Get that car fixed, number seven!
+player_pit_03	player_pit	Quick, the clock is running!
+
+player_overtake_01	player_overtake	Number seven makes the pass!
+player_overtake_02	player_overtake	Up a place for number seven!
+player_overtake_03	player_overtake	Through goes number seven!
+
+player_race_win_01	player_race_win	Number seven takes the checkered flag! You win!
+player_race_win_02	player_race_win	Victory for number seven! What a drive!
+player_race_win_03	player_race_win	You win the race, number seven!
+
+player_podium_01	player_podium	A podium for number seven!
+player_podium_02	player_podium	Top three! Great drive, number seven!
+player_podium_03	player_podium	Number seven is on the podium!
+
+player_finish_01	player_finish	Number seven takes the flag!
+player_finish_02	player_finish	Across the line! Race done!
+player_finish_03	player_finish	Number seven brings it home!
+
+race_close_01	race_close	Side by side!
+race_close_02	race_close	Door to door down the straight!
+race_close_03	race_close	Three wide! Somebody's got to give!
+
+race_results_01	race_results	What a race! Let's look at the results!
+race_results_02	race_results	That's the race done! Here are the results!
+
 # ---- generated number lines: generate.py rewrites everything below from NUMBER_TEMPLATES, edit there ----
 
 wrecked_num_02	wrecked_num	Number two is out!
@@ -384,3 +446,64 @@ leader_num_58	leader_num	Number fifty-eight takes the lead!
 leader_num_59	leader_num	Number fifty-nine takes the lead!
 leader_num_60	leader_num	Number sixty takes the lead!
 leader_num_61	leader_num	Number sixty-one takes the lead!
+
+race_winner_num_02	race_winner_num	Number two wins the race!
+race_winner_num_03	race_winner_num	And number three takes the checkered flag!
+race_winner_num_04	race_winner_num	Number four wins the race!
+race_winner_num_05	race_winner_num	And number five takes the checkered flag!
+race_winner_num_06	race_winner_num	Number six wins the race!
+race_winner_num_07	race_winner_num	And number seven takes the checkered flag!
+race_winner_num_08	race_winner_num	Number eight wins the race!
+race_winner_num_09	race_winner_num	And number nine takes the checkered flag!
+race_winner_num_10	race_winner_num	Number ten wins the race!
+race_winner_num_11	race_winner_num	And number eleven takes the checkered flag!
+race_winner_num_12	race_winner_num	Number twelve wins the race!
+race_winner_num_13	race_winner_num	And number thirteen takes the checkered flag!
+race_winner_num_14	race_winner_num	Number fourteen wins the race!
+race_winner_num_15	race_winner_num	And number fifteen takes the checkered flag!
+race_winner_num_16	race_winner_num	Number sixteen wins the race!
+race_winner_num_17	race_winner_num	And number seventeen takes the checkered flag!
+race_winner_num_18	race_winner_num	Number eighteen wins the race!
+race_winner_num_19	race_winner_num	And number nineteen takes the checkered flag!
+race_winner_num_20	race_winner_num	Number twenty wins the race!
+race_winner_num_21	race_winner_num	And number twenty-one takes the checkered flag!
+race_winner_num_22	race_winner_num	Number twenty-two wins the race!
+race_winner_num_23	race_winner_num	And number twenty-three takes the checkered flag!
+race_winner_num_24	race_winner_num	Number twenty-four wins the race!
+race_winner_num_25	race_winner_num	And number twenty-five takes the checkered flag!
+race_winner_num_26	race_winner_num	Number twenty-six wins the race!
+race_winner_num_27	race_winner_num	And number twenty-seven takes the checkered flag!
+race_winner_num_28	race_winner_num	Number twenty-eight wins the race!
+race_winner_num_29	race_winner_num	And number twenty-nine takes the checkered flag!
+race_winner_num_30	race_winner_num	Number thirty wins the race!
+race_winner_num_31	race_winner_num	And number thirty-one takes the checkered flag!
+race_winner_num_32	race_winner_num	Number thirty-two wins the race!
+race_winner_num_33	race_winner_num	And number thirty-three takes the checkered flag!
+race_winner_num_34	race_winner_num	Number thirty-four wins the race!
+race_winner_num_35	race_winner_num	And number thirty-five takes the checkered flag!
+race_winner_num_36	race_winner_num	Number thirty-six wins the race!
+race_winner_num_37	race_winner_num	And number thirty-seven takes the checkered flag!
+race_winner_num_38	race_winner_num	Number thirty-eight wins the race!
+race_winner_num_39	race_winner_num	And number thirty-nine takes the checkered flag!
+race_winner_num_40	race_winner_num	Number forty wins the race!
+race_winner_num_41	race_winner_num	And number forty-one takes the checkered flag!
+race_winner_num_42	race_winner_num	Number forty-two wins the race!
+race_winner_num_43	race_winner_num	And number forty-three takes the checkered flag!
+race_winner_num_44	race_winner_num	Number forty-four wins the race!
+race_winner_num_45	race_winner_num	And number forty-five takes the checkered flag!
+race_winner_num_46	race_winner_num	Number forty-six wins the race!
+race_winner_num_47	race_winner_num	And number forty-seven takes the checkered flag!
+race_winner_num_48	race_winner_num	Number forty-eight wins the race!
+race_winner_num_49	race_winner_num	And number forty-nine takes the checkered flag!
+race_winner_num_50	race_winner_num	Number fifty wins the race!
+race_winner_num_51	race_winner_num	And number fifty-one takes the checkered flag!
+race_winner_num_52	race_winner_num	Number fifty-two wins the race!
+race_winner_num_53	race_winner_num	And number fifty-three takes the checkered flag!
+race_winner_num_54	race_winner_num	Number fifty-four wins the race!
+race_winner_num_55	race_winner_num	And number fifty-five takes the checkered flag!
+race_winner_num_56	race_winner_num	Number fifty-six wins the race!
+race_winner_num_57	race_winner_num	And number fifty-seven takes the checkered flag!
+race_winner_num_58	race_winner_num	Number fifty-eight wins the race!
+race_winner_num_59	race_winner_num	And number fifty-nine takes the checkered flag!
+race_winner_num_60	race_winner_num	Number sixty wins the race!
+race_winner_num_61	race_winner_num	And number sixty-one takes the checkered flag!

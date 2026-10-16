@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Godot;
 
@@ -26,11 +27,20 @@ public partial class DevTools : Node
 
     public static DevTools? Instance { get; private set; }
 
+    /// <summary>--loadtime (plan §17.4: restart to driving ≤ 3 s, load ≤ 5 s): when the last scene change was asked for.</summary>
+    public static ulong SceneRequestedAt { get; private set; }
+    public static int SceneLoads { get; set; }
+    public static void MarkSceneRequest() => SceneRequestedAt = Time.GetTicksMsec();
+
     public string? Arg(string key) => _args.TryGetValue(key, out var v) ? v : null;
 
     public override void _EnterTree()
     {
         Instance = this;
+        if (OS.GetCmdlineUserArgs().Any(x => x.StartsWith("--loadtime"))) GD.Print(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"[Load] engine up: {Time.GetTicksMsec() / 1000.0:0.00} s after launch"));
+        // The game's text is English: "4.9 s", never the system locale's "4,9 s".
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         foreach (string raw in OS.GetCmdlineUserArgs())
         {
             string a = raw.TrimStart('-');

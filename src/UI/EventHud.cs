@@ -37,6 +37,10 @@ public interface IHudMode
     void SpectateNext(int direction);
     /// <summary>While spectating: TV cameras or the chase camera.</summary>
     void ToggleSpectateCamera() { }
+    /// <summary>The player's pit stop in progress (the repair panel), or null.</summary>
+    EventHud.PitInfo? PitPanel => null;
+    /// <summary>A small prompt above the damage panel ("PIT  240 M"), or null.</summary>
+    string? HudPit => null;
 }
 
 /// <summary>
@@ -48,6 +52,9 @@ public interface IHudMode
 public partial class EventHud : CanvasLayer
 {
     /// <summary>One results line. Bonus is the survivor bonus (derby) or the finishing bonus (race).</summary>
+    /// <summary>The pit stop panel: seconds left, the zone being repaired, whether the keys do it, presses so far.</summary>
+    public readonly record struct PitInfo(double TimeLeft, DamageZone Selected, bool Manual, int Presses);
+
     public readonly record struct ResultRow(int Place, int Number, string Driver, Color Roof, int Spins, int Wrecks, int Bonus, int Total, bool IsPlayer, string Note = "");
 
     public IHudMode Mode { get; set; } = null!;
@@ -82,6 +89,8 @@ public partial class EventHud : CanvasLayer
     private bool _resultsShown;
     private Tween? _bannerTween;
     private Label _pauseKeys = null!;
+    private Control _pitPanel = null!;
+    private Label _pitZone = null!, _pitTime = null!, _pitKeys = null!, _pitHint = null!;
 
     /// <summary>How many AI cars hunt the player right now (shown when 3 or more), set by the mode.</summary>
     public int Hunters { get; set; }
@@ -248,6 +257,28 @@ public partial class EventHud : CanvasLayer
 
         _help = HudStyle.Place(HudStyle.Label("", 19, HudStyle.White, "Medium", outline: 5), 0f, 1f, new Vector2(36, -48), new Vector2(1500, 30));
         _root.AddChild(_help);
+
+        // The pit prompt above the damage panel, and the pit stop panel bottom centre (plan §6.0, §13 "PIT").
+        _pitHint = HudStyle.Place(HudStyle.Label("", 26, HudStyle.Yellow, "ExtraBold", HorizontalAlignment.Right, 8), 1f, 1f, new Vector2(-436, -334), new Vector2(400, 36));
+        _pitHint.Visible = false;
+        _root.AddChild(_pitHint);
+        var pit = HudStyle.Place(Panel(HudStyle.Yellow, 0f), 0.5f, 1f, new Vector2(-340, -236), new Vector2(680, 0));
+        _pitPanel = pit;
+        _root.AddChild(pit);
+        var pitBox = new VBoxContainer();
+        pitBox.AddThemeConstantOverride("separation", -4);
+        pit.AddChild(pitBox);
+        var pitRow = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+        pitRow.AddThemeConstantOverride("separation", 36);
+        pitRow.AddChild(HudStyle.Label("PIT STOP", 46, HudStyle.Yellow, "ExtraBold", outline: 0));
+        _pitZone = HudStyle.Label("FRONT", 46, HudStyle.White, "ExtraBold", outline: 0);
+        pitRow.AddChild(_pitZone);
+        _pitTime = HudStyle.Label("5.0", 46, HudStyle.White, "Bold", outline: 0);
+        pitRow.AddChild(_pitTime);
+        pitBox.AddChild(pitRow);
+        _pitKeys = HudStyle.Label("", 21, HudStyle.Grey, "SemiBold", HorizontalAlignment.Center, 0);
+        pitBox.AddChild(_pitKeys);
+        pit.Visible = false;
     }
 
     private void BuildOverlays()
@@ -519,12 +550,14 @@ public partial class EventHud : CanvasLayer
         {
             tree.Paused = false;
             Engine.TimeScale = 1.0;
+            DevTools.MarkSceneRequest();
             tree.ChangeSceneToFile(MenuScene);
         }
         else if (key.PhysicalKeycode == Key.R && (tree.Paused || _resultsShown))
         {
             tree.Paused = false;
             Engine.TimeScale = 1.0;
+            DevTools.MarkSceneRequest();
             tree.ReloadCurrentScene();
         }
         else if (_resultsShown && ResultsKey != null && ResultsKey(key.PhysicalKeycode))
@@ -607,6 +640,22 @@ public partial class EventHud : CanvasLayer
         string? warning = _resultsShown ? null : Mode.HudWarning;
         _warning.Visible = warning != null && (Time.GetTicksMsec() / 350) % 2 == 0;
         if (warning != null) _warning.Text = warning;
+
+        var pitInfo = _resultsShown || Mode.PlayerOut ? null : Mode.PitPanel;
+        _pitPanel.Visible = pitInfo != null;
+        _diagram.Selected = pitInfo?.Selected;
+        if (pitInfo is { } p)
+        {
+            _pitZone.Text = p.Selected.ToString().ToUpperInvariant();
+            _pitTime.Text = $"{p.TimeLeft:0.0} S";
+            _pitTime.AddThemeColorOverride("font_color", p.TimeLeft < 1.5 ? HudStyle.Red : HudStyle.White);
+            _pitKeys.Text = p.Manual
+                ? $"{Controls.KeyName(Controls.PitPrev)} {Controls.KeyName(Controls.PitNext)}  choose a zone   ·   mash ENTER / SPACE  repair   ·   {Controls.KeyName(Controls.Accelerate)}  leave"
+                : "the crew is repairing";
+        }
+        string? pitHint = _resultsShown || Mode.PlayerOut || pitInfo != null ? null : Mode.HudPit;
+        _pitHint.Visible = pitHint != null;
+        if (pitHint != null) _pitHint.Text = pitHint;
 
         bool showHelp = GetTree().Paused || Mode.Time < 12.0;
         _help.Visible = showHelp && !_resultsShown;

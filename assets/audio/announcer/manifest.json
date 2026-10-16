@@ -1525,6 +1525,420 @@
    "hash": "97f0841f074cd2c9"
   },
   {
+   "id": "race_intro_01",
+   "category": "race_intro",
+   "text": "Welcome, race fans, to the Crossroads Speedway!",
+   "file": "race_intro_01.ogg",
+   "duration": 3.68,
+   "speech_end": 2.755,
+   "hash": "777784a12d5a3506"
+  },
+  {
+   "id": "race_intro_02",
+   "category": "race_intro",
+   "text": "Twenty cars, one checkered flag! Welcome to Crossroads!",
+   "file": "race_intro_02.ogg",
+   "duration": 4.34,
+   "speech_end": 3.545,
+   "hash": "b9cf196fc83e2f87"
+  },
+  {
+   "id": "race_intro_03",
+   "category": "race_intro",
+   "text": "Good evening, Crossroads! Are you ready to race?",
+   "file": "race_intro_03.ogg",
+   "duration": 3.25,
+   "speech_end": 2.41,
+   "hash": "2ed67494432ebafd"
+  },
+  {
+   "id": "race_intro_fig8_01",
+   "category": "race_intro_fig8",
+   "text": "The figure eight tonight! Watch that crossover!",
+   "file": "race_intro_fig8_01.ogg",
+   "duration": 3.41,
+   "speech_end": 2.46,
+   "hash": "2448331fadb79ba1"
+  },
+  {
+   "id": "race_intro_fig8_02",
+   "category": "race_intro_fig8",
+   "text": "It's the figure eight! Every lap, they cross in the middle!",
+   "file": "race_intro_fig8_02.ogg",
+   "duration": 3.87,
+   "speech_end": 2.945,
+   "hash": "1dfa434f8a841732"
+  },
+  {
+   "id": "race_intro_oval_01",
+   "category": "race_intro_oval",
+   "text": "The oval tonight! Flat out, three wide!",
+   "file": "race_intro_oval_01.ogg",
+   "duration": 3.07,
+   "speech_end": 2.16,
+   "hash": "7ca78c5687ce6d60"
+  },
+  {
+   "id": "race_intro_oval_02",
+   "category": "race_intro_oval",
+   "text": "It's the oval! Banked turns and long straights!",
+   "file": "race_intro_oval_02.ogg",
+   "duration": 3.02,
+   "speech_end": 2.285,
+   "hash": "55b4a204bbdca740"
+  },
+  {
+   "id": "race_intro_stock_01",
+   "category": "race_intro_stock",
+   "text": "Stock car racing! Clean racing, or so they say!",
+   "file": "race_intro_stock_01.ogg",
+   "duration": 3.7,
+   "speech_end": 2.815,
+   "hash": "68ea591069ccb9e2"
+  },
+  {
+   "id": "race_intro_stock_02",
+   "category": "race_intro_stock",
+   "text": "Stock cars tonight! Only the finish counts!",
+   "file": "race_intro_stock_02.ogg",
+   "duration": 3.08,
+   "speech_end": 2.385,
+   "hash": "50b564fa9b4ef9d1"
+  },
+  {
+   "id": "race_start_01",
+   "category": "race_start",
+   "text": "Green flag! Green flag!",
+   "file": "race_start_01.ogg",
+   "duration": 2.38,
+   "speech_end": 1.5,
+   "hash": "ee97e1494b2b39aa"
+  },
+  {
+   "id": "race_start_02",
+   "category": "race_start",
+   "text": "And they're away!",
+   "file": "race_start_02.ogg",
+   "duration": 1.75,
+   "speech_end": 0.855,
+   "hash": "19799af2009c418e"
+  },
+  {
+   "id": "race_start_03",
+   "category": "race_start",
+   "text": "Here they come into turn one!",
+   "file": "race_start_03.ogg",
+   "duration": 2.38,
+   "speech_end": 1.45,
+   "hash": "bc7b9f97a3697f10"
+  },
+  {
+   "id": "race_start_04",
+   "category": "race_start",
+   "text": "Go, go, go! The race is on!",
+   "file": "race_start_04.ogg",
+   "duration": 2.43,
+   "speech_end": 1.545,
+   "hash": "6a1852531c6282f1"
+  },
+  {
+   "id": "race_final_lap_01",
+   "category": "race_final_lap",
+   "text": "White flag! Final lap!",
+   "file": "race_final_lap_01.ogg",
+   "duration": 2.22,
+   "speech_end": 1.385,
+   "hash": "be0011e555de04d9"
+  },
+  {
+   "id": "race_final_lap_02",
+   "category": "race_final_lap",
+   "text": "One lap to go!",
+   "file": "race_final_lap_02.ogg",
+   "duration": 2.11,
+   "speech_end": 1.06,
+   "hash": "b64095595e386a8d"
+  },
+  {
+   "id": "race_final_lap_03",
+   "category": "race_final_lap",
+   "text": "Last lap! Give it everything!",
+   "file": "race_final_lap_03.ogg",
+   "duration": 2.45,
+   "speech_end": 1.56,
+   "hash": "bd2e02c3f27d4495"
+  },
+  {
+   "id": "race_crossover_01",
+   "category": "race_crossover",
+   "text": "Crash at the crossover!",
+   "file": "race_crossover_01.ogg",
+   "duration": 2.16,
+   "speech_end": 1.255,
+   "hash": "ae5b9e457670e6e0"
+  },
+  {
+   "id": "race_crossover_02",
+   "category": "race_crossover",
+   "text": "T-boned in the crossover!",
+   "file": "race_crossover_02.ogg",
+   "duration": 2.27,
+   "speech_end": 1.29,
+   "hash": "96504bb8f41bbb5b"
+  },
+  {
+   "id": "race_crossover_03",
+   "category": "race_crossover",
+   "text": "Chaos at the crossover!",
+   "file": "race_crossover_03.ogg",
+   "duration": 2.31,
+   "speech_end": 1.335,
+   "hash": "f53e46c715743a80"
+  },
+  {
+   "id": "race_crossover_04",
+   "category": "race_crossover",
+   "text": "Right in the middle of the crossover!",
+   "file": "race_crossover_04.ogg",
+   "duration": 2.61,
+   "speech_end": 1.65,
+   "hash": "e1bd7b8562e08268"
+  },
+  {
+   "id": "race_leader_spun_01",
+   "category": "race_leader_spun",
+   "text": "The leader is spun!",
+   "file": "race_leader_spun_01.ogg",
+   "duration": 1.98,
+   "speech_end": 1.065,
+   "hash": "8df3657d51e38ba2"
+  },
+  {
+   "id": "race_leader_spun_02",
+   "category": "race_leader_spun",
+   "text": "The leader goes around!",
+   "file": "race_leader_spun_02.ogg",
+   "duration": 2.12,
+   "speech_end": 1.275,
+   "hash": "4d150bd00ae6221c"
+  },
+  {
+   "id": "race_leader_spun_03",
+   "category": "race_leader_spun",
+   "text": "Down goes the leader!",
+   "file": "race_leader_spun_03.ogg",
+   "duration": 2.06,
+   "speech_end": 1.11,
+   "hash": "83c0c035c6ea5d58"
+  },
+  {
+   "id": "race_pit_01",
+   "category": "race_pit",
+   "text": "Into the pits!",
+   "file": "race_pit_01.ogg",
+   "duration": 1.83,
+   "speech_end": 0.93,
+   "hash": "b1159fe082c308e5"
+  },
+  {
+   "id": "race_pit_02",
+   "category": "race_pit",
+   "text": "Coming in for repairs!",
+   "file": "race_pit_02.ogg",
+   "duration": 2.06,
+   "speech_end": 1.27,
+   "hash": "59bd95330be35293"
+  },
+  {
+   "id": "race_pit_03",
+   "category": "race_pit",
+   "text": "Pit stop for that one!",
+   "file": "race_pit_03.ogg",
+   "duration": 2.17,
+   "speech_end": 1.26,
+   "hash": "42ada5797daf4f25"
+  },
+  {
+   "id": "player_pit_01",
+   "category": "player_pit",
+   "text": "Number seven is in the pits!",
+   "file": "player_pit_01.ogg",
+   "duration": 2.36,
+   "speech_end": 1.535,
+   "hash": "22971fe9c3cde7ac"
+  },
+  {
+   "id": "player_pit_02",
+   "category": "player_pit",
+   "text": "Get that car fixed, number seven!",
+   "file": "player_pit_02.ogg",
+   "duration": 2.66,
+   "speech_end": 1.755,
+   "hash": "60a950ac517e3a16"
+  },
+  {
+   "id": "player_pit_03",
+   "category": "player_pit",
+   "text": "Quick, the clock is running!",
+   "file": "player_pit_03.ogg",
+   "duration": 2.27,
+   "speech_end": 1.31,
+   "hash": "7de83c2aa08a2552"
+  },
+  {
+   "id": "player_overtake_01",
+   "category": "player_overtake",
+   "text": "Number seven makes the pass!",
+   "file": "player_overtake_01.ogg",
+   "duration": 2.29,
+   "speech_end": 1.525,
+   "hash": "bc48e6e19c8dabce"
+  },
+  {
+   "id": "player_overtake_02",
+   "category": "player_overtake",
+   "text": "Up a place for number seven!",
+   "file": "player_overtake_02.ogg",
+   "duration": 2.27,
+   "speech_end": 1.405,
+   "hash": "13e44dfa98618a35"
+  },
+  {
+   "id": "player_overtake_03",
+   "category": "player_overtake",
+   "text": "Through goes number seven!",
+   "file": "player_overtake_03.ogg",
+   "duration": 2.2,
+   "speech_end": 1.33,
+   "hash": "ef60c9d00ca34915"
+  },
+  {
+   "id": "player_race_win_01",
+   "category": "player_race_win",
+   "text": "Number seven takes the checkered flag! You win!",
+   "file": "player_race_win_01.ogg",
+   "duration": 3.45,
+   "speech_end": 2.54,
+   "hash": "8c96ab378bbe115f"
+  },
+  {
+   "id": "player_race_win_02",
+   "category": "player_race_win",
+   "text": "Victory for number seven! What a drive!",
+   "file": "player_race_win_02.ogg",
+   "duration": 3.13,
+   "speech_end": 2.285,
+   "hash": "42af4e5d6af01574"
+  },
+  {
+   "id": "player_race_win_03",
+   "category": "player_race_win",
+   "text": "You win the race, number seven!",
+   "file": "player_race_win_03.ogg",
+   "duration": 2.47,
+   "speech_end": 1.555,
+   "hash": "db45a76c6fe3c394"
+  },
+  {
+   "id": "player_podium_01",
+   "category": "player_podium",
+   "text": "A podium for number seven!",
+   "file": "player_podium_01.ogg",
+   "duration": 2.35,
+   "speech_end": 1.425,
+   "hash": "caff0e84eeefe842"
+  },
+  {
+   "id": "player_podium_02",
+   "category": "player_podium",
+   "text": "Top three! Great drive, number seven!",
+   "file": "player_podium_02.ogg",
+   "duration": 2.86,
+   "speech_end": 1.97,
+   "hash": "83173ffe5f6b9869"
+  },
+  {
+   "id": "player_podium_03",
+   "category": "player_podium",
+   "text": "Number seven is on the podium!",
+   "file": "player_podium_03.ogg",
+   "duration": 2.36,
+   "speech_end": 1.57,
+   "hash": "ab6fe4bf78e88dda"
+  },
+  {
+   "id": "player_finish_01",
+   "category": "player_finish",
+   "text": "Number seven takes the flag!",
+   "file": "player_finish_01.ogg",
+   "duration": 2.44,
+   "speech_end": 1.555,
+   "hash": "32e0503496fca493"
+  },
+  {
+   "id": "player_finish_02",
+   "category": "player_finish",
+   "text": "Across the line! Race done!",
+   "file": "player_finish_02.ogg",
+   "duration": 2.4,
+   "speech_end": 1.52,
+   "hash": "ccd9b42beb75eceb"
+  },
+  {
+   "id": "player_finish_03",
+   "category": "player_finish",
+   "text": "Number seven brings it home!",
+   "file": "player_finish_03.ogg",
+   "duration": 2.39,
+   "speech_end": 1.485,
+   "hash": "0fce95bd8ef5d057"
+  },
+  {
+   "id": "race_close_01",
+   "category": "race_close",
+   "text": "Side by side!",
+   "file": "race_close_01.ogg",
+   "duration": 1.96,
+   "speech_end": 0.99,
+   "hash": "ac84a6fab96fd41c"
+  },
+  {
+   "id": "race_close_02",
+   "category": "race_close",
+   "text": "Door to door down the straight!",
+   "file": "race_close_02.ogg",
+   "duration": 2.25,
+   "speech_end": 1.4,
+   "hash": "00144efc2d5c0512"
+  },
+  {
+   "id": "race_close_03",
+   "category": "race_close",
+   "text": "Three wide! Somebody's got to give!",
+   "file": "race_close_03.ogg",
+   "duration": 2.66,
+   "speech_end": 1.75,
+   "hash": "018d2874583d485e"
+  },
+  {
+   "id": "race_results_01",
+   "category": "race_results",
+   "text": "What a race! Let's look at the results!",
+   "file": "race_results_01.ogg",
+   "duration": 2.83,
+   "speech_end": 1.94,
+   "hash": "ebebc23bd246f4af"
+  },
+  {
+   "id": "race_results_02",
+   "category": "race_results",
+   "text": "That's the race done! Here are the results!",
+   "file": "race_results_02.ogg",
+   "duration": 2.91,
+   "speech_end": 2.02,
+   "hash": "df46485f1a96df7f"
+  },
+  {
    "id": "wrecked_num_02",
    "category": "wrecked_num",
    "text": "Number two is out!",
@@ -3143,6 +3557,546 @@
    "duration": 2.61,
    "speech_end": 1.75,
    "hash": "f40533f1af280083"
+  },
+  {
+   "id": "race_winner_num_02",
+   "category": "race_winner_num",
+   "text": "Number two wins the race!",
+   "file": "race_winner_num_02.ogg",
+   "duration": 2.13,
+   "speech_end": 1.315,
+   "hash": "39d21cfa3bbaee62"
+  },
+  {
+   "id": "race_winner_num_03",
+   "category": "race_winner_num",
+   "text": "And number three takes the checkered flag!",
+   "file": "race_winner_num_03.ogg",
+   "duration": 2.96,
+   "speech_end": 2.07,
+   "hash": "676a0494db000aee"
+  },
+  {
+   "id": "race_winner_num_04",
+   "category": "race_winner_num",
+   "text": "Number four wins the race!",
+   "file": "race_winner_num_04.ogg",
+   "duration": 2.2,
+   "speech_end": 1.34,
+   "hash": "0a28ce2377f1e76c"
+  },
+  {
+   "id": "race_winner_num_05",
+   "category": "race_winner_num",
+   "text": "And number five takes the checkered flag!",
+   "file": "race_winner_num_05.ogg",
+   "duration": 3.04,
+   "speech_end": 2.155,
+   "hash": "bd8cf075ff8530fb"
+  },
+  {
+   "id": "race_winner_num_06",
+   "category": "race_winner_num",
+   "text": "Number six wins the race!",
+   "file": "race_winner_num_06.ogg",
+   "duration": 2.26,
+   "speech_end": 1.385,
+   "hash": "7695994db0775aab"
+  },
+  {
+   "id": "race_winner_num_07",
+   "category": "race_winner_num",
+   "text": "And number seven takes the checkered flag!",
+   "file": "race_winner_num_07.ogg",
+   "duration": 3.03,
+   "speech_end": 2.135,
+   "hash": "3e1c256b8c3a8393"
+  },
+  {
+   "id": "race_winner_num_08",
+   "category": "race_winner_num",
+   "text": "Number eight wins the race!",
+   "file": "race_winner_num_08.ogg",
+   "duration": 2.12,
+   "speech_end": 1.265,
+   "hash": "893f4d943340b557"
+  },
+  {
+   "id": "race_winner_num_09",
+   "category": "race_winner_num",
+   "text": "And number nine takes the checkered flag!",
+   "file": "race_winner_num_09.ogg",
+   "duration": 2.93,
+   "speech_end": 2.06,
+   "hash": "5daf0d9199663658"
+  },
+  {
+   "id": "race_winner_num_10",
+   "category": "race_winner_num",
+   "text": "Number ten wins the race!",
+   "file": "race_winner_num_10.ogg",
+   "duration": 2.16,
+   "speech_end": 1.315,
+   "hash": "8861fb8ed2c3e5d4"
+  },
+  {
+   "id": "race_winner_num_11",
+   "category": "race_winner_num",
+   "text": "And number eleven takes the checkered flag!",
+   "file": "race_winner_num_11.ogg",
+   "duration": 3.09,
+   "speech_end": 2.235,
+   "hash": "5f39f214d1f5df4a"
+  },
+  {
+   "id": "race_winner_num_12",
+   "category": "race_winner_num",
+   "text": "Number twelve wins the race!",
+   "file": "race_winner_num_12.ogg",
+   "duration": 2.29,
+   "speech_end": 1.44,
+   "hash": "6d45366007869d41"
+  },
+  {
+   "id": "race_winner_num_13",
+   "category": "race_winner_num",
+   "text": "And number thirteen takes the checkered flag!",
+   "file": "race_winner_num_13.ogg",
+   "duration": 3.24,
+   "speech_end": 2.335,
+   "hash": "783a983412a32b02"
+  },
+  {
+   "id": "race_winner_num_14",
+   "category": "race_winner_num",
+   "text": "Number fourteen wins the race!",
+   "file": "race_winner_num_14.ogg",
+   "duration": 2.4,
+   "speech_end": 1.615,
+   "hash": "c690f7617d1b4822"
+  },
+  {
+   "id": "race_winner_num_15",
+   "category": "race_winner_num",
+   "text": "And number fifteen takes the checkered flag!",
+   "file": "race_winner_num_15.ogg",
+   "duration": 3.24,
+   "speech_end": 2.25,
+   "hash": "3621765c5bede892"
+  },
+  {
+   "id": "race_winner_num_16",
+   "category": "race_winner_num",
+   "text": "Number sixteen wins the race!",
+   "file": "race_winner_num_16.ogg",
+   "duration": 2.44,
+   "speech_end": 1.59,
+   "hash": "71ee237f0f9b6f0e"
+  },
+  {
+   "id": "race_winner_num_17",
+   "category": "race_winner_num",
+   "text": "And number seventeen takes the checkered flag!",
+   "file": "race_winner_num_17.ogg",
+   "duration": 3.39,
+   "speech_end": 2.505,
+   "hash": "8b5eb76cddeb9644"
+  },
+  {
+   "id": "race_winner_num_18",
+   "category": "race_winner_num",
+   "text": "Number eighteen wins the race!",
+   "file": "race_winner_num_18.ogg",
+   "duration": 2.29,
+   "speech_end": 1.47,
+   "hash": "debbfc0e69f6e1d6"
+  },
+  {
+   "id": "race_winner_num_19",
+   "category": "race_winner_num",
+   "text": "And number nineteen takes the checkered flag!",
+   "file": "race_winner_num_19.ogg",
+   "duration": 3.15,
+   "speech_end": 2.285,
+   "hash": "57deb6de433afffc"
+  },
+  {
+   "id": "race_winner_num_20",
+   "category": "race_winner_num",
+   "text": "Number twenty wins the race!",
+   "file": "race_winner_num_20.ogg",
+   "duration": 2.32,
+   "speech_end": 1.495,
+   "hash": "2ad1fe207753b33d"
+  },
+  {
+   "id": "race_winner_num_21",
+   "category": "race_winner_num",
+   "text": "And number twenty-one takes the checkered flag!",
+   "file": "race_winner_num_21.ogg",
+   "duration": 3.3,
+   "speech_end": 2.46,
+   "hash": "4343a0ccda5baf58"
+  },
+  {
+   "id": "race_winner_num_22",
+   "category": "race_winner_num",
+   "text": "Number twenty-two wins the race!",
+   "file": "race_winner_num_22.ogg",
+   "duration": 2.52,
+   "speech_end": 1.645,
+   "hash": "6b71676a470c6d17"
+  },
+  {
+   "id": "race_winner_num_23",
+   "category": "race_winner_num",
+   "text": "And number twenty-three takes the checkered flag!",
+   "file": "race_winner_num_23.ogg",
+   "duration": 3.37,
+   "speech_end": 2.485,
+   "hash": "37e08e115d49fb72"
+  },
+  {
+   "id": "race_winner_num_24",
+   "category": "race_winner_num",
+   "text": "Number twenty-four wins the race!",
+   "file": "race_winner_num_24.ogg",
+   "duration": 2.44,
+   "speech_end": 1.665,
+   "hash": "9626787680101a70"
+  },
+  {
+   "id": "race_winner_num_25",
+   "category": "race_winner_num",
+   "text": "And number twenty-five takes the checkered flag!",
+   "file": "race_winner_num_25.ogg",
+   "duration": 3.31,
+   "speech_end": 2.47,
+   "hash": "51953aeecd81ded9"
+  },
+  {
+   "id": "race_winner_num_26",
+   "category": "race_winner_num",
+   "text": "Number twenty-six wins the race!",
+   "file": "race_winner_num_26.ogg",
+   "duration": 2.59,
+   "speech_end": 1.78,
+   "hash": "8c3479e6b2fbac6b"
+  },
+  {
+   "id": "race_winner_num_27",
+   "category": "race_winner_num",
+   "text": "And number twenty-seven takes the checkered flag!",
+   "file": "race_winner_num_27.ogg",
+   "duration": 3.47,
+   "speech_end": 2.61,
+   "hash": "c646fa264f87f0d1"
+  },
+  {
+   "id": "race_winner_num_28",
+   "category": "race_winner_num",
+   "text": "Number twenty-eight wins the race!",
+   "file": "race_winner_num_28.ogg",
+   "duration": 2.51,
+   "speech_end": 1.625,
+   "hash": "2b4c2752d91a7009"
+  },
+  {
+   "id": "race_winner_num_29",
+   "category": "race_winner_num",
+   "text": "And number twenty-nine takes the checkered flag!",
+   "file": "race_winner_num_29.ogg",
+   "duration": 3.35,
+   "speech_end": 2.46,
+   "hash": "41c99eae462d13d3"
+  },
+  {
+   "id": "race_winner_num_30",
+   "category": "race_winner_num",
+   "text": "Number thirty wins the race!",
+   "file": "race_winner_num_30.ogg",
+   "duration": 2.3,
+   "speech_end": 1.45,
+   "hash": "8a44a560f9720b30"
+  },
+  {
+   "id": "race_winner_num_31",
+   "category": "race_winner_num",
+   "text": "And number thirty-one takes the checkered flag!",
+   "file": "race_winner_num_31.ogg",
+   "duration": 3.29,
+   "speech_end": 2.46,
+   "hash": "3a6fab0ec1b03b42"
+  },
+  {
+   "id": "race_winner_num_32",
+   "category": "race_winner_num",
+   "text": "Number thirty-two wins the race!",
+   "file": "race_winner_num_32.ogg",
+   "duration": 2.56,
+   "speech_end": 1.71,
+   "hash": "458f818fe9343e5d"
+  },
+  {
+   "id": "race_winner_num_33",
+   "category": "race_winner_num",
+   "text": "And number thirty-three takes the checkered flag!",
+   "file": "race_winner_num_33.ogg",
+   "duration": 3.36,
+   "speech_end": 2.485,
+   "hash": "21fe209046313c00"
+  },
+  {
+   "id": "race_winner_num_34",
+   "category": "race_winner_num",
+   "text": "Number thirty-four wins the race!",
+   "file": "race_winner_num_34.ogg",
+   "duration": 2.4,
+   "speech_end": 1.595,
+   "hash": "5a66642933be5951"
+  },
+  {
+   "id": "race_winner_num_35",
+   "category": "race_winner_num",
+   "text": "And number thirty-five takes the checkered flag!",
+   "file": "race_winner_num_35.ogg",
+   "duration": 3.26,
+   "speech_end": 2.435,
+   "hash": "c27be052200a5004"
+  },
+  {
+   "id": "race_winner_num_36",
+   "category": "race_winner_num",
+   "text": "Number thirty-six wins the race!",
+   "file": "race_winner_num_36.ogg",
+   "duration": 2.63,
+   "speech_end": 1.85,
+   "hash": "824497968483621b"
+  },
+  {
+   "id": "race_winner_num_37",
+   "category": "race_winner_num",
+   "text": "And number thirty-seven takes the checkered flag!",
+   "file": "race_winner_num_37.ogg",
+   "duration": 3.55,
+   "speech_end": 2.65,
+   "hash": "4be8c18feeb9949f"
+  },
+  {
+   "id": "race_winner_num_38",
+   "category": "race_winner_num",
+   "text": "Number thirty-eight wins the race!",
+   "file": "race_winner_num_38.ogg",
+   "duration": 2.52,
+   "speech_end": 1.635,
+   "hash": "7ae6080380cfb9bd"
+  },
+  {
+   "id": "race_winner_num_39",
+   "category": "race_winner_num",
+   "text": "And number thirty-nine takes the checkered flag!",
+   "file": "race_winner_num_39.ogg",
+   "duration": 3.33,
+   "speech_end": 2.41,
+   "hash": "d46c6c01ae114c9d"
+  },
+  {
+   "id": "race_winner_num_40",
+   "category": "race_winner_num",
+   "text": "Number forty wins the race!",
+   "file": "race_winner_num_40.ogg",
+   "duration": 2.22,
+   "speech_end": 1.41,
+   "hash": "4a38e81fa286270e"
+  },
+  {
+   "id": "race_winner_num_41",
+   "category": "race_winner_num",
+   "text": "And number forty-one takes the checkered flag!",
+   "file": "race_winner_num_41.ogg",
+   "duration": 3.25,
+   "speech_end": 2.36,
+   "hash": "491efe26bf30dd56"
+  },
+  {
+   "id": "race_winner_num_42",
+   "category": "race_winner_num",
+   "text": "Number forty-two wins the race!",
+   "file": "race_winner_num_42.ogg",
+   "duration": 2.57,
+   "speech_end": 1.685,
+   "hash": "33855504359dd935"
+  },
+  {
+   "id": "race_winner_num_43",
+   "category": "race_winner_num",
+   "text": "And number forty-three takes the checkered flag!",
+   "file": "race_winner_num_43.ogg",
+   "duration": 3.36,
+   "speech_end": 2.485,
+   "hash": "2b96f263282bafee"
+  },
+  {
+   "id": "race_winner_num_44",
+   "category": "race_winner_num",
+   "text": "Number forty-four wins the race!",
+   "file": "race_winner_num_44.ogg",
+   "duration": 2.47,
+   "speech_end": 1.66,
+   "hash": "983e48f4ab0d08a0"
+  },
+  {
+   "id": "race_winner_num_45",
+   "category": "race_winner_num",
+   "text": "And number forty-five takes the checkered flag!",
+   "file": "race_winner_num_45.ogg",
+   "duration": 3.35,
+   "speech_end": 2.48,
+   "hash": "bed0be48a7735847"
+  },
+  {
+   "id": "race_winner_num_46",
+   "category": "race_winner_num",
+   "text": "Number forty-six wins the race!",
+   "file": "race_winner_num_46.ogg",
+   "duration": 2.64,
+   "speech_end": 1.83,
+   "hash": "33b2cd6c1d4c4084"
+  },
+  {
+   "id": "race_winner_num_47",
+   "category": "race_winner_num",
+   "text": "And number forty-seven takes the checkered flag!",
+   "file": "race_winner_num_47.ogg",
+   "duration": 3.6,
+   "speech_end": 2.695,
+   "hash": "7b420c1a81dbc46f"
+  },
+  {
+   "id": "race_winner_num_48",
+   "category": "race_winner_num",
+   "text": "Number forty-eight wins the race!",
+   "file": "race_winner_num_48.ogg",
+   "duration": 2.45,
+   "speech_end": 1.66,
+   "hash": "ad0067b22d33a900"
+  },
+  {
+   "id": "race_winner_num_49",
+   "category": "race_winner_num",
+   "text": "And number forty-nine takes the checkered flag!",
+   "file": "race_winner_num_49.ogg",
+   "duration": 3.27,
+   "speech_end": 2.385,
+   "hash": "ebde7f78b541f7ef"
+  },
+  {
+   "id": "race_winner_num_50",
+   "category": "race_winner_num",
+   "text": "Number fifty wins the race!",
+   "file": "race_winner_num_50.ogg",
+   "duration": 2.34,
+   "speech_end": 1.515,
+   "hash": "e2a00cb6b163e48d"
+  },
+  {
+   "id": "race_winner_num_51",
+   "category": "race_winner_num",
+   "text": "And number fifty-one takes the checkered flag!",
+   "file": "race_winner_num_51.ogg",
+   "duration": 3.31,
+   "speech_end": 2.435,
+   "hash": "e9904b0b3d22e7d8"
+  },
+  {
+   "id": "race_winner_num_52",
+   "category": "race_winner_num",
+   "text": "Number fifty-two wins the race!",
+   "file": "race_winner_num_52.ogg",
+   "duration": 2.51,
+   "speech_end": 1.67,
+   "hash": "35f56e76f0556b93"
+  },
+  {
+   "id": "race_winner_num_53",
+   "category": "race_winner_num",
+   "text": "And number fifty-three takes the checkered flag!",
+   "file": "race_winner_num_53.ogg",
+   "duration": 3.5,
+   "speech_end": 2.51,
+   "hash": "806d902057fe1f7d"
+  },
+  {
+   "id": "race_winner_num_54",
+   "category": "race_winner_num",
+   "text": "Number fifty-four wins the race!",
+   "file": "race_winner_num_54.ogg",
+   "duration": 2.42,
+   "speech_end": 1.6,
+   "hash": "466728e5bfe81dbd"
+  },
+  {
+   "id": "race_winner_num_55",
+   "category": "race_winner_num",
+   "text": "And number fifty-five takes the checkered flag!",
+   "file": "race_winner_num_55.ogg",
+   "duration": 3.34,
+   "speech_end": 2.435,
+   "hash": "cb04304262c7c7b2"
+  },
+  {
+   "id": "race_winner_num_56",
+   "category": "race_winner_num",
+   "text": "Number fifty-six wins the race!",
+   "file": "race_winner_num_56.ogg",
+   "duration": 2.65,
+   "speech_end": 1.83,
+   "hash": "4dc7ddf3aac2ac94"
+  },
+  {
+   "id": "race_winner_num_57",
+   "category": "race_winner_num",
+   "text": "And number fifty-seven takes the checkered flag!",
+   "file": "race_winner_num_57.ogg",
+   "duration": 3.6,
+   "speech_end": 2.695,
+   "hash": "7679c62eb97eef0c"
+  },
+  {
+   "id": "race_winner_num_58",
+   "category": "race_winner_num",
+   "text": "Number fifty-eight wins the race!",
+   "file": "race_winner_num_58.ogg",
+   "duration": 2.4,
+   "speech_end": 1.62,
+   "hash": "bc1db01cda286e7e"
+  },
+  {
+   "id": "race_winner_num_59",
+   "category": "race_winner_num",
+   "text": "And number fifty-nine takes the checkered flag!",
+   "file": "race_winner_num_59.ogg",
+   "duration": 3.39,
+   "speech_end": 2.485,
+   "hash": "255c2423b8a7d8ed"
+  },
+  {
+   "id": "race_winner_num_60",
+   "category": "race_winner_num",
+   "text": "Number sixty wins the race!",
+   "file": "race_winner_num_60.ogg",
+   "duration": 2.38,
+   "speech_end": 1.535,
+   "hash": "9ab81b4957456368"
+  },
+  {
+   "id": "race_winner_num_61",
+   "category": "race_winner_num",
+   "text": "And number sixty-one takes the checkered flag!",
+   "file": "race_winner_num_61.ogg",
+   "duration": 3.31,
+   "speech_end": 2.44,
+   "hash": "361cdd68f563f4cb"
   }
  ]
 }

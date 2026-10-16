@@ -32,8 +32,14 @@ func _process(_delta: float) -> void:
 				EditorInterface.open_scene_from_path(_scene)
 				_next(1)
 		1:
+			# The editor may restore the last session's scene first; wait until ours is the edited one.
+			var root := EditorInterface.get_edited_scene_root()
+			if root == null or root.scene_file_path != _scene:
+				if _frames > 3600:
+					_fail("scene did not open: " + _scene)
+				return
 			if _frames > 30:
-				_lightmap = _find_lightmap(EditorInterface.get_edited_scene_root())
+				_lightmap = _find_lightmap(root)
 				if _lightmap == null:
 					_fail("no LightmapGI in scene")
 					return

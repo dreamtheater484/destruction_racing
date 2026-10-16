@@ -1,0 +1,3509 @@
+[gd_scene format=3 uid="uid://bbnh3htgf0yu4"]
+
+[ext_resource type="Script" uid="uid://dyl1i21yj248g" path="res://src/Tools/SpeedwayLook.cs" id="1_2ma5d"]
+[ext_resource type="Texture2D" uid="uid://irir11x2yiy6" path="res://assets/third_party/polyhaven/golden_gate_hills/golden_gate_hills_2k.hdr" id="2_qp8bf"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_0_0.res" id="3_bjs1i"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_1_0.res" id="4_te5qu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_2_0.res" id="5_hvirn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_3_0.res" id="6_uojtj"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_4_0.res" id="7_qtkd5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_5_0.res" id="8_c827u"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_6_0.res" id="9_7s8m3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_0_1.res" id="10_hedw5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_1_1.res" id="11_82ew3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_2_1.res" id="12_72jwh"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_3_1.res" id="13_b0cep"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_4_1.res" id="14_mivyt"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_5_1.res" id="15_t2cua"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_6_1.res" id="16_dj5sg"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_0_2.res" id="17_ojqdl"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_1_2.res" id="18_djplu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_2_2.res" id="19_2qykl"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_3_2.res" id="20_4kn68"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_4_2.res" id="21_irvds"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_5_2.res" id="22_2ttem"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_6_2.res" id="23_56so8"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_0_3.res" id="24_esyjw"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_1_3.res" id="25_afugb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_2_3.res" id="26_nal6f"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_3_3.res" id="27_2oyi6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_4_3.res" id="28_t4unf"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_5_3.res" id="29_t87np"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Terrain_6_3.res" id="30_lejdh"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Outside.res" id="31_crkuu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/OuterWall.res" id="32_mt55c"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/CatchFence.res" id="33_gedah"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Island_0.res" id="34_nybqc"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Island_1.res" id="35_rm4sq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Island_2.res" id="36_w73g0"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Island_3.res" id="37_q5vcv"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Island_4.res" id="38_i34fa"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Island_5.res" id="39_43vr5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Paint.res" id="40_qe4yv"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_0.res" id="41_1vgs4"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_0.res" id="42_m0635"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_1.res" id="43_2imyy"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_1.res" id="44_3fvgg"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_2.res" id="45_dl6mi"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_2.res" id="46_hl7o5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_3.res" id="47_oemm3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_3.res" id="48_su81h"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_4.res" id="49_p7r4v"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_4.res" id="50_yv7bu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_5.res" id="51_xrb5a"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_5.res" id="52_m1nkx"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_6.res" id="53_y8wtx"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_6.res" id="54_ibtoo"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_7.res" id="55_uuq31"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_7.res" id="56_l1qni"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_8.res" id="57_7an2i"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_8.res" id="58_14jtk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_9.res" id="59_dlr3s"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_9.res" id="60_uf5tm"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_10.res" id="61_6k05g"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_10.res" id="62_g2dbn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_11.res" id="63_pjp3g"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_11.res" id="64_psux1"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_12.res" id="65_j1oa5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_12.res" id="66_cwgpm"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Terrace_13.res" id="67_n31mg"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Bench_13.res" id="68_p7rvk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Back.res" id="69_yxhap"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Roof.res" id="70_52pxq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_0_0.res" id="71_50uuu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_0_11.res" id="72_gosm3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_1_0.res" id="73_kneed"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_1_11.res" id="74_sl5th"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_2_0.res" id="75_xljgb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_2_11.res" id="76_nymiw"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_3_0.res" id="77_2ujih"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_3_11.res" id="78_eq0fr"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_4_0.res" id="79_eqbmn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_4_11.res" id="80_0elbb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_5_0.res" id="81_6mtbh"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_5_11.res" id="82_rsuw2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_6_0.res" id="83_hso0t"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_6_11.res" id="84_cg4na"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_7_0.res" id="85_p25l8"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_7_11.res" id="86_ka2dr"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_8_0.res" id="87_h30ep"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_8_11.res" id="88_nuc8l"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_9_0.res" id="89_ysfjq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_9_11.res" id="90_gmujp"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_10_0.res" id="91_o5cw8"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_10_11.res" id="92_r3o4j"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_11_0.res" id="93_or6i3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_11_11.res" id="94_b82q3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_12_0.res" id="95_egrip"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/MainStand_Col_12_11.res" id="96_lgohb"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_0.tres" id="97_ku3vq"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_3.tres" id="98_kvm1b"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_6.tres" id="99_eesn0"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_1.tres" id="100_ajuvs"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_4.tres" id="101_u0j5m"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_7.tres" id="102_43xws"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_2.tres" id="103_kj132"]
+[ext_resource type="Material" path="res://assets/speedway/materials/sponsor_5.tres" id="104_tsi3g"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_0.res" id="105_oso5x"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_0.res" id="106_1cs5i"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_1.res" id="107_whn85"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_1.res" id="108_fe77i"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_2.res" id="109_6mfh6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_2.res" id="110_i6hkt"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_3.res" id="111_btu8p"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_3.res" id="112_drick"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_4.res" id="113_byxbc"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_4.res" id="114_i2xol"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_5.res" id="115_momot"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_5.res" id="116_rfany"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_6.res" id="117_lgjig"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_6.res" id="118_jgsyj"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_7.res" id="119_7ippn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_7.res" id="120_0gegi"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_8.res" id="121_tng5b"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_8.res" id="122_wxdwn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Terrace_9.res" id="123_vyf5y"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Bench_9.res" id="124_10guh"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Back.res" id="125_jmjy8"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Roof.res" id="126_2oeb0"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_0_0.res" id="127_82j7t"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_0_8.res" id="128_weud5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_1_0.res" id="129_v6rbq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_1_8.res" id="130_fsyul"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_2_0.res" id="131_wn18u"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_2_8.res" id="132_5duoy"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_3_0.res" id="133_av6wi"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_3_8.res" id="134_4qiqk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_4_0.res" id="135_1gm0f"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_4_8.res" id="136_hmi8m"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_5_0.res" id="137_gi28u"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_5_8.res" id="138_prg6s"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_6_0.res" id="139_yydio"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_6_8.res" id="140_qnau3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_7_0.res" id="141_8tj87"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/BackStand_Col_7_8.res" id="142_cfw6w"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Back.res" id="143_vk062"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Side_-3.res" id="144_ukg3l"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Side_3.res" id="145_8a77d"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Roof.res" id="146_nyy8h"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Lintel.res" id="147_b5g3x"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Floor.res" id="148_onyix"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_0_Bench.res" id="149_f3lc7"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Back.res" id="150_es0tu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Side_-3.res" id="151_nw0k2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Side_3.res" id="152_qps30"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Roof.res" id="153_1f3nu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Lintel.res" id="154_ew3vy"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Floor.res" id="155_5l7rg"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_1_Bench.res" id="156_1scwb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Back.res" id="157_vcwry"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Side_-3.res" id="158_ya0cq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Side_3.res" id="159_1e7pm"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Roof.res" id="160_yvvhq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Lintel.res" id="161_jjs8v"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Floor.res" id="162_j6ayl"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_2_Bench.res" id="163_oci2v"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Back.res" id="164_62sj1"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Side_-3.res" id="165_askn3"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Side_3.res" id="166_k27by"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Roof.res" id="167_d6yum"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Lintel.res" id="168_txb6f"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Floor.res" id="169_nc72l"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_oval_3_Bench.res" id="170_gbswe"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Back.res" id="171_7oyh5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Side_-3.res" id="172_t1tea"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Side_3.res" id="173_6sku6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Roof.res" id="174_7e5cj"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Lintel.res" id="175_kmmki"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Floor.res" id="176_8ew0e"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_0_Bench.res" id="177_gmj7p"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Back.res" id="178_an53l"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Side_-3.res" id="179_udwgo"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Side_3.res" id="180_k3mr4"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Roof.res" id="181_l3td8"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Lintel.res" id="182_53gad"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Floor.res" id="183_lkxpc"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_1_Bench.res" id="184_tvuqn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Back.res" id="185_6nuwv"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Side_-3.res" id="186_6mo8t"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Side_3.res" id="187_pc0vp"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Roof.res" id="188_1580n"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Lintel.res" id="189_s2qys"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Floor.res" id="190_xn0kn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_2_Bench.res" id="191_5r1ut"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Back.res" id="192_5f0rh"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Side_-3.res" id="193_eshkt"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Side_3.res" id="194_aj1u0"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Roof.res" id="195_0t2x7"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Lintel.res" id="196_a5fko"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Floor.res" id="197_5eqdd"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Garage_figure8_3_Bench.res" id="198_2l2ld"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Gantry_oval_Pillar_-8.res" id="199_d3oiw"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Gantry_oval_Pillar_8.res" id="200_bjq0o"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Gantry_oval_Beam.res" id="201_61qmm"]
+[ext_resource type="Material" path="res://assets/speedway/materials/dark.tres" id="202_xehcn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Gantry_figure8_Pillar_-8.res" id="203_xkvcu"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Gantry_figure8_Pillar_8.res" id="204_p8ln6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Gantry_figure8_Beam.res" id="205_ps0b0"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_0_Leg_-4.res" id="206_u1r75"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_0_Leg_4.res" id="207_uc8i6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_0_Frame.res" id="208_pftqx"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_1_Leg_-4.res" id="209_kvbim"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_1_Leg_4.res" id="210_001pp"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_1_Frame.res" id="211_4580e"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_2_Leg_-4.res" id="212_cie70"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_2_Leg_4.res" id="213_a36ow"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_2_Frame.res" id="214_4a4gq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_3_Leg_-4.res" id="215_bttl5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_3_Leg_4.res" id="216_x1ct1"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Billboard_3_Frame.res" id="217_vtuom"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_0_Pole.res" id="218_opv75"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_0_Frame.res" id="219_lub65"]
+[ext_resource type="Material" path="res://assets/speedway/materials/lamp.tres" id="220_ql538"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_1_Pole.res" id="221_3rl6v"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_1_Frame.res" id="222_llle6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_2_Pole.res" id="223_21rsm"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_2_Frame.res" id="224_wc2uf"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_3_Pole.res" id="225_uwnu2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_3_Frame.res" id="226_1nagk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_4_Pole.res" id="227_r0oln"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_4_Frame.res" id="228_jua75"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_5_Pole.res" id="229_jbhp4"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_5_Frame.res" id="230_1f5tq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_6_Pole.res" id="231_ofk6y"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_6_Frame.res" id="232_sqddf"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_7_Pole.res" id="233_acvxm"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_7_Frame.res" id="234_ri7gv"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_8_Pole.res" id="235_qpnuc"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_8_Frame.res" id="236_1n60l"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_9_Pole.res" id="237_i35f5"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Floodlight_9_Frame.res" id="238_5uewc"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Body.res" id="239_qpfh7"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Stripe.res" id="240_7y0i2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Window_-16.res" id="241_pe20y"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Window_16.res" id="242_we140"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Wheel_-1_-12.res" id="243_xnowq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Wheel_1_-12.res" id="244_7j58n"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Wheel_-1_12.res" id="245_vwgnn"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_0_Wheel_1_12.res" id="246_tlo0r"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Body.res" id="247_ggo26"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Stripe.res" id="248_yd2lr"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Window_-16.res" id="249_qdo3m"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Window_16.res" id="250_b2wol"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Wheel_-1_-12.res" id="251_vv3bi"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Wheel_1_-12.res" id="252_qxroa"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Wheel_-1_12.res" id="253_dluwk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_1_Wheel_1_12.res" id="254_h0o1p"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Body.res" id="255_bb8fe"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Stripe.res" id="256_a7jgb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Window_-16.res" id="257_b7d6d"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Window_16.res" id="258_jetyp"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Wheel_-1_-12.res" id="259_y5qdt"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Wheel_1_-12.res" id="260_1eflo"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Wheel_-1_12.res" id="261_c2pk6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_2_Wheel_1_12.res" id="262_7dwlp"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Body.res" id="263_8b42i"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Stripe.res" id="264_tapk2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Window_-16.res" id="265_d5ath"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Window_16.res" id="266_k701i"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Wheel_-1_-12.res" id="267_2frqf"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Wheel_1_-12.res" id="268_upgpk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Wheel_-1_12.res" id="269_ivup7"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_3_Wheel_1_12.res" id="270_ebi06"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Body.res" id="271_l8poh"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Stripe.res" id="272_xwq6s"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Window_-16.res" id="273_fujth"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Window_16.res" id="274_oqnkw"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Wheel_-1_-12.res" id="275_w36my"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Wheel_1_-12.res" id="276_7sofb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Wheel_-1_12.res" id="277_et3jc"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_4_Wheel_1_12.res" id="278_xn3pm"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Body.res" id="279_0vxmi"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Stripe.res" id="280_3ocn1"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Window_-16.res" id="281_xtkk4"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Window_16.res" id="282_v42ms"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Wheel_-1_-12.res" id="283_ji38u"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Wheel_1_-12.res" id="284_2byh4"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Wheel_-1_12.res" id="285_wsst2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_5_Wheel_1_12.res" id="286_pe3yb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Body.res" id="287_cokk1"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Stripe.res" id="288_n7yk4"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Window_-16.res" id="289_lq1qa"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Window_16.res" id="290_q4rrq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Wheel_-1_-12.res" id="291_unqtd"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Wheel_1_-12.res" id="292_up76r"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Wheel_-1_12.res" id="293_fulla"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_6_Wheel_1_12.res" id="294_ccyqk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Body.res" id="295_uri5p"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Stripe.res" id="296_yk137"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Window_-16.res" id="297_fk42l"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Window_16.res" id="298_vo3bq"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Wheel_-1_-12.res" id="299_ekyaf"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Wheel_1_-12.res" id="300_elrv2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Wheel_-1_12.res" id="301_nhnng"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Trailer_7_Wheel_1_12.res" id="302_u7pcs"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Tent_Roof.res" id="303_iaipv"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Tent_Pole_-6_-4.res" id="304_n0u5v"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Tent_Pole_-6_4.res" id="305_78kp1"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Tent_Pole_6_-4.res" id="306_jhbxb"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Tent_Pole_6_4.res" id="307_e78xa"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_0.res" id="308_w0pqr"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_0.res" id="309_t8jys"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_1.res" id="310_wikie"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_1.res" id="311_fft3g"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_2.res" id="312_p0qqa"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_2.res" id="313_w288j"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_3.res" id="314_h0146"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_3.res" id="315_pjj4q"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_4.res" id="316_l21w6"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_4.res" id="317_qgs10"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_5.res" id="318_ap3lk"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_5.res" id="319_oxc46"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_6.res" id="320_f58g0"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_6.res" id="321_sb1x2"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_7.res" id="322_kjifx"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_7.res" id="323_qyhus"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_8.res" id="324_wc4ey"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_8.res" id="325_4aver"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/FlagPole_9.res" id="326_y10c8"]
+[ext_resource type="ArrayMesh" path="res://assets/speedway/meshes/Flag_9.res" id="327_lhgvx"]
+[ext_resource type="LightmapGIData" uid="uid://xsw1f08vqkxd" path="res://scenes/speedway/SpeedwayLook.lmbake" id="328_qp8bf"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_beomr"]
+panorama = ExtResource("2_qp8bf")
+
+[sub_resource type="Sky" id="Sky_1kp6y"]
+sky_material = SubResource("PanoramaSkyMaterial_beomr")
+radiance_size = 4
+
+[sub_resource type="Environment" id="Environment_lhmvq"]
+background_mode = 2
+sky = SubResource("Sky_1kp6y")
+ambient_light_source = 3
+reflected_light_source = 2
+tonemap_mode = 4
+tonemap_exposure = 0.95
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 1.6
+glow_enabled = true
+fog_enabled = true
+fog_light_color = Color(0.74, 0.78, 0.84, 1)
+fog_density = 0.0006
+fog_aerial_perspective = 0.5
+fog_sky_affect = 0.1
+
+[sub_resource type="QuadMesh" id="QuadMesh_ya51b"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_3wfio"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_hmd7l"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_wn2ke"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_7iw5q"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_235xo"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_k5qo1"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_23ksh"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_c3lv0"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_3hs2p"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_8rdo6"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_todiw"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_o6x48"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_gsrkd"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_0hc8p"]
+size = Vector2(12, 3)
+
+[sub_resource type="QuadMesh" id="QuadMesh_ogyna"]
+size = Vector2(12, 3)
+
+[sub_resource type="SphereMesh" id="SphereMesh_7nciw"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_6xt1x"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_3yyak"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_fobgs"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_jf266"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_dqtna"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_d8voi"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_m6ci8"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_8u0mi"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereMesh" id="SphereMesh_ik2lp"]
+radius = 0.22
+height = 0.44
+radial_segments = 12
+rings = 6
+
+[sub_resource type="QuadMesh" id="QuadMesh_shkkx"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_66vlm"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_p72hf"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_1qee0"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_d5cwu"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_7qs7w"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_kd0rc"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="QuadMesh" id="QuadMesh_pk1gm"]
+size = Vector2(10.4, 2.6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wyfwi"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3euxi"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_v1auy"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vubme"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ct2lp"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dmudl"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8jyv1"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_60qxl"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_v3x2y"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_idi02"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_385tf"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jgvfd"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bpgp3"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w2i7d"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2s28q"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sg17a"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rfo8o"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sgkph"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hls0s"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q61h2"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ye361"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2cubw"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8daat"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tp0vy"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_murmq"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3pll5"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2db1h"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r2q8o"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ivemx"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ve0jf"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_16hv1"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yjw3m"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dol2t"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xmbkw"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_34pvs"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r3mnr"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r4c0s"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_l1oav"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2ql3n"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ui06i"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a51w5"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4bn5t"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0aepq"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dqpe7"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nt017"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5wna7"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h6hcs"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i2gba"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pvgrj"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nsyae"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3kswb"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ifb3m"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hf8dx"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0jsx6"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3v6sd"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mh5fd"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kv7re"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oups8"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4qklr"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3pvvq"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4hp11"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jfub6"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5ivaw"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vlqm4"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2jhqa"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_myj0v"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wai4n"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_id58y"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ipysr"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nrwr5"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dfv7m"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_c5hin"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yxxtf"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ycgs3"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ng1l0"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s82l0"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sl3gn"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a62an"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_do6jj"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rb6y0"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cx248"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tqoa5"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_la427"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gj7ix"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sp2gu"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hxrqv"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sxdts"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fxxug"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yypui"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mniin"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h620m"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1ywkh"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6dxpc"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bqaof"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g46yu"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q0d0n"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ubv86"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_clg6x"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nmekr"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hdfvc"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_omy6s"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8ub3f"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t3r6m"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_agpjq"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1yh4p"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5ubw5"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tsbpk"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_x1xr8"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s00j8"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5y57l"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3ms4d"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ka610"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oonji"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6jej1"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3gi4c"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pcoyp"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0v6uc"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cro2p"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wai26"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a82qq"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nx85b"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_iku00"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_agmqc"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_d5sm4"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nedmt"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6iwnd"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ugu8g"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cb752"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_inqdm"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a6r53"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mkahy"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qoh55"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pbfbi"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_16oqn"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nikx8"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_en8iu"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_alroc"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_54u0j"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_iesh1"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1w7qf"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_k4v4a"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_22g8j"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vmner"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wbdbl"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jjkpa"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_f3cqi"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a8374"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_elhfk"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nev02"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tp3is"]
+material = ExtResource("220_ql538")
+size = Vector3(0.75, 0.6, 0.12)
+
+[node name="SpeedwayLook" type="Node3D" unique_id=2145027652]
+script = ExtResource("1_2ma5d")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=191611209]
+environment = SubResource("Environment_lhmvq")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1493385798]
+transform = Transform3D(-0.7739574, -0.43988395, 0.45551312, 0, 0.71933985, 0.6946584, -0.6332378, 0.537636, -0.5567383, 22.775656, 34.73292, -27.836916)
+light_color = Color(1, 0.95, 0.88, 1)
+light_energy = 2.3
+light_angular_distance = 0.6
+shadow_enabled = true
+directional_shadow_max_distance = 220.0
+
+[node name="Terrain" type="Node3D" parent="." unique_id=563801234]
+
+[node name="Terrain_0_0" type="MeshInstance3D" parent="Terrain" unique_id=105158807]
+mesh = ExtResource("3_bjs1i")
+
+[node name="Terrain_1_0" type="MeshInstance3D" parent="Terrain" unique_id=1225071953]
+mesh = ExtResource("4_te5qu")
+
+[node name="Terrain_2_0" type="MeshInstance3D" parent="Terrain" unique_id=1670473767]
+mesh = ExtResource("5_hvirn")
+
+[node name="Terrain_3_0" type="MeshInstance3D" parent="Terrain" unique_id=539551950]
+mesh = ExtResource("6_uojtj")
+
+[node name="Terrain_4_0" type="MeshInstance3D" parent="Terrain" unique_id=408332140]
+mesh = ExtResource("7_qtkd5")
+
+[node name="Terrain_5_0" type="MeshInstance3D" parent="Terrain" unique_id=74968500]
+mesh = ExtResource("8_c827u")
+
+[node name="Terrain_6_0" type="MeshInstance3D" parent="Terrain" unique_id=1084573089]
+mesh = ExtResource("9_7s8m3")
+
+[node name="Terrain_0_1" type="MeshInstance3D" parent="Terrain" unique_id=1414615688]
+mesh = ExtResource("10_hedw5")
+
+[node name="Terrain_1_1" type="MeshInstance3D" parent="Terrain" unique_id=1279027524]
+mesh = ExtResource("11_82ew3")
+
+[node name="Terrain_2_1" type="MeshInstance3D" parent="Terrain" unique_id=1182452930]
+mesh = ExtResource("12_72jwh")
+
+[node name="Terrain_3_1" type="MeshInstance3D" parent="Terrain" unique_id=584402624]
+mesh = ExtResource("13_b0cep")
+
+[node name="Terrain_4_1" type="MeshInstance3D" parent="Terrain" unique_id=1841139549]
+mesh = ExtResource("14_mivyt")
+
+[node name="Terrain_5_1" type="MeshInstance3D" parent="Terrain" unique_id=389650740]
+mesh = ExtResource("15_t2cua")
+
+[node name="Terrain_6_1" type="MeshInstance3D" parent="Terrain" unique_id=1605928798]
+mesh = ExtResource("16_dj5sg")
+
+[node name="Terrain_0_2" type="MeshInstance3D" parent="Terrain" unique_id=843431196]
+mesh = ExtResource("17_ojqdl")
+
+[node name="Terrain_1_2" type="MeshInstance3D" parent="Terrain" unique_id=1487781197]
+mesh = ExtResource("18_djplu")
+
+[node name="Terrain_2_2" type="MeshInstance3D" parent="Terrain" unique_id=1363589388]
+mesh = ExtResource("19_2qykl")
+
+[node name="Terrain_3_2" type="MeshInstance3D" parent="Terrain" unique_id=1805599301]
+mesh = ExtResource("20_4kn68")
+
+[node name="Terrain_4_2" type="MeshInstance3D" parent="Terrain" unique_id=1218265791]
+mesh = ExtResource("21_irvds")
+
+[node name="Terrain_5_2" type="MeshInstance3D" parent="Terrain" unique_id=736498515]
+mesh = ExtResource("22_2ttem")
+
+[node name="Terrain_6_2" type="MeshInstance3D" parent="Terrain" unique_id=1935658625]
+mesh = ExtResource("23_56so8")
+
+[node name="Terrain_0_3" type="MeshInstance3D" parent="Terrain" unique_id=1572564634]
+mesh = ExtResource("24_esyjw")
+
+[node name="Terrain_1_3" type="MeshInstance3D" parent="Terrain" unique_id=679618033]
+mesh = ExtResource("25_afugb")
+
+[node name="Terrain_2_3" type="MeshInstance3D" parent="Terrain" unique_id=920836139]
+mesh = ExtResource("26_nal6f")
+
+[node name="Terrain_3_3" type="MeshInstance3D" parent="Terrain" unique_id=1617326561]
+mesh = ExtResource("27_2oyi6")
+
+[node name="Terrain_4_3" type="MeshInstance3D" parent="Terrain" unique_id=1199182449]
+mesh = ExtResource("28_t4unf")
+
+[node name="Terrain_5_3" type="MeshInstance3D" parent="Terrain" unique_id=1508632585]
+mesh = ExtResource("29_t87np")
+
+[node name="Terrain_6_3" type="MeshInstance3D" parent="Terrain" unique_id=1074304719]
+mesh = ExtResource("30_lejdh")
+
+[node name="Outside" type="MeshInstance3D" parent="." unique_id=1624062428]
+gi_mode = 2
+mesh = ExtResource("31_crkuu")
+
+[node name="OuterWall" type="MeshInstance3D" parent="." unique_id=1574856336]
+mesh = ExtResource("32_mt55c")
+
+[node name="CatchFence" type="MeshInstance3D" parent="." unique_id=1712502003]
+gi_mode = 0
+mesh = ExtResource("33_gedah")
+
+[node name="Island_0" type="MeshInstance3D" parent="." unique_id=1760769400]
+mesh = ExtResource("34_nybqc")
+
+[node name="Island_1" type="MeshInstance3D" parent="." unique_id=206159382]
+mesh = ExtResource("35_rm4sq")
+
+[node name="Island_2" type="MeshInstance3D" parent="." unique_id=1693288060]
+mesh = ExtResource("36_w73g0")
+
+[node name="Island_3" type="MeshInstance3D" parent="." unique_id=1537421157]
+mesh = ExtResource("37_q5vcv")
+
+[node name="Island_4" type="MeshInstance3D" parent="." unique_id=1328667393]
+mesh = ExtResource("38_i34fa")
+
+[node name="Island_5" type="MeshInstance3D" parent="." unique_id=1311842924]
+mesh = ExtResource("39_43vr5")
+
+[node name="Paint" type="MeshInstance3D" parent="." unique_id=1531000598]
+cast_shadow = 0
+gi_mode = 2
+mesh = ExtResource("40_qe4yv")
+
+[node name="MainStand" type="Node3D" parent="." unique_id=196181378]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 79.6)
+
+[node name="MainStand_Terrace_0" type="MeshInstance3D" parent="MainStand" unique_id=2105417398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0.4)
+mesh = ExtResource("41_1vgs4")
+
+[node name="MainStand_Bench_0" type="MeshInstance3D" parent="MainStand" unique_id=811835934]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.52)
+mesh = ExtResource("42_m0635")
+
+[node name="MainStand_Terrace_1" type="MeshInstance3D" parent="MainStand" unique_id=2031171956]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 1.2)
+mesh = ExtResource("43_2imyy")
+
+[node name="MainStand_Bench_1" type="MeshInstance3D" parent="MainStand" unique_id=1062823428]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.87, 1.32)
+mesh = ExtResource("44_3fvgg")
+
+[node name="MainStand_Terrace_2" type="MeshInstance3D" parent="MainStand" unique_id=821753115]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43, 2)
+mesh = ExtResource("45_dl6mi")
+
+[node name="MainStand_Bench_2" type="MeshInstance3D" parent="MainStand" unique_id=1662241960]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.29, 2.12)
+mesh = ExtResource("46_hl7o5")
+
+[node name="MainStand_Terrace_3" type="MeshInstance3D" parent="MainStand" unique_id=1631567820]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 2.8)
+mesh = ExtResource("47_oemm3")
+
+[node name="MainStand_Bench_3" type="MeshInstance3D" parent="MainStand" unique_id=432264299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.71, 2.92)
+mesh = ExtResource("48_su81h")
+
+[node name="MainStand_Terrace_4" type="MeshInstance3D" parent="MainStand" unique_id=641222892]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 3.6)
+mesh = ExtResource("49_p7r4v")
+
+[node name="MainStand_Bench_4" type="MeshInstance3D" parent="MainStand" unique_id=1418667799]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.13, 3.72)
+mesh = ExtResource("50_yv7bu")
+
+[node name="MainStand_Terrace_5" type="MeshInstance3D" parent="MainStand" unique_id=623043871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.06, 4.4)
+mesh = ExtResource("51_xrb5a")
+
+[node name="MainStand_Bench_5" type="MeshInstance3D" parent="MainStand" unique_id=361924206]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, 4.52)
+mesh = ExtResource("52_m1nkx")
+
+[node name="MainStand_Terrace_6" type="MeshInstance3D" parent="MainStand" unique_id=34498346]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.27, 5.2)
+mesh = ExtResource("53_y8wtx")
+
+[node name="MainStand_Bench_6" type="MeshInstance3D" parent="MainStand" unique_id=266038407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.97, 5.32)
+mesh = ExtResource("54_ibtoo")
+
+[node name="MainStand_Terrace_7" type="MeshInstance3D" parent="MainStand" unique_id=451860812]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48, 6)
+mesh = ExtResource("55_uuq31")
+
+[node name="MainStand_Bench_7" type="MeshInstance3D" parent="MainStand" unique_id=2069761153]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.39, 6.12)
+mesh = ExtResource("56_l1qni")
+
+[node name="MainStand_Terrace_8" type="MeshInstance3D" parent="MainStand" unique_id=1986030607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.69, 6.8)
+mesh = ExtResource("57_7an2i")
+
+[node name="MainStand_Bench_8" type="MeshInstance3D" parent="MainStand" unique_id=1049389153]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.81, 6.92)
+mesh = ExtResource("58_14jtk")
+
+[node name="MainStand_Terrace_9" type="MeshInstance3D" parent="MainStand" unique_id=1513998821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 7.6)
+mesh = ExtResource("59_dlr3s")
+
+[node name="MainStand_Bench_9" type="MeshInstance3D" parent="MainStand" unique_id=2118426396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.23, 7.72)
+mesh = ExtResource("60_uf5tm")
+
+[node name="MainStand_Terrace_10" type="MeshInstance3D" parent="MainStand" unique_id=2031792362]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.11, 8.4)
+mesh = ExtResource("61_6k05g")
+
+[node name="MainStand_Bench_10" type="MeshInstance3D" parent="MainStand" unique_id=849017752]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.65, 8.52)
+mesh = ExtResource("62_g2dbn")
+
+[node name="MainStand_Terrace_11" type="MeshInstance3D" parent="MainStand" unique_id=268152990]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.32, 9.2)
+mesh = ExtResource("63_pjp3g")
+
+[node name="MainStand_Bench_11" type="MeshInstance3D" parent="MainStand" unique_id=270202055]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.07, 9.32)
+mesh = ExtResource("64_psux1")
+
+[node name="MainStand_Terrace_12" type="MeshInstance3D" parent="MainStand" unique_id=1462526810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.53, 10)
+mesh = ExtResource("65_j1oa5")
+
+[node name="MainStand_Bench_12" type="MeshInstance3D" parent="MainStand" unique_id=1989936371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.49, 10.12)
+mesh = ExtResource("66_cwgpm")
+
+[node name="MainStand_Terrace_13" type="MeshInstance3D" parent="MainStand" unique_id=1081023654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.74, 10.8)
+mesh = ExtResource("67_n31mg")
+
+[node name="MainStand_Bench_13" type="MeshInstance3D" parent="MainStand" unique_id=216270153]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.91, 10.92)
+mesh = ExtResource("68_p7rvk")
+
+[node name="MainStand_Back" type="MeshInstance3D" parent="MainStand" unique_id=210530628]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 11.5)
+mesh = ExtResource("69_yxhap")
+
+[node name="MainStand_Roof" type="MeshInstance3D" parent="MainStand" unique_id=1115716623]
+transform = Transform3D(1, 0, 0, 0, 0.9945219, 0.104528464, 0, -0.104528464, 0.9945219, 0, 10.2, 4.4)
+mesh = ExtResource("70_52pxq")
+
+[node name="MainStand_Col_0_0" type="MeshInstance3D" parent="MainStand" unique_id=227220028]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65, 5.1, 0.1)
+mesh = ExtResource("71_50uuu")
+
+[node name="MainStand_Col_0_11" type="MeshInstance3D" parent="MainStand" unique_id=1102275207]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65, 5.1, 11.2)
+mesh = ExtResource("72_gosm3")
+
+[node name="MainStand_Col_1_0" type="MeshInstance3D" parent="MainStand" unique_id=813187431]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -54.166668, 5.1, 0.1)
+mesh = ExtResource("73_kneed")
+
+[node name="MainStand_Col_1_11" type="MeshInstance3D" parent="MainStand" unique_id=1859997109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -54.166668, 5.1, 11.2)
+mesh = ExtResource("74_sl5th")
+
+[node name="MainStand_Col_2_0" type="MeshInstance3D" parent="MainStand" unique_id=1669788846]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.333332, 5.1, 0.1)
+mesh = ExtResource("75_xljgb")
+
+[node name="MainStand_Col_2_11" type="MeshInstance3D" parent="MainStand" unique_id=1822070259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.333332, 5.1, 11.2)
+mesh = ExtResource("76_nymiw")
+
+[node name="MainStand_Col_3_0" type="MeshInstance3D" parent="MainStand" unique_id=77414509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 5.1, 0.1)
+mesh = ExtResource("77_2ujih")
+
+[node name="MainStand_Col_3_11" type="MeshInstance3D" parent="MainStand" unique_id=709370764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 5.1, 11.2)
+mesh = ExtResource("78_eq0fr")
+
+[node name="MainStand_Col_4_0" type="MeshInstance3D" parent="MainStand" unique_id=207897585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.666666, 5.1, 0.1)
+mesh = ExtResource("79_eqbmn")
+
+[node name="MainStand_Col_4_11" type="MeshInstance3D" parent="MainStand" unique_id=1950463720]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.666666, 5.1, 11.2)
+mesh = ExtResource("80_0elbb")
+
+[node name="MainStand_Col_5_0" type="MeshInstance3D" parent="MainStand" unique_id=1869279811]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.833333, 5.1, 0.1)
+mesh = ExtResource("81_6mtbh")
+
+[node name="MainStand_Col_5_11" type="MeshInstance3D" parent="MainStand" unique_id=1544203668]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.833333, 5.1, 11.2)
+mesh = ExtResource("82_rsuw2")
+
+[node name="MainStand_Col_6_0" type="MeshInstance3D" parent="MainStand" unique_id=1172577737]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 0.1)
+mesh = ExtResource("83_hso0t")
+
+[node name="MainStand_Col_6_11" type="MeshInstance3D" parent="MainStand" unique_id=765780615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 11.2)
+mesh = ExtResource("84_cg4na")
+
+[node name="MainStand_Col_7_0" type="MeshInstance3D" parent="MainStand" unique_id=702580167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.833333, 5.1, 0.1)
+mesh = ExtResource("85_p25l8")
+
+[node name="MainStand_Col_7_11" type="MeshInstance3D" parent="MainStand" unique_id=390491982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.833333, 5.1, 11.2)
+mesh = ExtResource("86_ka2dr")
+
+[node name="MainStand_Col_8_0" type="MeshInstance3D" parent="MainStand" unique_id=121758850]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.666666, 5.1, 0.1)
+mesh = ExtResource("87_h30ep")
+
+[node name="MainStand_Col_8_11" type="MeshInstance3D" parent="MainStand" unique_id=564839082]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.666666, 5.1, 11.2)
+mesh = ExtResource("88_nuc8l")
+
+[node name="MainStand_Col_9_0" type="MeshInstance3D" parent="MainStand" unique_id=1922538560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.5, 5.1, 0.1)
+mesh = ExtResource("89_ysfjq")
+
+[node name="MainStand_Col_9_11" type="MeshInstance3D" parent="MainStand" unique_id=1258366908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.5, 5.1, 11.2)
+mesh = ExtResource("90_gmujp")
+
+[node name="MainStand_Col_10_0" type="MeshInstance3D" parent="MainStand" unique_id=1280708390]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.333332, 5.1, 0.1)
+mesh = ExtResource("91_o5cw8")
+
+[node name="MainStand_Col_10_11" type="MeshInstance3D" parent="MainStand" unique_id=593152832]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.333332, 5.1, 11.2)
+mesh = ExtResource("92_r3o4j")
+
+[node name="MainStand_Col_11_0" type="MeshInstance3D" parent="MainStand" unique_id=759855724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.166668, 5.1, 0.1)
+mesh = ExtResource("93_or6i3")
+
+[node name="MainStand_Col_11_11" type="MeshInstance3D" parent="MainStand" unique_id=719225423]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.166668, 5.1, 11.2)
+mesh = ExtResource("94_b82q3")
+
+[node name="MainStand_Col_12_0" type="MeshInstance3D" parent="MainStand" unique_id=1355985975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65, 5.1, 0.1)
+mesh = ExtResource("95_egrip")
+
+[node name="MainStand_Col_12_11" type="MeshInstance3D" parent="MainStand" unique_id=1399158747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65, 5.1, 11.2)
+mesh = ExtResource("96_lgohb")
+
+[node name="MainStand_Board_0" type="MeshInstance3D" parent="MainStand" unique_id=415798092]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -59.4, 8.4, -1.6)
+material_override = ExtResource("97_ku3vq")
+gi_mode = 2
+mesh = SubResource("QuadMesh_ya51b")
+
+[node name="MainStand_Board_1" type="MeshInstance3D" parent="MainStand" unique_id=1620337543]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -46.2, 8.4, -1.6)
+material_override = ExtResource("98_kvm1b")
+gi_mode = 2
+mesh = SubResource("QuadMesh_3wfio")
+
+[node name="MainStand_Board_2" type="MeshInstance3D" parent="MainStand" unique_id=500631955]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -33, 8.4, -1.6)
+material_override = ExtResource("99_eesn0")
+gi_mode = 2
+mesh = SubResource("QuadMesh_hmd7l")
+
+[node name="MainStand_Board_3" type="MeshInstance3D" parent="MainStand" unique_id=1321981646]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -19.8, 8.4, -1.6)
+material_override = ExtResource("100_ajuvs")
+gi_mode = 2
+mesh = SubResource("QuadMesh_wn2ke")
+
+[node name="MainStand_Board_4" type="MeshInstance3D" parent="MainStand" unique_id=1202368412]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -6.6, 8.4, -1.6)
+material_override = ExtResource("101_u0j5m")
+gi_mode = 2
+mesh = SubResource("QuadMesh_7iw5q")
+
+[node name="MainStand_Board_5" type="MeshInstance3D" parent="MainStand" unique_id=1401350687]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 6.6, 8.4, -1.6)
+material_override = ExtResource("102_43xws")
+gi_mode = 2
+mesh = SubResource("QuadMesh_235xo")
+
+[node name="MainStand_Board_6" type="MeshInstance3D" parent="MainStand" unique_id=561830982]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 19.8, 8.4, -1.6)
+material_override = ExtResource("103_kj132")
+gi_mode = 2
+mesh = SubResource("QuadMesh_k5qo1")
+
+[node name="MainStand_Board_7" type="MeshInstance3D" parent="MainStand" unique_id=342399203]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 33, 8.4, -1.6)
+material_override = ExtResource("104_tsi3g")
+gi_mode = 2
+mesh = SubResource("QuadMesh_23ksh")
+
+[node name="MainStand_Board_8" type="MeshInstance3D" parent="MainStand" unique_id=1575606670]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 46.2, 8.4, -1.6)
+material_override = ExtResource("97_ku3vq")
+gi_mode = 2
+mesh = SubResource("QuadMesh_c3lv0")
+
+[node name="MainStand_Board_9" type="MeshInstance3D" parent="MainStand" unique_id=988791226]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 59.4, 8.4, -1.6)
+material_override = ExtResource("98_kvm1b")
+gi_mode = 2
+mesh = SubResource("QuadMesh_3hs2p")
+
+[node name="BackStand" type="Node3D" parent="." unique_id=54323058]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -79.6)
+
+[node name="BackStand_Terrace_0" type="MeshInstance3D" parent="BackStand" unique_id=1202852245]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0.4)
+mesh = ExtResource("105_oso5x")
+
+[node name="BackStand_Bench_0" type="MeshInstance3D" parent="BackStand" unique_id=1247596744]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.52)
+mesh = ExtResource("106_1cs5i")
+
+[node name="BackStand_Terrace_1" type="MeshInstance3D" parent="BackStand" unique_id=747329595]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 1.2)
+mesh = ExtResource("107_whn85")
+
+[node name="BackStand_Bench_1" type="MeshInstance3D" parent="BackStand" unique_id=511226932]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.87, 1.32)
+mesh = ExtResource("108_fe77i")
+
+[node name="BackStand_Terrace_2" type="MeshInstance3D" parent="BackStand" unique_id=1036943591]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43, 2)
+mesh = ExtResource("109_6mfh6")
+
+[node name="BackStand_Bench_2" type="MeshInstance3D" parent="BackStand" unique_id=791178784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.29, 2.12)
+mesh = ExtResource("110_i6hkt")
+
+[node name="BackStand_Terrace_3" type="MeshInstance3D" parent="BackStand" unique_id=522490129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64, 2.8)
+mesh = ExtResource("111_btu8p")
+
+[node name="BackStand_Bench_3" type="MeshInstance3D" parent="BackStand" unique_id=1923718950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.71, 2.92)
+mesh = ExtResource("112_drick")
+
+[node name="BackStand_Terrace_4" type="MeshInstance3D" parent="BackStand" unique_id=762166230]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 3.6)
+mesh = ExtResource("113_byxbc")
+
+[node name="BackStand_Bench_4" type="MeshInstance3D" parent="BackStand" unique_id=764223289]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.13, 3.72)
+mesh = ExtResource("114_i2xol")
+
+[node name="BackStand_Terrace_5" type="MeshInstance3D" parent="BackStand" unique_id=578922777]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.06, 4.4)
+mesh = ExtResource("115_momot")
+
+[node name="BackStand_Bench_5" type="MeshInstance3D" parent="BackStand" unique_id=1604346100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, 4.52)
+mesh = ExtResource("116_rfany")
+
+[node name="BackStand_Terrace_6" type="MeshInstance3D" parent="BackStand" unique_id=1378479444]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.27, 5.2)
+mesh = ExtResource("117_lgjig")
+
+[node name="BackStand_Bench_6" type="MeshInstance3D" parent="BackStand" unique_id=986132979]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.97, 5.32)
+mesh = ExtResource("118_jgsyj")
+
+[node name="BackStand_Terrace_7" type="MeshInstance3D" parent="BackStand" unique_id=313191915]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.48, 6)
+mesh = ExtResource("119_7ippn")
+
+[node name="BackStand_Bench_7" type="MeshInstance3D" parent="BackStand" unique_id=1069858923]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.39, 6.12)
+mesh = ExtResource("120_0gegi")
+
+[node name="BackStand_Terrace_8" type="MeshInstance3D" parent="BackStand" unique_id=1814939821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.69, 6.8)
+mesh = ExtResource("121_tng5b")
+
+[node name="BackStand_Bench_8" type="MeshInstance3D" parent="BackStand" unique_id=134205959]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.81, 6.92)
+mesh = ExtResource("122_wxdwn")
+
+[node name="BackStand_Terrace_9" type="MeshInstance3D" parent="BackStand" unique_id=290540411]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 7.6)
+mesh = ExtResource("123_vyf5y")
+
+[node name="BackStand_Bench_9" type="MeshInstance3D" parent="BackStand" unique_id=145963958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.23, 7.72)
+mesh = ExtResource("124_10guh")
+
+[node name="BackStand_Back" type="MeshInstance3D" parent="BackStand" unique_id=978003404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 8.3)
+mesh = ExtResource("125_jmjy8")
+
+[node name="BackStand_Roof" type="MeshInstance3D" parent="BackStand" unique_id=151561712]
+transform = Transform3D(1, 0, 0, 0, 0.9945219, 0.104528464, 0, -0.104528464, 0.9945219, 0, 10.2, 2.8)
+mesh = ExtResource("126_2oeb0")
+
+[node name="BackStand_Col_0_0" type="MeshInstance3D" parent="BackStand" unique_id=836014341]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 5.1, 0.1)
+mesh = ExtResource("127_82j7t")
+
+[node name="BackStand_Col_0_8" type="MeshInstance3D" parent="BackStand" unique_id=658107914]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41, 5.1, 8)
+mesh = ExtResource("128_weud5")
+
+[node name="BackStand_Col_1_0" type="MeshInstance3D" parent="BackStand" unique_id=1876755447]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.285715, 5.1, 0.1)
+mesh = ExtResource("129_v6rbq")
+
+[node name="BackStand_Col_1_8" type="MeshInstance3D" parent="BackStand" unique_id=2121000830]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.285715, 5.1, 8)
+mesh = ExtResource("130_fsyul")
+
+[node name="BackStand_Col_2_0" type="MeshInstance3D" parent="BackStand" unique_id=412915377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.571428, 5.1, 0.1)
+mesh = ExtResource("131_wn18u")
+
+[node name="BackStand_Col_2_8" type="MeshInstance3D" parent="BackStand" unique_id=692938419]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.571428, 5.1, 8)
+mesh = ExtResource("132_5duoy")
+
+[node name="BackStand_Col_3_0" type="MeshInstance3D" parent="BackStand" unique_id=541203297]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.857143, 5.1, 0.1)
+mesh = ExtResource("133_av6wi")
+
+[node name="BackStand_Col_3_8" type="MeshInstance3D" parent="BackStand" unique_id=1665837434]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.857143, 5.1, 8)
+mesh = ExtResource("134_4qiqk")
+
+[node name="BackStand_Col_4_0" type="MeshInstance3D" parent="BackStand" unique_id=2118144931]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.857143, 5.1, 0.1)
+mesh = ExtResource("135_1gm0f")
+
+[node name="BackStand_Col_4_8" type="MeshInstance3D" parent="BackStand" unique_id=885801532]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.857143, 5.1, 8)
+mesh = ExtResource("136_hmi8m")
+
+[node name="BackStand_Col_5_0" type="MeshInstance3D" parent="BackStand" unique_id=1141917595]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.571428, 5.1, 0.1)
+mesh = ExtResource("137_gi28u")
+
+[node name="BackStand_Col_5_8" type="MeshInstance3D" parent="BackStand" unique_id=71235550]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.571428, 5.1, 8)
+mesh = ExtResource("138_prg6s")
+
+[node name="BackStand_Col_6_0" type="MeshInstance3D" parent="BackStand" unique_id=748035085]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.285715, 5.1, 0.1)
+mesh = ExtResource("139_yydio")
+
+[node name="BackStand_Col_6_8" type="MeshInstance3D" parent="BackStand" unique_id=1719005486]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.285715, 5.1, 8)
+mesh = ExtResource("140_qnau3")
+
+[node name="BackStand_Col_7_0" type="MeshInstance3D" parent="BackStand" unique_id=1388274519]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41, 5.1, 0.1)
+mesh = ExtResource("141_8tj87")
+
+[node name="BackStand_Col_7_8" type="MeshInstance3D" parent="BackStand" unique_id=1128489465]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41, 5.1, 8)
+mesh = ExtResource("142_cfw6w")
+
+[node name="BackStand_Board_0" type="MeshInstance3D" parent="BackStand" unique_id=454879235]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -35, 8.4, -1.6)
+material_override = ExtResource("100_ajuvs")
+gi_mode = 2
+mesh = SubResource("QuadMesh_8rdo6")
+
+[node name="BackStand_Board_1" type="MeshInstance3D" parent="BackStand" unique_id=2000409973]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -21, 8.4, -1.6)
+material_override = ExtResource("101_u0j5m")
+gi_mode = 2
+mesh = SubResource("QuadMesh_todiw")
+
+[node name="BackStand_Board_2" type="MeshInstance3D" parent="BackStand" unique_id=888714873]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -7, 8.4, -1.6)
+material_override = ExtResource("102_43xws")
+gi_mode = 2
+mesh = SubResource("QuadMesh_o6x48")
+
+[node name="BackStand_Board_3" type="MeshInstance3D" parent="BackStand" unique_id=859242199]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 7, 8.4, -1.6)
+material_override = ExtResource("103_kj132")
+gi_mode = 2
+mesh = SubResource("QuadMesh_gsrkd")
+
+[node name="BackStand_Board_4" type="MeshInstance3D" parent="BackStand" unique_id=1657933569]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 21, 8.4, -1.6)
+material_override = ExtResource("104_tsi3g")
+gi_mode = 2
+mesh = SubResource("QuadMesh_0hc8p")
+
+[node name="BackStand_Board_5" type="MeshInstance3D" parent="BackStand" unique_id=1250992065]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 35, 8.4, -1.6)
+material_override = ExtResource("97_ku3vq")
+gi_mode = 2
+mesh = SubResource("QuadMesh_ogyna")
+
+[node name="Garage_oval_0" type="Node3D" parent="." unique_id=611864527]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -27, 0, 47.5)
+
+[node name="Garage_oval_0_Back" type="MeshInstance3D" parent="Garage_oval_0" unique_id=1318588095]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("143_vk062")
+
+[node name="Garage_oval_0_Side_-3" type="MeshInstance3D" parent="Garage_oval_0" unique_id=18204442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("144_ukg3l")
+
+[node name="Garage_oval_0_Side_3" type="MeshInstance3D" parent="Garage_oval_0" unique_id=1905103489]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("145_8a77d")
+
+[node name="Garage_oval_0_Roof" type="MeshInstance3D" parent="Garage_oval_0" unique_id=1437145984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("146_nyy8h")
+
+[node name="Garage_oval_0_Lintel" type="MeshInstance3D" parent="Garage_oval_0" unique_id=1960502579]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("147_b5g3x")
+
+[node name="Garage_oval_0_Floor" type="MeshInstance3D" parent="Garage_oval_0" unique_id=1106087384]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("148_onyix")
+
+[node name="Garage_oval_0_Bench" type="MeshInstance3D" parent="Garage_oval_0" unique_id=1199959831]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("149_f3lc7")
+
+[node name="Number" type="Label3D" parent="Garage_oval_0" unique_id=1729941158]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 1"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_oval_1" type="Node3D" parent="." unique_id=1315919511]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -9, 0, 47.5)
+
+[node name="Garage_oval_1_Back" type="MeshInstance3D" parent="Garage_oval_1" unique_id=955747266]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("150_es0tu")
+
+[node name="Garage_oval_1_Side_-3" type="MeshInstance3D" parent="Garage_oval_1" unique_id=1053624714]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("151_nw0k2")
+
+[node name="Garage_oval_1_Side_3" type="MeshInstance3D" parent="Garage_oval_1" unique_id=16086414]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("152_qps30")
+
+[node name="Garage_oval_1_Roof" type="MeshInstance3D" parent="Garage_oval_1" unique_id=1791024394]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("153_1f3nu")
+
+[node name="Garage_oval_1_Lintel" type="MeshInstance3D" parent="Garage_oval_1" unique_id=1183532663]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("154_ew3vy")
+
+[node name="Garage_oval_1_Floor" type="MeshInstance3D" parent="Garage_oval_1" unique_id=681039009]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("155_5l7rg")
+
+[node name="Garage_oval_1_Bench" type="MeshInstance3D" parent="Garage_oval_1" unique_id=1860976891]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("156_1scwb")
+
+[node name="Number" type="Label3D" parent="Garage_oval_1" unique_id=2043847124]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 2"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_oval_2" type="Node3D" parent="." unique_id=94817833]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 9, 0, 47.5)
+
+[node name="Garage_oval_2_Back" type="MeshInstance3D" parent="Garage_oval_2" unique_id=1166830010]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("157_vcwry")
+
+[node name="Garage_oval_2_Side_-3" type="MeshInstance3D" parent="Garage_oval_2" unique_id=430911371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("158_ya0cq")
+
+[node name="Garage_oval_2_Side_3" type="MeshInstance3D" parent="Garage_oval_2" unique_id=2101985105]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("159_1e7pm")
+
+[node name="Garage_oval_2_Roof" type="MeshInstance3D" parent="Garage_oval_2" unique_id=547799035]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("160_yvvhq")
+
+[node name="Garage_oval_2_Lintel" type="MeshInstance3D" parent="Garage_oval_2" unique_id=287943129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("161_jjs8v")
+
+[node name="Garage_oval_2_Floor" type="MeshInstance3D" parent="Garage_oval_2" unique_id=838588441]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("162_j6ayl")
+
+[node name="Garage_oval_2_Bench" type="MeshInstance3D" parent="Garage_oval_2" unique_id=263781854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("163_oci2v")
+
+[node name="Number" type="Label3D" parent="Garage_oval_2" unique_id=1295961726]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 3"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_oval_3" type="Node3D" parent="." unique_id=1119868439]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 27, 0, 47.5)
+
+[node name="Garage_oval_3_Back" type="MeshInstance3D" parent="Garage_oval_3" unique_id=1793496173]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("164_62sj1")
+
+[node name="Garage_oval_3_Side_-3" type="MeshInstance3D" parent="Garage_oval_3" unique_id=524504604]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("165_askn3")
+
+[node name="Garage_oval_3_Side_3" type="MeshInstance3D" parent="Garage_oval_3" unique_id=498331678]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("166_k27by")
+
+[node name="Garage_oval_3_Roof" type="MeshInstance3D" parent="Garage_oval_3" unique_id=809423811]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("167_d6yum")
+
+[node name="Garage_oval_3_Lintel" type="MeshInstance3D" parent="Garage_oval_3" unique_id=890790540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("168_txb6f")
+
+[node name="Garage_oval_3_Floor" type="MeshInstance3D" parent="Garage_oval_3" unique_id=2090719019]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("169_nc72l")
+
+[node name="Garage_oval_3_Bench" type="MeshInstance3D" parent="Garage_oval_3" unique_id=1587528301]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("170_gbswe")
+
+[node name="Number" type="Label3D" parent="Garage_oval_3" unique_id=740769957]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 4"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_figure8_0" type="Node3D" parent="." unique_id=800143720]
+transform = Transform3D(0.9878026, 0, 0.15571146, 0, 1.0000001, 0, -0.15571146, 0, 0.9878026, -121.111534, 0, -46.91783)
+
+[node name="Garage_figure8_0_Back" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=1222206196]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("171_7oyh5")
+
+[node name="Garage_figure8_0_Side_-3" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=2070799453]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("172_t1tea")
+
+[node name="Garage_figure8_0_Side_3" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=871427813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("173_6sku6")
+
+[node name="Garage_figure8_0_Roof" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=1710155271]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("174_7e5cj")
+
+[node name="Garage_figure8_0_Lintel" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=898920358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("175_kmmki")
+
+[node name="Garage_figure8_0_Floor" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=1464416653]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("176_8ew0e")
+
+[node name="Garage_figure8_0_Bench" type="MeshInstance3D" parent="Garage_figure8_0" unique_id=751044546]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("177_gmj7p")
+
+[node name="Number" type="Label3D" parent="Garage_figure8_0" unique_id=549783312]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 1"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_figure8_1" type="Node3D" parent="." unique_id=996472634]
+transform = Transform3D(0.97707665, 0, -0.21288791, 0, 1, 0, 0.21288791, 0, 0.97707665, -103.574196, 0, -46.408165)
+
+[node name="Garage_figure8_1_Back" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=1201929762]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("178_an53l")
+
+[node name="Garage_figure8_1_Side_-3" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=2138908314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("179_udwgo")
+
+[node name="Garage_figure8_1_Side_3" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=2091968156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("180_k3mr4")
+
+[node name="Garage_figure8_1_Roof" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=2126215269]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("181_l3td8")
+
+[node name="Garage_figure8_1_Lintel" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=930628137]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("182_53gad")
+
+[node name="Garage_figure8_1_Floor" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=1220604122]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("183_lkxpc")
+
+[node name="Garage_figure8_1_Bench" type="MeshInstance3D" parent="Garage_figure8_1" unique_id=1593455109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("184_tvuqn")
+
+[node name="Number" type="Label3D" parent="Garage_figure8_1" unique_id=1633638965]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 2"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_figure8_2" type="Node3D" parent="." unique_id=1698491758]
+transform = Transform3D(0.8248841, 0, -0.5653019, 0, 1, 0, 0.5653019, 0, 0.8248841, -86.864296, 0, -39.193493)
+
+[node name="Garage_figure8_2_Back" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=1274578895]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("185_6nuwv")
+
+[node name="Garage_figure8_2_Side_-3" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=996616407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("186_6mo8t")
+
+[node name="Garage_figure8_2_Side_3" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=1136452776]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("187_pc0vp")
+
+[node name="Garage_figure8_2_Roof" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=1267666770]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("188_1580n")
+
+[node name="Garage_figure8_2_Lintel" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=293982299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("189_s2qys")
+
+[node name="Garage_figure8_2_Floor" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=1075828071]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("190_xn0kn")
+
+[node name="Garage_figure8_2_Bench" type="MeshInstance3D" parent="Garage_figure8_2" unique_id=1331975853]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("191_5r1ut")
+
+[node name="Number" type="Label3D" parent="Garage_figure8_2" unique_id=2056900967]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 3"
+font_size = 96
+outline_size = 0
+
+[node name="Garage_figure8_3" type="Node3D" parent="." unique_id=159339338]
+transform = Transform3D(0.78808486, 0, -0.6155666, 0, 1, 0, 0.6155666, 0, 0.78808486, -66.643295, 0, -23.514538)
+
+[node name="Garage_figure8_3_Back" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=734134801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 4.3)
+mesh = ExtResource("192_5f0rh")
+
+[node name="Garage_figure8_3_Side_-3" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=1658799969]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 2.1, 0)
+mesh = ExtResource("193_eshkt")
+
+[node name="Garage_figure8_3_Side_3" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=641649592]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 2.1, 0)
+mesh = ExtResource("194_aj1u0")
+
+[node name="Garage_figure8_3_Roof" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=1768084433]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.35, -0.3)
+mesh = ExtResource("195_0t2x7")
+
+[node name="Garage_figure8_3_Lintel" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=1420803213]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, -4.3)
+mesh = ExtResource("196_a5fko")
+
+[node name="Garage_figure8_3_Floor" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=394218397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = ExtResource("197_5eqdd")
+
+[node name="Garage_figure8_3_Bench" type="MeshInstance3D" parent="Garage_figure8_3" unique_id=147861228]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.45, 3.6)
+mesh = ExtResource("198_2l2ld")
+
+[node name="Number" type="Label3D" parent="Garage_figure8_3" unique_id=128458677]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 3.75, -4.47)
+pixel_size = 0.008
+modulate = Color(1, 0.85, 0.2, 1)
+text = "PIT 4"
+font_size = 96
+outline_size = 0
+
+[node name="Gantry_oval" type="Node3D" parent="." unique_id=147921722]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 70)
+
+[node name="Gantry_oval_Pillar_-8" type="MeshInstance3D" parent="Gantry_oval" unique_id=1082432678]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.7, 3.8, 0)
+mesh = ExtResource("199_d3oiw")
+
+[node name="Gantry_oval_Pillar_8" type="MeshInstance3D" parent="Gantry_oval" unique_id=1835902054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.7, 3.8, 0)
+mesh = ExtResource("200_bjq0o")
+
+[node name="Gantry_oval_Beam" type="MeshInstance3D" parent="Gantry_oval" unique_id=1485064696]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+mesh = ExtResource("201_61qmm")
+
+[node name="Title" type="Label3D" parent="Gantry_oval" unique_id=583998492]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0.37)
+pixel_size = 0.0085
+modulate = Color(1, 0.85, 0.25, 1)
+text = "CROSSROADS SPEEDWAY"
+font_size = 120
+outline_size = 0
+
+[node name="TitleBack" type="Label3D" parent="Gantry_oval" unique_id=588807546]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 7, -0.37)
+pixel_size = 0.0085
+modulate = Color(1, 0.85, 0.25, 1)
+text = "CROSSROADS SPEEDWAY"
+font_size = 120
+outline_size = 0
+
+[node name="StartLight_0" type="MeshInstance3D" parent="Gantry_oval" unique_id=1570098701]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_7nciw")
+
+[node name="StartLight_1" type="MeshInstance3D" parent="Gantry_oval" unique_id=491752189]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_6xt1x")
+
+[node name="StartLight_2" type="MeshInstance3D" parent="Gantry_oval" unique_id=2122180381]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_3yyak")
+
+[node name="StartLight_3" type="MeshInstance3D" parent="Gantry_oval" unique_id=1456702730]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_fobgs")
+
+[node name="StartLight_4" type="MeshInstance3D" parent="Gantry_oval" unique_id=1719032716]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_jf266")
+
+[node name="Gantry_figure8" type="Node3D" parent="." unique_id=31170911]
+transform = Transform3D(-0.6155663, 0, -0.7880851, 0, 1, 0, 0.7880851, 0, -0.6155663, 66.975, 0, 52.326)
+
+[node name="Gantry_figure8_Pillar_-8" type="MeshInstance3D" parent="Gantry_figure8" unique_id=1196453145]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.7, 3.8, 0)
+mesh = ExtResource("203_xkvcu")
+
+[node name="Gantry_figure8_Pillar_8" type="MeshInstance3D" parent="Gantry_figure8" unique_id=743516586]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.7, 3.8, 0)
+mesh = ExtResource("204_p8ln6")
+
+[node name="Gantry_figure8_Beam" type="MeshInstance3D" parent="Gantry_figure8" unique_id=1593113604]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0)
+mesh = ExtResource("205_ps0b0")
+
+[node name="Title" type="Label3D" parent="Gantry_figure8" unique_id=1523393244]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, 0.37)
+pixel_size = 0.0085
+modulate = Color(1, 0.85, 0.25, 1)
+text = "CROSSROADS SPEEDWAY"
+font_size = 120
+outline_size = 0
+
+[node name="TitleBack" type="Label3D" parent="Gantry_figure8" unique_id=406017027]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 7, -0.37)
+pixel_size = 0.0085
+modulate = Color(1, 0.85, 0.25, 1)
+text = "CROSSROADS SPEEDWAY"
+font_size = 120
+outline_size = 0
+
+[node name="StartLight_0" type="MeshInstance3D" parent="Gantry_figure8" unique_id=1914327438]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_dqtna")
+
+[node name="StartLight_1" type="MeshInstance3D" parent="Gantry_figure8" unique_id=1607750726]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_d8voi")
+
+[node name="StartLight_2" type="MeshInstance3D" parent="Gantry_figure8" unique_id=128712991]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_m6ci8")
+
+[node name="StartLight_3" type="MeshInstance3D" parent="Gantry_figure8" unique_id=305217900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_8u0mi")
+
+[node name="StartLight_4" type="MeshInstance3D" parent="Gantry_figure8" unique_id=44593462]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 6, 0.36)
+material_override = ExtResource("202_xehcn")
+gi_mode = 0
+mesh = SubResource("SphereMesh_ik2lp")
+
+[node name="Billboard_0" type="Node3D" parent="." unique_id=1673325817]
+transform = Transform3D(0.09736216, 0, 0.9952491, 0, 1.0000001, 0, -0.9952491, 0, 0.09736216, 21.390617, 0, 2.0925784)
+
+[node name="Billboard_0_Leg_-4" type="MeshInstance3D" parent="Billboard_0" unique_id=842761838]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 2.2, 0.3)
+mesh = ExtResource("206_u1r75")
+
+[node name="Billboard_0_Leg_4" type="MeshInstance3D" parent="Billboard_0" unique_id=958124175]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 2.2, 0.3)
+mesh = ExtResource("207_uc8i6")
+
+[node name="Billboard_0_Frame" type="MeshInstance3D" parent="Billboard_0" unique_id=1226542853]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.15)
+mesh = ExtResource("208_pftqx")
+
+[node name="Face_0" type="MeshInstance3D" parent="Billboard_0" unique_id=426269849]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2.75, -0.01)
+material_override = ExtResource("97_ku3vq")
+gi_mode = 2
+mesh = SubResource("QuadMesh_shkkx")
+
+[node name="Face_1" type="MeshInstance3D" parent="Billboard_0" unique_id=836177446]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.31)
+material_override = ExtResource("104_tsi3g")
+gi_mode = 2
+mesh = SubResource("QuadMesh_66vlm")
+
+[node name="Billboard_1" type="Node3D" parent="." unique_id=1213763239]
+transform = Transform3D(-0.9425591, 0, 0.33403945, 0, 1.0000001, 0, -0.33403945, 0, -0.9425591, 7.1803355, 0, -20.260752)
+
+[node name="Billboard_1_Leg_-4" type="MeshInstance3D" parent="Billboard_1" unique_id=1315011587]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 2.2, 0.3)
+mesh = ExtResource("209_kvbim")
+
+[node name="Billboard_1_Leg_4" type="MeshInstance3D" parent="Billboard_1" unique_id=188643245]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 2.2, 0.3)
+mesh = ExtResource("210_001pp")
+
+[node name="Billboard_1_Frame" type="MeshInstance3D" parent="Billboard_1" unique_id=10135410]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.15)
+mesh = ExtResource("211_4580e")
+
+[node name="Face_0" type="MeshInstance3D" parent="Billboard_1" unique_id=1422989498]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2.75, -0.01)
+material_override = ExtResource("103_kj132")
+gi_mode = 2
+mesh = SubResource("QuadMesh_p72hf")
+
+[node name="Face_1" type="MeshInstance3D" parent="Billboard_1" unique_id=447969163]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.31)
+material_override = ExtResource("102_43xws")
+gi_mode = 2
+mesh = SubResource("QuadMesh_1qee0")
+
+[node name="Billboard_2" type="Node3D" parent="." unique_id=839591905]
+transform = Transform3D(0.9425591, 0, 0.33403945, 0, 1.0000001, 0, -0.33403945, 0, 0.9425591, 7.1803355, 0, 20.260752)
+
+[node name="Billboard_2_Leg_-4" type="MeshInstance3D" parent="Billboard_2" unique_id=562827533]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 2.2, 0.3)
+mesh = ExtResource("212_cie70")
+
+[node name="Billboard_2_Leg_4" type="MeshInstance3D" parent="Billboard_2" unique_id=550637392]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 2.2, 0.3)
+mesh = ExtResource("213_a36ow")
+
+[node name="Billboard_2_Frame" type="MeshInstance3D" parent="Billboard_2" unique_id=1404243041]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.15)
+mesh = ExtResource("214_4a4gq")
+
+[node name="Face_0" type="MeshInstance3D" parent="Billboard_2" unique_id=1227627586]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2.75, -0.01)
+material_override = ExtResource("101_u0j5m")
+gi_mode = 2
+mesh = SubResource("QuadMesh_d5cwu")
+
+[node name="Face_1" type="MeshInstance3D" parent="Billboard_2" unique_id=1368562540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.31)
+material_override = ExtResource("100_ajuvs")
+gi_mode = 2
+mesh = SubResource("QuadMesh_7qs7w")
+
+[node name="Billboard_3" type="Node3D" parent="." unique_id=177673509]
+transform = Transform3D(-0.09736216, 0, -0.9952491, 0, 1.0000001, 0, 0.9952491, 0, -0.09736216, -21.390617, 0, -2.0925784)
+
+[node name="Billboard_3_Leg_-4" type="MeshInstance3D" parent="Billboard_3" unique_id=480057604]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 2.2, 0.3)
+mesh = ExtResource("215_bttl5")
+
+[node name="Billboard_3_Leg_4" type="MeshInstance3D" parent="Billboard_3" unique_id=216053340]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 2.2, 0.3)
+mesh = ExtResource("216_x1ct1")
+
+[node name="Billboard_3_Frame" type="MeshInstance3D" parent="Billboard_3" unique_id=1816312750]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.15)
+mesh = ExtResource("217_vtuom")
+
+[node name="Face_0" type="MeshInstance3D" parent="Billboard_3" unique_id=1458107840]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 2.75, -0.01)
+material_override = ExtResource("99_eesn0")
+gi_mode = 2
+mesh = SubResource("QuadMesh_kd0rc")
+
+[node name="Face_1" type="MeshInstance3D" parent="Billboard_3" unique_id=1114280877]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0.31)
+material_override = ExtResource("98_kvm1b")
+gi_mode = 2
+mesh = SubResource("QuadMesh_pk1gm")
+
+[node name="Floodlight_0" type="Node3D" parent="." unique_id=1209186669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 96)
+
+[node name="Floodlight_0_Pole" type="MeshInstance3D" parent="Floodlight_0" unique_id=708048993]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("218_opv75")
+
+[node name="Head" type="Node3D" parent="Floodlight_0" unique_id=895814542]
+transform = Transform3D(0.37139067, -0.3962961, 0.83965373, 0, 0.9043347, 0.42682397, -0.9284767, -0.15851845, 0.33586147, 0, 30.5, 0)
+
+[node name="Floodlight_0_Frame" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=177164597]
+mesh = ExtResource("219_lub65")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1254827228]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_wyfwi")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1736881040]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3euxi")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=623970709]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_v1auy")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1608403570]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_vubme")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=729825898]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ct2lp")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=59512918]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_dmudl")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1147459603]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_8jyv1")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=93133016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_60qxl")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1656338640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_v3x2y")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=663951881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_idi02")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1858511870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_385tf")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=92474922]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_jgvfd")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=849901466]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_bpgp3")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=1925698367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_w2i7d")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_0/Head" unique_id=861885764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_2s28q")
+
+[node name="Floodlight_1" type="Node3D" parent="." unique_id=192676555]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 204, 0, 18)
+
+[node name="Floodlight_1_Pole" type="MeshInstance3D" parent="Floodlight_1" unique_id=871205337]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("221_3rl6v")
+
+[node name="Head" type="Node3D" parent="Floodlight_1" unique_id=2073282051]
+transform = Transform3D(-0.32711056, -0.4581141, 0.8265169, 0, 0.87463397, 0.48478395, -0.9449861, 0.15857795, -0.286102, 0, 30.5, 0)
+
+[node name="Floodlight_1_Frame" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=460482755]
+mesh = ExtResource("222_llle6")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1830597021]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_sg17a")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1992624485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_rfo8o")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=824389987]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_sgkph")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=665146126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_hls0s")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1807160801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_q61h2")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1963162219]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ye361")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1014545154]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_2cubw")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1536060322]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_8daat")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1223306280]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_tp0vy")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=2066062243]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_murmq")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=377385415]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3pll5")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=168357193]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_2db1h")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1774304804]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_r2q8o")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=56346706]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ivemx")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_1/Head" unique_id=1084973732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ve0jf")
+
+[node name="Floodlight_2" type="Node3D" parent="." unique_id=741117624]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, -96)
+
+[node name="Floodlight_2_Pole" type="MeshInstance3D" parent="Floodlight_2" unique_id=161054585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("223_21rsm")
+
+[node name="Head" type="Node3D" parent="Floodlight_2" unique_id=1769392897]
+transform = Transform3D(-0.37139067, -0.3962961, 0.83965373, 0, 0.9043347, 0.42682397, -0.9284767, 0.15851845, -0.33586147, 0, 30.5, 0)
+
+[node name="Floodlight_2_Frame" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1502700996]
+mesh = ExtResource("224_wc2uf")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1120964435]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_16hv1")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1715191690]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_yjw3m")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1271018505]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_dol2t")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=2055896101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_xmbkw")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=282533379]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_34pvs")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=2094171542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_r3mnr")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1791775621]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_r4c0s")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=679203100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_l1oav")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1278876317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_2ql3n")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=335701801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ui06i")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1688745349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_a51w5")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=656720559]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_4bn5t")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1395249985]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_0aepq")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=1014337462]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_dqpe7")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_2/Head" unique_id=80700348]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nt017")
+
+[node name="Floodlight_3" type="Node3D" parent="." unique_id=1961787642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 204, 0, -18)
+
+[node name="Floodlight_3_Pole" type="MeshInstance3D" parent="Floodlight_3" unique_id=893881103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("225_uwnu2")
+
+[node name="Head" type="Node3D" parent="Floodlight_3" unique_id=430158663]
+transform = Transform3D(0.32711056, -0.4581141, 0.8265169, 0, 0.87463397, 0.48478395, -0.9449861, -0.15857795, 0.286102, 0, 30.5, 0)
+
+[node name="Floodlight_3_Frame" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1089618374]
+mesh = ExtResource("226_1nagk")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=832484670]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_5wna7")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=615399338]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_h6hcs")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1358660824]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_i2gba")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=240928756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_pvgrj")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=2044993495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nsyae")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1291227098]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3kswb")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=694766915]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ifb3m")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1890858966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_hf8dx")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=976384186]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_0jsx6")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=98880799]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3v6sd")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=558243649]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_mh5fd")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1898654400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_kv7re")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1376467067]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_oups8")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1519543831]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_4qklr")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_3/Head" unique_id=1547966266]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3pvvq")
+
+[node name="Floodlight_4" type="Node3D" parent="." unique_id=310714463]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0, 96)
+
+[node name="Floodlight_4_Pole" type="MeshInstance3D" parent="Floodlight_4" unique_id=1517199548]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("227_r0oln")
+
+[node name="Head" type="Node3D" parent="Floodlight_4" unique_id=1338753424]
+transform = Transform3D(0.37139067, 0.3962961, -0.83965373, 0, 0.9043347, 0.42682397, 0.9284767, -0.15851845, 0.33586147, 0, 30.5, 0)
+
+[node name="Floodlight_4_Frame" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=373626326]
+mesh = ExtResource("228_jua75")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=696817443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_4hp11")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1806206830]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_jfub6")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1349078631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_5ivaw")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=774414189]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_vlqm4")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1735391186]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_2jhqa")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=884389050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_myj0v")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1091094864]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_wai4n")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1136973718]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_id58y")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1569208989]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ipysr")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=89840175]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nrwr5")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1859750801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_dfv7m")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1447574597]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_c5hin")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1295588689]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_yxxtf")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=1174724906]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ycgs3")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_4/Head" unique_id=996171209]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ng1l0")
+
+[node name="Floodlight_5" type="Node3D" parent="." unique_id=2007295268]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204, 0, 18)
+
+[node name="Floodlight_5_Pole" type="MeshInstance3D" parent="Floodlight_5" unique_id=46932126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("229_jbhp4")
+
+[node name="Head" type="Node3D" parent="Floodlight_5" unique_id=609663137]
+transform = Transform3D(-0.32711056, 0.4581141, -0.8265169, 0, 0.87463397, 0.48478395, 0.9449861, 0.15857795, -0.286102, 0, 30.5, 0)
+
+[node name="Floodlight_5_Frame" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=1206315366]
+mesh = ExtResource("230_1f5tq")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=806632522]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_s82l0")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=1615119821]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_sl3gn")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=612514582]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_a62an")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=416125441]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_do6jj")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=790208065]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_rb6y0")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=436109221]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_cx248")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=1353872810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_tqoa5")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=207845594]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_la427")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=364817590]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_gj7ix")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=842612535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_sp2gu")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=173729947]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_hxrqv")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=1709165568]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_sxdts")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=751672604]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_fxxug")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=2115968327]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_yypui")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_5/Head" unique_id=633314897]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_mniin")
+
+[node name="Floodlight_6" type="Node3D" parent="." unique_id=509058714]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0, -96)
+
+[node name="Floodlight_6_Pole" type="MeshInstance3D" parent="Floodlight_6" unique_id=280294489]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("231_ofk6y")
+
+[node name="Head" type="Node3D" parent="Floodlight_6" unique_id=100315520]
+transform = Transform3D(-0.37139067, 0.3962961, -0.83965373, 0, 0.9043347, 0.42682397, 0.9284767, 0.15851845, -0.33586147, 0, 30.5, 0)
+
+[node name="Floodlight_6_Frame" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1465785123]
+mesh = ExtResource("232_sqddf")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=407363068]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_h620m")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1701644772]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_1ywkh")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1551842249]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_6dxpc")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=935642039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_bqaof")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=641365270]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_g46yu")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1523109407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_q0d0n")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1662142348]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ubv86")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1915664754]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_clg6x")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1661986965]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nmekr")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=747684571]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_hdfvc")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1369834031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_omy6s")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1834163240]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_8ub3f")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1014761383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_t3r6m")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=249586074]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_agpjq")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_6/Head" unique_id=1052504729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_1yh4p")
+
+[node name="Floodlight_7" type="Node3D" parent="." unique_id=1316758411]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -204, 0, -18)
+
+[node name="Floodlight_7_Pole" type="MeshInstance3D" parent="Floodlight_7" unique_id=852243692]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("233_acvxm")
+
+[node name="Head" type="Node3D" parent="Floodlight_7" unique_id=1056872365]
+transform = Transform3D(0.32711056, 0.4581141, -0.8265169, 0, 0.87463397, 0.48478395, 0.9449861, -0.15857795, 0.286102, 0, 30.5, 0)
+
+[node name="Floodlight_7_Frame" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=2061215917]
+mesh = ExtResource("234_ri7gv")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=1243388512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_5ubw5")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=1404082985]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_tsbpk")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=918845929]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_x1xr8")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=1001196474]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_s00j8")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=1286924500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_5y57l")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=1269619917]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3ms4d")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=2145004890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ka610")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=504136969]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_oonji")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=130572754]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_6jej1")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=865532775]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_3gi4c")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=1671543316]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_pcoyp")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=400603564]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_0v6uc")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=535785157]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_cro2p")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=412701285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_wai26")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_7/Head" unique_id=2116636419]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_a82qq")
+
+[node name="Floodlight_8" type="Node3D" parent="." unique_id=1393425580]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 30)
+
+[node name="Floodlight_8_Pole" type="MeshInstance3D" parent="Floodlight_8" unique_id=878561469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("235_qpnuc")
+
+[node name="Head" type="Node3D" parent="Floodlight_8" unique_id=475362877]
+transform = Transform3D(1, 0, 0, 0, 0.9343952, 0.3562382, 0, -0.3562382, 0.9343952, 0, 30.5, 0)
+
+[node name="Floodlight_8_Frame" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=1350465802]
+mesh = ExtResource("236_1n60l")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=314458056]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nx85b")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=193571004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_iku00")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=750100541]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_agmqc")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=671523735]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_d5sm4")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=645298957]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nedmt")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=580589143]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_6iwnd")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=1238175972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_ugu8g")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=1780286642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_cb752")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=936999916]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_inqdm")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=1707041768]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_a6r53")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=224487386]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_mkahy")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=929562172]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_qoh55")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=396733911]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_pbfbi")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=139524027]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_16oqn")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_8/Head" unique_id=366783897]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nikx8")
+
+[node name="Floodlight_9" type="Node3D" parent="." unique_id=1614376774]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -30)
+
+[node name="Floodlight_9_Pole" type="MeshInstance3D" parent="Floodlight_9" unique_id=1493106809]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
+mesh = ExtResource("237_i35f5")
+
+[node name="Head" type="Node3D" parent="Floodlight_9" unique_id=1997427597]
+transform = Transform3D(-1, 0, 0, 0, 0.9343952, 0.3562382, 0, 0.3562382, -0.9343952, 0, 30.5, 0)
+
+[node name="Floodlight_9_Frame" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=1783403316]
+mesh = ExtResource("238_5uewc")
+
+[node name="Lamp_0_0" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=201409300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_en8iu")
+
+[node name="Lamp_0_1" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=562239724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_alroc")
+
+[node name="Lamp_0_2" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=2106637437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_54u0j")
+
+[node name="Lamp_0_3" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=1694512291]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_iesh1")
+
+[node name="Lamp_0_4" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=386605229]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, -0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_1w7qf")
+
+[node name="Lamp_1_0" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=1700449234]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_k4v4a")
+
+[node name="Lamp_1_1" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=1334323939]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_22g8j")
+
+[node name="Lamp_1_2" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=498652033]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_vmner")
+
+[node name="Lamp_1_3" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=801613269]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_wbdbl")
+
+[node name="Lamp_1_4" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=821429465]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_jjkpa")
+
+[node name="Lamp_2_0" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=1324590643]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_f3cqi")
+
+[node name="Lamp_2_1" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=903220350]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_a8374")
+
+[node name="Lamp_2_2" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=167996503]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_elhfk")
+
+[node name="Lamp_2_3" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=1725341796]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_nev02")
+
+[node name="Lamp_2_4" type="MeshInstance3D" parent="Floodlight_9/Head" unique_id=2072928222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.22)
+gi_mode = 0
+mesh = SubResource("BoxMesh_tp3is")
+
+[node name="Trailer_0" type="Node3D" parent="." unique_id=604661703]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 132, 0, 18)
+
+[node name="Trailer_0_Body" type="MeshInstance3D" parent="Trailer_0" unique_id=1896002304]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("239_qpfh7")
+
+[node name="Trailer_0_Stripe" type="MeshInstance3D" parent="Trailer_0" unique_id=1904864145]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("240_7y0i2")
+
+[node name="Trailer_0_Window_-16" type="MeshInstance3D" parent="Trailer_0" unique_id=1420132962]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("241_pe20y")
+
+[node name="Trailer_0_Window_16" type="MeshInstance3D" parent="Trailer_0" unique_id=1272487985]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("242_we140")
+
+[node name="Trailer_0_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_0" unique_id=579862928]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("243_xnowq")
+
+[node name="Trailer_0_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_0" unique_id=101216196]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("244_7j58n")
+
+[node name="Trailer_0_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_0" unique_id=1852785805]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("245_vwgnn")
+
+[node name="Trailer_0_Wheel_1_12" type="MeshInstance3D" parent="Trailer_0" unique_id=1910522417]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("246_tlo0r")
+
+[node name="Trailer_1" type="Node3D" parent="." unique_id=404610354]
+transform = Transform3D(0.25881907, 0, 0.9659258, 0, 1, 0, -0.9659258, 0, 0.25881907, 141, 0, -6)
+
+[node name="Trailer_1_Body" type="MeshInstance3D" parent="Trailer_1" unique_id=1446645134]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("247_ggo26")
+
+[node name="Trailer_1_Stripe" type="MeshInstance3D" parent="Trailer_1" unique_id=185346858]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("248_yd2lr")
+
+[node name="Trailer_1_Window_-16" type="MeshInstance3D" parent="Trailer_1" unique_id=310595791]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("249_qdo3m")
+
+[node name="Trailer_1_Window_16" type="MeshInstance3D" parent="Trailer_1" unique_id=1597877202]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("250_b2wol")
+
+[node name="Trailer_1_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_1" unique_id=542998037]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("251_vv3bi")
+
+[node name="Trailer_1_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_1" unique_id=975389986]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("252_qxroa")
+
+[node name="Trailer_1_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_1" unique_id=677060036]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("253_dluwk")
+
+[node name="Trailer_1_Wheel_1_12" type="MeshInstance3D" parent="Trailer_1" unique_id=1355928396]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("254_h0o1p")
+
+[node name="Trailer_2" type="Node3D" parent="." unique_id=1066808610]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 126, 0, -28)
+
+[node name="Trailer_2_Body" type="MeshInstance3D" parent="Trailer_2" unique_id=1253222897]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("255_bb8fe")
+
+[node name="Trailer_2_Stripe" type="MeshInstance3D" parent="Trailer_2" unique_id=138484319]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("256_a7jgb")
+
+[node name="Trailer_2_Window_-16" type="MeshInstance3D" parent="Trailer_2" unique_id=1114387395]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("257_b7d6d")
+
+[node name="Trailer_2_Window_16" type="MeshInstance3D" parent="Trailer_2" unique_id=2133971215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("258_jetyp")
+
+[node name="Trailer_2_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_2" unique_id=1089557644]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("259_y5qdt")
+
+[node name="Trailer_2_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_2" unique_id=100100971]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("260_1eflo")
+
+[node name="Trailer_2_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_2" unique_id=396357764]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("261_c2pk6")
+
+[node name="Trailer_2_Wheel_1_12" type="MeshInstance3D" parent="Trailer_2" unique_id=811038609]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("262_7dwlp")
+
+[node name="Trailer_3" type="Node3D" parent="." unique_id=609792540]
+transform = Transform3D(-0.9396926, 0, 0.3420202, 0, 1, 0, -0.3420202, 0, -0.9396926, 150, 0, 28)
+
+[node name="Trailer_3_Body" type="MeshInstance3D" parent="Trailer_3" unique_id=584600247]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("263_8b42i")
+
+[node name="Trailer_3_Stripe" type="MeshInstance3D" parent="Trailer_3" unique_id=625159513]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("264_tapk2")
+
+[node name="Trailer_3_Window_-16" type="MeshInstance3D" parent="Trailer_3" unique_id=1291469377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("265_d5ath")
+
+[node name="Trailer_3_Window_16" type="MeshInstance3D" parent="Trailer_3" unique_id=62265919]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("266_k701i")
+
+[node name="Trailer_3_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_3" unique_id=71398535]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("267_2frqf")
+
+[node name="Trailer_3_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_3" unique_id=1377101942]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("268_upgpk")
+
+[node name="Trailer_3_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_3" unique_id=47729094]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("269_ivup7")
+
+[node name="Trailer_3_Wheel_1_12" type="MeshInstance3D" parent="Trailer_3" unique_id=439815127]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("270_ebi06")
+
+[node name="Trailer_4" type="Node3D" parent="." unique_id=1577326577]
+transform = Transform3D(0.9848077, 0, 0.17364818, 0, 1, 0, -0.17364818, 0, 0.9848077, -140, 0, 30)
+
+[node name="Trailer_4_Body" type="MeshInstance3D" parent="Trailer_4" unique_id=1341580215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("271_l8poh")
+
+[node name="Trailer_4_Stripe" type="MeshInstance3D" parent="Trailer_4" unique_id=69014814]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("272_xwq6s")
+
+[node name="Trailer_4_Window_-16" type="MeshInstance3D" parent="Trailer_4" unique_id=915768658]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("273_fujth")
+
+[node name="Trailer_4_Window_16" type="MeshInstance3D" parent="Trailer_4" unique_id=555309519]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("274_oqnkw")
+
+[node name="Trailer_4_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_4" unique_id=1670183645]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("275_w36my")
+
+[node name="Trailer_4_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_4" unique_id=652534010]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("276_7sofb")
+
+[node name="Trailer_4_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_4" unique_id=1903018229]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("277_et3jc")
+
+[node name="Trailer_4_Wheel_1_12" type="MeshInstance3D" parent="Trailer_4" unique_id=1262215957]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("278_xn3pm")
+
+[node name="Trailer_5" type="Node3D" parent="." unique_id=668476603]
+transform = Transform3D(-0.08715577, 0, 0.9961947, 0, 1, 0, -0.9961947, 0, -0.08715577, -118, 0, 40)
+
+[node name="Trailer_5_Body" type="MeshInstance3D" parent="Trailer_5" unique_id=97263565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("279_0vxmi")
+
+[node name="Trailer_5_Stripe" type="MeshInstance3D" parent="Trailer_5" unique_id=1577880793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("280_3ocn1")
+
+[node name="Trailer_5_Window_-16" type="MeshInstance3D" parent="Trailer_5" unique_id=1034862624]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("281_xtkk4")
+
+[node name="Trailer_5_Window_16" type="MeshInstance3D" parent="Trailer_5" unique_id=1887735699]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("282_v42ms")
+
+[node name="Trailer_5_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_5" unique_id=542234837]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("283_ji38u")
+
+[node name="Trailer_5_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_5" unique_id=1741940217]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("284_2byh4")
+
+[node name="Trailer_5_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_5" unique_id=84847368]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("285_wsst2")
+
+[node name="Trailer_5_Wheel_1_12" type="MeshInstance3D" parent="Trailer_5" unique_id=961100821]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("286_pe3yb")
+
+[node name="Trailer_6" type="Node3D" parent="." unique_id=176654636]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, -152, 0, 6)
+
+[node name="Trailer_6_Body" type="MeshInstance3D" parent="Trailer_6" unique_id=1031318491]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("287_cokk1")
+
+[node name="Trailer_6_Stripe" type="MeshInstance3D" parent="Trailer_6" unique_id=530965594]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("288_n7yk4")
+
+[node name="Trailer_6_Window_-16" type="MeshInstance3D" parent="Trailer_6" unique_id=1243601833]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("289_lq1qa")
+
+[node name="Trailer_6_Window_16" type="MeshInstance3D" parent="Trailer_6" unique_id=1957942743]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("290_q4rrq")
+
+[node name="Trailer_6_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_6" unique_id=1191837013]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("291_unqtd")
+
+[node name="Trailer_6_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_6" unique_id=1293855466]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("292_up76r")
+
+[node name="Trailer_6_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_6" unique_id=202210548]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("293_fulla")
+
+[node name="Trailer_6_Wheel_1_12" type="MeshInstance3D" parent="Trailer_6" unique_id=330297856]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("294_ccyqk")
+
+[node name="Trailer_7" type="Node3D" parent="." unique_id=253585687]
+transform = Transform3D(-0.76604444, 0, 0.64278764, 0, 1, 0, -0.64278764, 0, -0.76604444, -96, 0, 34)
+
+[node name="Trailer_7_Body" type="MeshInstance3D" parent="Trailer_7" unique_id=2102076272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = ExtResource("295_uri5p")
+
+[node name="Trailer_7_Stripe" type="MeshInstance3D" parent="Trailer_7" unique_id=1003648288]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = ExtResource("296_yk137")
+
+[node name="Trailer_7_Window_-16" type="MeshInstance3D" parent="Trailer_7" unique_id=642952567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.6)
+mesh = ExtResource("297_fk42l")
+
+[node name="Trailer_7_Window_16" type="MeshInstance3D" parent="Trailer_7" unique_id=485962111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 1.6)
+mesh = ExtResource("298_vo3bq")
+
+[node name="Trailer_7_Wheel_-1_-12" type="MeshInstance3D" parent="Trailer_7" unique_id=1602011942]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, -1.2)
+mesh = ExtResource("299_ekyaf")
+
+[node name="Trailer_7_Wheel_1_-12" type="MeshInstance3D" parent="Trailer_7" unique_id=618354109]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, -1.2)
+mesh = ExtResource("300_elrv2")
+
+[node name="Trailer_7_Wheel_-1_12" type="MeshInstance3D" parent="Trailer_7" unique_id=684897773]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -1.15, 0.42, 1.2)
+mesh = ExtResource("301_nhnng")
+
+[node name="Trailer_7_Wheel_1_12" type="MeshInstance3D" parent="Trailer_7" unique_id=1024762744]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 1.15, 0.42, 1.2)
+mesh = ExtResource("302_u7pcs")
+
+[node name="Tent" type="Node3D" parent="." unique_id=2124166325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 0, 0)
+
+[node name="Tent_Roof" type="MeshInstance3D" parent="Tent" unique_id=1900561565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+mesh = ExtResource("303_iaipv")
+
+[node name="Tent_Pole_-6_-4" type="MeshInstance3D" parent="Tent" unique_id=218547978]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 1.6, -4.3)
+mesh = ExtResource("304_n0u5v")
+
+[node name="Tent_Pole_-6_4" type="MeshInstance3D" parent="Tent" unique_id=1982572636]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 1.6, 4.3)
+mesh = ExtResource("305_78kp1")
+
+[node name="Tent_Pole_6_-4" type="MeshInstance3D" parent="Tent" unique_id=1520939476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 1.6, -4.3)
+mesh = ExtResource("306_jhbxb")
+
+[node name="Tent_Pole_6_4" type="MeshInstance3D" parent="Tent" unique_id=1461036349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 1.6, 4.3)
+mesh = ExtResource("307_e78xa")
+
+[node name="FlagPole_0" type="MeshInstance3D" parent="." unique_id=501375506]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -54, 8, 94)
+mesh = ExtResource("308_w0pqr")
+
+[node name="Flag_0" type="MeshInstance3D" parent="." unique_id=1382742263]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52.75, 15, 94)
+mesh = ExtResource("309_t8jys")
+
+[node name="FlagPole_1" type="MeshInstance3D" parent="." unique_id=635047805]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 8, 94)
+mesh = ExtResource("310_wikie")
+
+[node name="Flag_1" type="MeshInstance3D" parent="." unique_id=1680856062]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40.75, 15, 94)
+mesh = ExtResource("311_fft3g")
+
+[node name="FlagPole_2" type="MeshInstance3D" parent="." unique_id=1643963725]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 8, 94)
+mesh = ExtResource("312_p0qqa")
+
+[node name="Flag_2" type="MeshInstance3D" parent="." unique_id=824269206]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.75, 15, 94)
+mesh = ExtResource("313_w288j")
+
+[node name="FlagPole_3" type="MeshInstance3D" parent="." unique_id=183654272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 8, 94)
+mesh = ExtResource("314_h0146")
+
+[node name="Flag_3" type="MeshInstance3D" parent="." unique_id=576676421]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.75, 15, 94)
+mesh = ExtResource("315_pjj4q")
+
+[node name="FlagPole_4" type="MeshInstance3D" parent="." unique_id=1737714822]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 8, 94)
+mesh = ExtResource("316_l21w6")
+
+[node name="Flag_4" type="MeshInstance3D" parent="." unique_id=1666338094]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 15, 94)
+mesh = ExtResource("317_qgs10")
+
+[node name="FlagPole_5" type="MeshInstance3D" parent="." unique_id=1352989781]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 8, 94)
+mesh = ExtResource("318_ap3lk")
+
+[node name="Flag_5" type="MeshInstance3D" parent="." unique_id=898464264]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 15, 94)
+mesh = ExtResource("319_oxc46")
+
+[node name="FlagPole_6" type="MeshInstance3D" parent="." unique_id=1845192556]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 8, 94)
+mesh = ExtResource("320_f58g0")
+
+[node name="Flag_6" type="MeshInstance3D" parent="." unique_id=1827423661]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.25, 15, 94)
+mesh = ExtResource("321_sb1x2")
+
+[node name="FlagPole_7" type="MeshInstance3D" parent="." unique_id=344696095]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 8, 94)
+mesh = ExtResource("322_kjifx")
+
+[node name="Flag_7" type="MeshInstance3D" parent="." unique_id=381659772]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.25, 15, 94)
+mesh = ExtResource("323_qyhus")
+
+[node name="FlagPole_8" type="MeshInstance3D" parent="." unique_id=765893610]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 8, 94)
+mesh = ExtResource("324_wc4ey")
+
+[node name="Flag_8" type="MeshInstance3D" parent="." unique_id=490705251]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.25, 15, 94)
+mesh = ExtResource("325_4aver")
+
+[node name="FlagPole_9" type="MeshInstance3D" parent="." unique_id=522342633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, 8, 94)
+mesh = ExtResource("326_y10c8")
+
+[node name="Flag_9" type="MeshInstance3D" parent="." unique_id=1162034451]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.25, 15, 94)
+mesh = ExtResource("327_lhgvx")
+
+[node name="LightmapGI" type="LightmapGI" parent="." unique_id=1871013439]
+bounces = 2
+max_texture_size = 8192
+generate_probes_subdiv = 1
+light_data = ExtResource("328_qp8bf")

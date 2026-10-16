@@ -172,6 +172,14 @@ public sealed class DamageState
         _zones[i] = MathF.Min(MaxHealth, _zones[i] + amount);
     }
 
+    /// <summary>Pit repair of one wheel (its wobble and camber). A lost wheel stays lost.</summary>
+    public void RepairWheel(Wheel wheel, float amount)
+    {
+        int i = (int)wheel;
+        if (IsWrecked || _wheelLost[i]) return;
+        _wheels[i] = MathF.Min(MaxHealth, _wheels[i] + amount);
+    }
+
     /// <summary>Marks the car wrecked for reasons other than the front (e.g. immobilised, ✱ A9).</summary>
     public void ForceWreck() => IsWrecked = true;
 

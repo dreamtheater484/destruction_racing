@@ -1,0 +1,40 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/speedway_ground.gdshader" id="1_mmynx"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/asphalt_02/asphalt_02_diff_2k.jpg" id="2_yqnp1"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/asphalt_02/asphalt_02_nor_gl_2k.jpg" id="3_27irf"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/asphalt_02/asphalt_02_arm_2k.jpg" id="4_p33bl"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/concrete_wall_008/concrete_wall_008_diff_2k.jpg" id="5_4i1gp"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/concrete_wall_008/concrete_wall_008_nor_gl_2k.jpg" id="6_m4bv0"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/concrete_wall_008/concrete_wall_008_arm_2k.jpg" id="7_qy8v0"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/brown_mud_dry/brown_mud_dry_diff_2k.jpg" id="8_ngon4"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/brown_mud_dry/brown_mud_dry_nor_gl_2k.jpg" id="9_ohdfl"]
+[ext_resource type="Texture2D" path="res://assets/third_party/polyhaven/brown_mud_dry/brown_mud_dry_arm_2k.jpg" id="10_ldkes"]
+[ext_resource type="Texture2D" path="res://assets/speedway/materials/splat.res" id="11_dy3ig"]
+
+[resource]
+resource_name = "ground"
+render_priority = 0
+shader = ExtResource("1_mmynx")
+shader_parameter/splat = ExtResource("11_dy3ig")
+shader_parameter/splat_rect = Vector4(-212.125, -124.125, 424, 248)
+shader_parameter/asphalt_albedo = ExtResource("2_yqnp1")
+shader_parameter/asphalt_normal = ExtResource("3_27irf")
+shader_parameter/asphalt_orm = ExtResource("4_p33bl")
+shader_parameter/concrete_albedo = ExtResource("5_4i1gp")
+shader_parameter/concrete_normal = ExtResource("6_m4bv0")
+shader_parameter/concrete_orm = ExtResource("7_qy8v0")
+shader_parameter/dirt_albedo = ExtResource("8_ngon4")
+shader_parameter/dirt_normal = ExtResource("9_ohdfl")
+shader_parameter/dirt_orm = ExtResource("10_ldkes")
+shader_parameter/asphalt_scale = 0.16
+shader_parameter/concrete_scale = 0.22
+shader_parameter/dirt_scale = 0.2
+shader_parameter/asphalt_tint = Color(0.62, 0.62, 0.64, 1)
+shader_parameter/pit_tint = Color(0.78, 0.77, 0.75, 1)
+shader_parameter/concrete_tint = Color(0.82, 0.81, 0.78, 1)
+shader_parameter/dirt_tint = Color(0.7, 0.62, 0.52, 1)
+shader_parameter/grass_a = Color(0.2, 0.3, 0.1, 1)
+shader_parameter/grass_b = Color(0.34, 0.4, 0.16, 1)
+shader_parameter/grass_dry = Color(0.47, 0.44, 0.27, 1)
+shader_parameter/groove_strength = 0.35

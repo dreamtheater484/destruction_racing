@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/chain_link.gdshader" id="1_8ac7p"]
+
+[resource]
+resource_name = "fence"
+render_priority = 0
+shader = ExtResource("1_8ac7p")
+shader_parameter/cell = 0.065
+shader_parameter/wire = 0.07
+shader_parameter/colour = Color(0.52, 0.53, 0.54, 1)

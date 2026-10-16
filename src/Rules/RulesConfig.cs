@@ -73,6 +73,10 @@ public sealed record RulesConfig
     /// <summary>Pit stops allowed per Stock Car race; -1 = unlimited.</summary>
     public int StockCarPitStopsAllowed { get; init; } = -1;
     public float PitStopTimeLimit { get; init; } = 5f;
+    /// <summary>Health restored by one pit repair press (plan §6.1 PIT_REPAIR_PER_PRESS) ✱.</summary>
+    public float PitRepairPerPress { get; init; } = 3.5f;
+    /// <summary>Repair presses per second at most (key echo is ignored as well).</summary>
+    public float PitMaxPressRate { get; init; } = 15f;
 
     // Damage
     public float FrontToughness { get; init; } = 1.0f;

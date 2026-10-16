@@ -89,6 +89,8 @@ public partial class ReplayPlayer : Node
     public Car? StartFocus { get; set; }
     public double StartTime { get; set; }
     public CameraRig? Rig { get; set; }
+    /// <summary>The venue's TV camera posts (the Bowl's when not set).</summary>
+    public IReadOnlyList<Vector3>? TvPosts { get; set; }
 
     /// <summary>A recorded hit was passed (for its sound).</summary>
     public event Action<ReplayImpact, Car?, Car?>? ImpactPlayed;
@@ -109,7 +111,7 @@ public partial class ReplayPlayer : Node
     {
         ProcessMode = ProcessModeEnum.Always;
         foreach (var c in Cars) c.BeginReplay();
-        _tv = new TvDirector();
+        _tv = new TvDirector { Posts = TvPosts };
         AddChild(_tv);
         _tv.Current = true;
         _focus = Math.Max(0, StartFocus != null ? Cars.ToList().IndexOf(StartFocus) : 0);

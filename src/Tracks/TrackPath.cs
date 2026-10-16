@@ -15,15 +15,20 @@ public sealed class TrackPath
     private readonly Vector3[] _t;
     private readonly float[] _k;
     private readonly float[] _v;
+    private readonly float[] _bank;
 
-    public TrackPath(IReadOnlyList<Vector3> points, float width, float lateralGrip = 7.6f, float braking = 8f)
+    /// <param name="bank">Banking per point (rad, the outside of the turn higher); null = flat.</param>
+    public TrackPath(IReadOnlyList<Vector3> points, float width, float lateralGrip = 7.6f, float braking = 8f,
+        IReadOnlyList<float>? bank = null)
     {
         int n = points.Count;
         _p = new Vector3[n];
         _t = new Vector3[n];
         _k = new float[n];
         _v = new float[n];
+        _bank = new float[n];
         for (int i = 0; i < n; i++) _p[i] = points[i];
+        if (bank != null) for (int i = 0; i < n; i++) _bank[i] = bank[i];
 
         float length = 0f;
         for (int i = 0; i < n; i++) length += _p[i].DistanceTo(_p[(i + 1) % n]);
@@ -39,11 +44,15 @@ public sealed class TrackPath
             _k[i] = turn / (2f * Spacing);
         }
 
-        // Speed profile: cornering limit, then a backward pass for braking (two laps to settle the wrap).
+        // Speed profile: cornering limit (banking adds to the grip: a = g(mu + tan b) / (1 - mu tan b)), then a
+        // backward pass for braking (two laps to settle the wrap).
+        float mu = lateralGrip / 9.81f;
         for (int i = 0; i < n; i++)
         {
             float k = MathF.Abs(SmoothedCurvature(i, 6));
-            _v[i] = k > 1e-4f ? MathF.Min(90f, MathF.Sqrt(lateralGrip / k)) : 90f;
+            float tb = MathF.Tan(_bank[i]);
+            float lateral = 9.81f * (mu + tb) / MathF.Max(1f - mu * tb, 0.2f);
+            _v[i] = k > 1e-4f ? MathF.Min(90f, MathF.Sqrt(lateral / k)) : 90f;
         }
         for (int pass = 0; pass < 2; pass++)
             for (int i = n - 1; i >= 0; i--)
@@ -99,6 +108,9 @@ public sealed class TrackPath
     public float CurvatureAt(float s) => SmoothedCurvature(Index(s), 4);
 
     public float SpeedAt(float s) => _v[Index(s)];
+
+    /// <summary>Banking under the line at s (rad, the outside of the turn higher).</summary>
+    public float BankAt(float s) => _bank[Index(s)];
 
     /// <summary>
     /// Projects a world point onto the line, searching only ±<paramref name="window"/> metres around

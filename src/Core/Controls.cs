@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace DestructionRacing.Core;
@@ -29,6 +30,10 @@ public static class Controls
     public const string DebugPanel = "debug_panel";
     public const string NextPreset = "next_preset";
     public const string ResetCar = "reset_car";
+    /// <summary>The pit stop mini-game (plan §14): ←/→ choose the zone, Enter or Space repairs.</summary>
+    public const string PitPrev = "pit_prev";
+    public const string PitNext = "pit_next";
+    public const string PitRepair = "pit_repair";
 
     public static ControlPreset Current { get; private set; } = ControlPreset.Arrows;
 
@@ -76,10 +81,28 @@ public static class Controls
         };
 
         foreach (string action in GameActions) Bind(action, map[action]);
+        // The pit mini-game: the arrows and the preset's steering keys choose, Enter or Space repairs.
+        Bind(PitPrev, map[SteerLeft].Contains(Key.Left) ? map[SteerLeft] : map[SteerLeft].Append(Key.Left).ToArray());
+        Bind(PitNext, map[SteerRight].Contains(Key.Right) ? map[SteerRight] : map[SteerRight].Append(Key.Right).ToArray());
+        Bind(PitRepair, new[] { Key.Enter, Key.KpEnter, Key.Space });
         // Developer keys, identical in every preset.
         Bind(DebugPanel, new[] { Key.F1 });
         Bind(NextPreset, new[] { Key.F3 });
         Bind(ResetCar, new[] { Key.F5 });
+    }
+
+    /// <summary>The first key bound to an action, for on-screen hints ("↑", "W").</summary>
+    public static string KeyName(string action)
+    {
+        if (!InputMap.HasAction(action)) return "?";
+        foreach (var e in InputMap.ActionGetEvents(action))
+            if (e is InputEventKey k)
+                return k.PhysicalKeycode switch
+                {
+                    Key.Up => "↑", Key.Down => "↓", Key.Left => "←", Key.Right => "→",
+                    var other => other.ToString().ToUpperInvariant(),
+                };
+        return "?";
     }
 
     public static ControlPreset Next(ControlPreset p) => (ControlPreset)(((int)p + 1) % 3);

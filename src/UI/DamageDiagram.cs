@@ -12,6 +12,8 @@ namespace DestructionRacing.UI;
 public partial class DamageDiagram : Control
 {
     public Car? Target { get; set; }
+    /// <summary>The zone chosen in a pit stop: outlined and blinking (null: none).</summary>
+    public DamageZone? Selected { get; set; }
 
     private readonly float[] _pulse = new float[4];
 
@@ -62,6 +64,17 @@ public partial class DamageDiagram : Control
         DrawRect(new Rect2(cx + w / 2 - 16, top + 40, 16, h - 80), Zone(DamageZone.Right));
         DrawRect(new Rect2(cx - w / 2 + 18, top + 40, w - 36, h - 80), new Color(0.12f, 0.12f, 0.14f, 0.9f)); // cabin
         DrawRect(new Rect2(cx - w / 2, top, w, h), outline, filled: false, width: 2f);
+        if (Selected is DamageZone sel)
+        {
+            var r = sel switch
+            {
+                DamageZone.Front => new Rect2(cx - w / 2, top, w, 38),
+                DamageZone.Rear => new Rect2(cx - w / 2, top + h - 38, w, 38),
+                DamageZone.Left => new Rect2(cx - w / 2, top + 40, 16, h - 80),
+                _ => new Rect2(cx + w / 2 - 16, top + 40, 16, h - 80),
+            };
+            DrawRect(r.Grow(3f), new Color(1f, 0.85f, 0.15f, 0.55f + 0.45f * throb), filled: false, width: 3.5f);
+        }
 
         // Wheels outside the body.
         var wheels = new (Rules.Wheel Wheel, float X, float Y)[]

@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "paint_yellow"
+albedo_color = Color(0.85, 0.62, 0.05, 1)
+roughness = 0.55

@@ -22,6 +22,13 @@ public partial class CameraRig : Camera3D
 
     public Car? Target { get; set; }
     public View Mode { get; set; } = View.Chase;
+    /// <summary>
+    /// Pit stop (plan §6.0): the camera orbits the car to look at this side of it, in radians from the nose,
+    /// clockwise seen from above (0 front, π/2 right, π rear). Null: the normal view.
+    /// </summary>
+    public float? Orbit { get; set; }
+    private float _orbit;
+    private bool _orbiting;
 
     private float _smoothedHeight;
     private Vector3 _smoothedHeading = Vector3.Forward;
@@ -73,6 +80,19 @@ public partial class CameraRig : Camera3D
         _smoothedHeight = _initialised ? Mathf.Lerp(_smoothedHeight, xf.Origin.Y, 1f - Mathf.Exp(-8f * dt)) : xf.Origin.Y;
         Vector3 anchor = new(xf.Origin.X, _smoothedHeight, xf.Origin.Z);
         _initialised = true;
+
+        if (Orbit is float orbitTarget)
+        {
+            // Swing round from behind the car (where the chase views are) to the chosen side.
+            if (!_orbiting) _orbit = Mathf.Pi;
+            _orbiting = true;
+            _orbit = Mathf.LerpAngle(_orbit, orbitTarget, 1f - Mathf.Exp(-4f * dt));
+            Vector3 side = _smoothedHeading.Rotated(Vector3.Up, -_orbit);
+            Fov = _baseFov = 50f;
+            GlobalTransform = new Transform3D(Basis.Identity, anchor + side * 6.4f + Vector3.Up * 2.3f).LookingAt(anchor + Vector3.Up * 0.05f, Vector3.Up);
+            return;
+        }
+        _orbiting = false;
 
         Vector3 position;
         Vector3 lookAt;

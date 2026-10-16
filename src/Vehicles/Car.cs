@@ -43,11 +43,26 @@ public partial class Car : RigidBody3D
 
     /// <summary>Prints every hit reaction (scenario debugging).</summary>
     public static bool DebugHits;
+    /// <summary>Tyre grip of the ground at a world x, z (set by a venue with grass, dirt and asphalt; null = 1).</summary>
+    public static System.Func<float, float, float>? SurfaceGripAt { get; set; }
 
     public CarTuning Tuning { get; private set; } = new();
     /// <summary>The referee's toughness for this car (plan §9.3): from its model's rating, 1 with --sametuning or the grey box.</summary>
     public float RefereeToughness => DestructionRacing.Core.DevTools.Instance?.Arg("sametuning") != null ? 1f : CarCatalog.ToughnessOf(ModelId);
     public ICarInput? Driver { get; set; }
+    /// <summary>
+    /// Where a flipped car is put back on its wheels (plan §6.0: on track, the nearest track point); null, or a null
+    /// result, rights it in place (the Bowl). Wrecks are always righted in place.
+    /// </summary>
+    public System.Func<Car, Transform3D?>? RightingPose { get; set; }
+    /// <summary>Slipstream (0..1), set by the race every step: how well the car is tucked in behind another.</summary>
+    public float Draft { get; set; }
+    /// <summary>Drag saved at full slipstream ✱.</summary>
+    public const float DraftDragSaving = 0.35f;
+    /// <summary>The car has been on its roof or side for 2 s (it is righted 1 s later).</summary>
+    public event System.Action<Car>? Flipped;
+    /// <summary>The car has been put back on its wheels.</summary>
+    public event System.Action<Car>? Righted;
 
     /// <summary>Unique id in the event (the referee's car id).</summary>
     public int Id { get; set; }
@@ -300,17 +315,25 @@ public partial class Car : RigidBody3D
         }
     }
 
-    /// <summary>Puts the car back on its wheels at its current spot, keeping its heading.</summary>
+    /// <summary>Puts the car back on its wheels: at <see cref="RightingPose"/>, or at its current spot keeping its heading.</summary>
     public void RightCar()
     {
-        var fwd = -GlobalTransform.Basis.Z;
-        fwd.Y = 0f;
-        if (fwd.LengthSquared() < 1e-4f) fwd = Vector3.Forward;
-        var pos = GlobalPosition + Vector3.Up * 1.2f;
-        GlobalTransform = new Transform3D(Basis.LookingAt(fwd.Normalized(), Vector3.Up), pos);
+        if (!IsWrecked && RightingPose?.Invoke(this) is Transform3D pose)
+        {
+            GlobalTransform = pose;
+        }
+        else
+        {
+            var fwd = -GlobalTransform.Basis.Z;
+            fwd.Y = 0f;
+            if (fwd.LengthSquared() < 1e-4f) fwd = Vector3.Forward;
+            var pos = GlobalPosition + Vector3.Up * 1.2f;
+            GlobalTransform = new Transform3D(Basis.LookingAt(fwd.Normalized(), Vector3.Up), pos);
+        }
         LinearVelocity = Vector3.Zero;
         AngularVelocity = Vector3.Zero;
         _upsideDownTime = 0f;
+        Righted?.Invoke(this);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -469,6 +492,7 @@ public partial class Car : RigidBody3D
             float mark = Mathf.Clamp((MathF.Abs(vLat) - 1.5f) / 5f, 0f, 1f);
 
             float grip = t.SurfaceGrip * (w.Front ? t.FrontGrip : t.RearGrip);
+            if (SurfaceGripAt != null) grip *= SurfaceGripAt(w.ContactPoint.X, w.ContactPoint.Z);
             if (!w.Front && TurningAround) grip *= t.TurnAroundRearGrip;
             if (!w.Front && fastPivot > 0f) grip *= Mathf.Lerp(1f, t.FastSteerRearGrip, fastPivot);
             // Post-hit grip loss lets a hit car keep rotating (calibration, plan §3).
@@ -523,9 +547,9 @@ public partial class Car : RigidBody3D
             w.Spin += vLong / _wheelRadius * dt;
         }
 
-        // Aero drag and rolling resistance.
+        // Aero drag (less in a slipstream) and rolling resistance.
         Vector3 flat = v - up * v.Dot(up);
-        ApplyCentralForce(-flat * flat.Length() * t.DragCoefficient - flat * t.RollingResistance);
+        ApplyCentralForce(-flat * flat.Length() * t.DragCoefficient * (1f - DraftDragSaving * Draft) - flat * t.RollingResistance);
 
         if (fastPivot > 0f && grounded >= 3)
             ApplyTorque(up * (-MathF.Sign(c.Steer) * fastPivot * t.FastSteerYawTorque));
@@ -601,13 +625,18 @@ public partial class Car : RigidBody3D
         Rpm = 900f + Mathf.Clamp((s - lo) / (hi - lo), 0f, 1.1f) * 5600f;
     }
 
-    /// <summary>DD2 rule (plan §6.0): a car on its roof or side is righted after a short penalty.</summary>
+    /// <summary>
+    /// DD2 rule (plan §6.0): a car on its roof or side for 2 s is righted after a penalty, 3 s in all. It counts once
+    /// the car has stopped rolling: nearly still, or no longer turning over (a car on its roof being shoved along).
+    /// </summary>
     private void UpdateUpsideDown(Vector3 up, Vector3 v, float dt)
     {
-        if (up.Dot(Vector3.Up) < 0.35f && v.Length() < 3f)
+        if (up.Dot(Vector3.Up) < 0.35f && (v.Length() < 3f || AngularVelocity.Length() < 1.5f))
         {
+            float before = _upsideDownTime;
             _upsideDownTime += dt;
-            if (_upsideDownTime > 2.5f) RightCar();
+            if (before < 2f && _upsideDownTime >= 2f) Flipped?.Invoke(this);
+            if (_upsideDownTime > 3f) RightCar();
         }
         else
         {

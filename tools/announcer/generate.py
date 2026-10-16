@@ -70,6 +70,7 @@ NUMBER_TEMPLATES = {          # several phrasings alternate by car number
     "wrecked_num": ["Number {n} is out!", "That's it for number {n}!"],
     "winner_num": ["Number {n} is the last car running!"],
     "leader_num": ["Number {n} takes the lead!"],
+    "race_winner_num": ["Number {n} wins the race!", "And number {n} takes the checkered flag!"],
 }
 GENERATED_MARKER = "# ---- generated number lines: generate.py rewrites everything below from NUMBER_TEMPLATES, edit there ----"
 

@@ -12,6 +12,8 @@ namespace DestructionRacing.Cameras;
 public partial class TvDirector : Camera3D
 {
     public Node3D? Focus { get; set; }
+    /// <summary>The venue's camera positions (posts below 4 m are low trackside ones); the Bowl's when not set.</summary>
+    public IReadOnlyList<Vector3>? Posts { get; set; }
 
     private readonly List<Vector3> _posts = new();
     private int _current = -1;
@@ -23,6 +25,11 @@ public partial class TvDirector : Camera3D
     {
         Near = 0.1f;
         Far = 4000f;
+        if (Posts != null)
+        {
+            _posts.AddRange(Posts);
+            return;
+        }
         foreach (float sx in new[] { -1f, 1f })
             foreach (float sz in new[] { -1f, 1f })
                 _posts.Add(new Vector3(sx * 49f, 14f, sz * 44f));                          // floodlight towers

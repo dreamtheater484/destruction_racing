@@ -89,6 +89,19 @@ public partial class ImpactSystem : Node
 
     private readonly List<(Car Car, Vector3 Point, Vector3 Normal)> _wallContacts = new();
 
+    /// <summary>Per static body: how much of a hit's energy counts (meta "damage_scale"; a crash cushion is soft).</summary>
+    private readonly System.Collections.Generic.Dictionary<ulong, float> _wallScale = new();
+
+    private float WallScale(GodotObject? collider)
+    {
+        if (collider is not Node node) return 1f;
+        ulong id = node.GetInstanceId();
+        if (_wallScale.TryGetValue(id, out float s)) return s;
+        s = node.HasMeta("damage_scale") ? (float)node.GetMeta("damage_scale") : 1f;
+        _wallScale[id] = s;
+        return s;
+    }
+
     private struct Contact
     {
         public GodotObject? Collider;
@@ -182,6 +195,8 @@ public partial class ImpactSystem : Node
                     if (n.LengthSquared() < 1e-4f) continue;
                     n = n.Normalized();
                     var result = HitEnergy.CarVsStatic(Pre(car), N(point), N(n));
+                    float scale = WallScale(collider);
+                    if (scale != 1f) result = result with { Energy = result.Energy * scale };
                     if (result.Energy > bestWall.Energy)
                     {
                         bestWall = result;

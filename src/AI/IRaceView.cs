@@ -19,6 +19,10 @@ public interface IRaceView
     (float S, float Lateral) TrackPos(Car car);
     /// <summary>Lap positions of the crossover passes (empty for a track without one).</summary>
     IReadOnlyList<float> CrossoverPasses { get; }
+    /// <summary>A car passing through the pits: no contact with it, so it is neither traffic nor a target.</summary>
+    bool IsGhost(Car car) => false;
+    /// <summary>The leader's lap (1 on the first lap).</summary>
+    int LeaderLap => 1;
     /// <summary>Back-marker catch-up speed factor (1 = none; plan §4.2, off in Purist).</summary>
     float CatchUp(Car car);
 }

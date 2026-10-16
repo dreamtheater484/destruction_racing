@@ -1,0 +1,6 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "paint_white"
+albedo_color = Color(0.84, 0.84, 0.82, 1)
+roughness = 0.6

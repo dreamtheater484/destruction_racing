@@ -8,7 +8,7 @@ using Godot;
 
 namespace DestructionRacing.Modes;
 
-/// <summary>One Wreckin' race as the sim harness sees it (plan §17.4).</summary>
+/// <summary>One race (Wreckin' or Stock Car) as the sim harness sees it (plan §17.4).</summary>
 public sealed class RaceMetricsResult
 {
     public int Seed { get; init; }
@@ -39,6 +39,21 @@ public sealed class RaceMetricsResult
     public int Dnfs { get; set; }
     public bool TimedOut { get; set; }
     public double WinnerTime { get; set; } = double.NaN;
+    /// <summary>Stock Car: seconds from the 1st to the 10th car completing lap 2 (NaN if fewer than ten did).</summary>
+    public double Lap2Spread { get; set; } = double.NaN;
+    /// <summary>Stock Car: a close battle (another car within 0.5 s for 10 s) involving the player in the last 2 laps.</summary>
+    public bool PlayerLateBattle { get; set; }
+    /// <summary>Pit stops made in the race (all cars) and by the player.</summary>
+    public int PitStops { get; set; }
+    public int PlayerPitStops { get; set; }
+    /// <summary>DD Code in the field (plan §4.7): AI brake-checks (and how many the tailgater ran into), squeezes,
+    /// tailgating stints, dodges and blocks.</summary>
+    public int BrakeChecks { get; set; }
+    public int BrakeCheckHits { get; set; }
+    public int Squeezes { get; set; }
+    public int Tailgates { get; set; }
+    public int Evasions { get; set; }
+    public int Blocks { get; set; }
 }
 
 /// <summary>
@@ -59,6 +74,8 @@ public sealed class RaceMetrics
     private double _closeTime;
     private float _stuckFor;
     private float _raceDistance;
+    private readonly Dictionary<int, double> _lap2At = new();
+    private double _battleFor;
 
     public RaceMetrics(Car player, int seed, TrackPath path, Vector3 crossover, float crossoverRadius)
     {
@@ -75,6 +92,8 @@ public sealed class RaceMetrics
         IReadOnlyDictionary<int, float> progress, Func<Car, bool> isRunning)
     {
         _raceDistance = standings.RaceDistance;
+        foreach (var (id, p) in progress)
+            if (p >= 2f * standings.LapLength && !_lap2At.ContainsKey(id)) _lap2At[id] = time;
         if (!isRunning(_player) || standings.HasFinished(_player.Id)) return;
         _r.PlayerDrivingTime += dt;
 
@@ -106,6 +125,21 @@ public sealed class RaceMetrics
             }
         }
         if (close) _closeTime += dt;
+
+        // A close battle in the last two laps: another running car within 0.5 s, for 10 s on end.
+        if (progress[_player.Id] >= (standings.Laps - 2) * standings.LapLength)
+        {
+            float gap = 0.5f * MathF.Max(_player.ForwardSpeed, 8f);
+            bool battling = false;
+            foreach (var (id, s) in lapPos)
+                if (id != _player.Id && standings.IsRacing(id) && MathF.Abs(_path.Delta(me, s)) < gap + 4.6f)
+                {
+                    battling = true;
+                    break;
+                }
+            _battleFor = battling ? _battleFor + dt : 0;
+            if (_battleFor >= 10.0) _r.PlayerLateBattle = true;
+        }
 
         var c = _player.LastControls;
         bool trying = c.Throttle > 0.5f || c.Reverse;
@@ -176,5 +210,7 @@ public sealed class RaceMetrics
         _r.Dnfs = standings.Cars.Count(standings.IsRetired);
         var first = standings.Order().FirstOrDefault();
         if (standings.FinishTime(first) is double t) _r.WinnerTime = t;
+        var lap2 = _lap2At.Values.OrderBy(x => x).ToList();
+        if (lap2.Count >= 10) _r.Lap2Spread = lap2[9] - lap2[0];
     }
 }

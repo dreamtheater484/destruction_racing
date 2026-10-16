@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/sponsors.png" id="1_t1txu"]
+
+[resource]
+resource_name = "sponsor_6"
+albedo_texture = ExtResource("1_t1txu")
+roughness = 0.55
+uv1_scale = Vector3(0.5, 0.25, 1)
+uv1_offset = Vector3(0, 0.75, 0)

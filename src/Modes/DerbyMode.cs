@@ -19,7 +19,7 @@ namespace DestructionRacing.Modes;
 /// (<see cref="Bowl"/>, three lighting presets); presentation (crowd, audio, announcer, banners) listens to the
 /// events below. Also runs headless with the PlayerProxy bot for the sim harness.
 /// </summary>
-public partial class DerbyMode : Node3D, IArenaView, IHudMode
+public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
 {
     /// <summary>The paint colours of the field (the player's red first).</summary>
     public static readonly Color[] Liveries =
@@ -74,6 +74,10 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     public event Action? Started;
     /// <summary>The countdown ticks: 3, 2, 1.</summary>
     public event Action<int>? CountdownTick;
+    /// <summary>The music's intensity from the cars left (5, 3, 2: the final duel).</summary>
+    public event Action<int>? IntensityChanged;
+    public event Action? Ended;
+    public float CrowdExcitement => _arena.Crowd?.Excitement ?? 0.3f;
 
     private enum Phase { Countdown, Running, Over }
 
@@ -125,7 +129,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
     public int Remaining => _standings.Remaining;
     public bool Skipping => _skipping;
     public DerbyPresenter? Presenter { get; private set; }
-    public Audio.DerbyAudio? Sound { get; private set; }
+    public Audio.EventAudio? Sound { get; private set; }
     public Car? CarById(int id) => _byId.GetValueOrDefault(id);
     public double CountdownLeft => _countdown;
     public string DriverName(Car car) => car == _player ? "You" : _drivers.TryGetValue(car.Id, out var d) ? d.Short : "?";
@@ -264,7 +268,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
                 AddChild(new HeadlightRig { Cars = _cars, Beams = _arena.IsNight, Focus = () => _rig.Target });
             Presenter = new DerbyPresenter { Mode = this };
             AddChild(Presenter);
-            Sound = new Audio.DerbyAudio { Mode = this };
+            Sound = new Audio.EventAudio { Mode = this };
             AddChild(Sound);
             _recorder = new Replay.ReplayRecorder { Cars = _cars, Clock = () => _time };
             AddChild(_recorder);
@@ -424,6 +428,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
             _standings.Eliminate(_time, _wreckBatch);
             _arena.SetScoreboard($"THE BOWL   CARS LEFT {_standings.Remaining}");
             RemainingChanged?.Invoke(_standings.Remaining);
+            IntensityChanged?.Invoke(_standings.Remaining switch { <= 2 => 3, <= 3 => 2, <= 5 => 1, _ => 0 });
         }
 
         _metrics.Step(_time, dt, _standings.Remaining, !_referee.IsWrecked(_player.Id));
@@ -622,6 +627,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode
         if (!Headless && DevTools.Instance?.Arg("autoreplay") != null)
             GetTree().CreateTimer(1.5, true, false, true).Timeout += () => { if (_replay == null) StartReplay(); };
         Finished?.Invoke(this);
+        Ended?.Invoke();
     }
 
     /// <summary>A driver's radio taunt for this event, if any (plan §10.2).</summary>

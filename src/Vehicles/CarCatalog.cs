@@ -18,8 +18,8 @@ public sealed record CarInfo(
     public string FullName => $"{Make} {Name}";
     /// <summary>
     /// The car-select verdicts (1 weak .. 5 best) from the balance sims (tools/dev/balance_report.py): derby points,
-    /// Wreckin' points (nearly all from spins, so the heavy cars score well), and pace (Stock Car points for the
-    /// race finishing order, an estimate until Stock Car Racing has its own sims in M6).
+    /// Wreckin' points (nearly all from spins, so the heavy cars score well), and pace (Stock Car points: the
+    /// finishing order). From the M6 run of 120 events per mode.
     /// </summary>
     public int DerbyStars { get; init; } = 3;
     public int RaceStars { get; init; } = 3;
@@ -76,8 +76,8 @@ public sealed record CarInfo(
         {
             // Front drive: the fronts carry drive and steer (a little less cornering grip left), the tail is
             // stable and steady under power.
-            t.FrontGrip *= 1.03f;
-            t.RearGrip *= 1.04f;
+            t.FrontGrip *= RatingScale.FwdFrontGrip;
+            t.RearGrip *= RatingScale.FwdRearGrip;
         }
         return t;
     }
@@ -85,7 +85,7 @@ public sealed record CarInfo(
 
 /// <summary>
 /// How far one rating point moves the physics (the balance knobs, plan §9.3). Sims can override them with
-/// --ratingscale=mass:0.035,tough:0.06 (keys: mass, accel, top, grip, steer, tough).
+/// --ratingscale=mass:0.035,tough:0.06 (keys: mass, accel, top, grip, steer, tough, fwdfront, fwdrear).
 /// </summary>
 public static class RatingScale
 {
@@ -107,6 +107,12 @@ public static class RatingScale
     /// decides the derby: 0.07 (0.76 to 1.25) put the tough cars at +18-27% there, 0.02 keeps all within the target.
     /// </summary>
     public static float Tough = 0.02f;
+    /// <summary>
+    /// Front drive: the front and rear grip against a rear-drive car with the same handling. M5 had 1.03 and 1.04,
+    /// grip on both axles that put the Volant at +60% in Stock Car (M6 sims).
+    /// </summary>
+    public static float FwdFrontGrip = 0.97f;
+    public static float FwdRearGrip = 1.04f;
 
     static RatingScale()
     {
@@ -124,9 +130,11 @@ public static class RatingScale
                 case "grip": Grip = v; break;
                 case "steer": Steer = v; break;
                 case "tough": Tough = v; break;
+                case "fwdfront": FwdFrontGrip = v; break;
+                case "fwdrear": FwdRearGrip = v; break;
             }
         }
-        Godot.GD.Print($"[RatingScale] mass {Mass} accel {Accel} top {TopSpeed} grip {Grip} steer {Steer} tough {Tough}");
+        Godot.GD.Print($"[RatingScale] mass {Mass} accel {Accel} top {TopSpeed} grip {Grip} steer {Steer} tough {Tough} fwd {FwdFrontGrip}/{FwdRearGrip}");
     }
 }
 
@@ -136,26 +144,47 @@ public static class CarCatalog
     public static readonly CarInfo[] All =
     {
         new("brougham", 1, "Aldridge", "Brougham 400", Region.US, "sedan", "V8", false, 6, 5, 3, 9, 9,
-            "Heavy and tough: a battering ram, slow to turn.") { DerbyStars = 5, RaceStars = 3, PaceStars = 1 },
+            "Heavy and tough: a battering ram, slow to turn.") { DerbyStars = 4, RaceStars = 3, PaceStars = 1 },
         new("homestead", 2, "Aldridge", "Homestead", Region.US, "wagon", "V8", false, 5, 5, 3, 9, 10,
-            "The toughest car in the Bowl: a long steel tail for reverse-ramming.") { DerbyStars = 5, RaceStars = 5, PaceStars = 1 },
+            "The toughest car in the Bowl: a long steel tail for reverse-ramming.") { DerbyStars = 5, RaceStars = 4, PaceStars = 1 },
         new("interceptor", 3, "Columbia", "Interceptor GT", Region.US, "fastback", "V8", false, 8, 8, 5, 6, 6,
-            "Muscle: quick in a straight line, wide in the turns.") { DerbyStars = 2, RaceStars = 2, PaceStars = 2 },
+            "Muscle: quick in a straight line, wide in the turns.") { DerbyStars = 3, RaceStars = 3, PaceStars = 1 },
         new("nordvik", 5, "Nordvik", "Fjord DL", Region.EU, "sedan", "I4", false, 5, 5, 5, 7, 9,
-            "Balanced and solid: a strong rear for reverse-ramming.") { DerbyStars = 4, RaceStars = 4, PaceStars = 1 },
+            "Balanced and solid: a strong rear for reverse-ramming.") { DerbyStars = 3, RaceStars = 3, PaceStars = 2 },
         new("adler", 6, "Adler", "Falke 2.7i", Region.EU, "coupé", "I6", false, 8, 7, 8, 5, 6,
-            "A sharp all-rounder: fast and precise, medium weight.") { DerbyStars = 2, RaceStars = 1, PaceStars = 5 },
+            "A sharp all-rounder: fast and precise, medium weight.") { DerbyStars = 2, RaceStars = 2, PaceStars = 5 },
         new("volant", 7, "Volant", "105 GTi", Region.EU, "hot hatch", "I4", true, 7, 8, 8, 3, 4,
-            "Front-drive hot hatch: darts into gaps, but fragile.") { DerbyStars = 4, RaceStars = 3, PaceStars = 5 },
+            "Front-drive hot hatch: darts into gaps, but fragile.") { DerbyStars = 5, RaceStars = 3, PaceStars = 5 },
         new("hikari", 9, "Hikari", "Kaze GT", Region.JP, "liftback", "I4", false, 7, 7, 9, 3, 4,
-            "The best handling in the field: light, so stay out of the crush.") { DerbyStars = 2, RaceStars = 3, PaceStars = 5 },
+            "The best handling in the field: light, so stay out of the crush.") { DerbyStars = 1, RaceStars = 3, PaceStars = 5 },
         new("ryujin", 11, "Ryujin", "Raiden GTS", Region.JP, "turbo sedan", "I6 turbo", false, 8, 8, 6, 6, 6,
-            "Turbo sedan: fast and medium-tough, a racer that can take a hit.") { DerbyStars = 3, RaceStars = 3, PaceStars = 3 },
+            "Turbo sedan: fast and medium-tough, a racer that can take a hit.") { DerbyStars = 2, RaceStars = 3, PaceStars = 4 },
         new("kitsune", 12, "Kitsune", "Rotary GS", Region.JP, "coupé", "rotary", false, 9, 7, 8, 4, 3,
             "The fastest car: light and nimble, but the nose is soft.") { DerbyStars = 1, RaceStars = 3, PaceStars = 5 },
     };
 
-    private static readonly Dictionary<string, CarInfo> ById = All.ToDictionary(c => c.Id);
+    private static readonly Dictionary<string, CarInfo> ById = WithOverrides(All).ToDictionary(c => c.Id);
+
+    /// <summary>
+    /// Balance runs: --carstats=volant:7,7,8,3,5 (several separated by ';') sets a car's speed, acceleration,
+    /// handling, weight and toughness.
+    /// </summary>
+    private static CarInfo[] WithOverrides(CarInfo[] all)
+    {
+        if (Core.DevTools.Instance?.Arg("carstats") is not { } arg) return all;
+        foreach (string entry in arg.Split(';'))
+        {
+            var kv = entry.Split(':');
+            int i = kv.Length == 2 ? Array.FindIndex(all, c => c.Id == kv[0]) : -1;
+            var r = kv.Length == 2 ? kv[1].Split(',') : Array.Empty<string>();
+            if (i < 0 || r.Length != 5) continue;
+            var v = new int[5];
+            if (!r.Select((s, k) => int.TryParse(s, out v[k])).All(ok => ok)) continue;
+            all[i] = all[i] with { Speed = v[0], Accel = v[1], Handling = v[2], Weight = v[3], Toughness = v[4] };
+            Godot.GD.Print($"[CarStats] {kv[0]}: speed {v[0]} accel {v[1]} handling {v[2]} weight {v[3]} toughness {v[4]}");
+        }
+        return all;
+    }
 
     /// <summary>Model ids in roster order (the AI cycle through them).</summary>
     public static readonly string[] Ids = All.Select(c => c.Id).ToArray();

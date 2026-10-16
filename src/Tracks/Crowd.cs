@@ -4,17 +4,30 @@ using Godot;
 namespace DestructionRacing.Tracks;
 
 /// <summary>
-/// The Bowl's crowd (plan §8.5): about 1,500 seated spectators on the two grandstands' benches, one MultiMesh of
-/// a low-poly person animated in <c>crowd.gdshader</c>, plus camera flashes at night. <see cref="Excitement"/>
-/// drives both and the crowd audio: it rises with big hits and wrecks, decays back to a base that climbs as the
-/// field shrinks.
+/// The crowd (plan §8.5): seated spectators on the grandstands' benches (the Bowl's two, about 1,500 people, or
+/// the stands of another venue), one MultiMesh of a low-poly person animated in <c>crowd.gdshader</c>, plus camera
+/// flashes at night. <see cref="Excitement"/> drives both and the crowd audio: it rises with big hits and wrecks,
+/// decays back to a base that climbs as the field shrinks.
 /// </summary>
 public partial class Crowd : Node3D
 {
-    // The grandstands as BowlLookBuilder.gd builds them: 12 terraces, 46 m long, first bench 3.2 m behind the wall.
-    private const int Rows = 12;
-    private const float StandLength = 46f, RowDepth = 0.8f, RowRise = 0.42f;
-    private static readonly float FirstRowZ = Bowl.SemiAxisZ + 3.2f;
+    /// <summary>
+    /// A grandstand in its own frame: the stand faces -Z, the first bench row is at the origin and rows step up
+    /// (<paramref name="RowRise"/>) and back (+Z, <paramref name="RowDepth"/>); <paramref name="Columns"/> roof columns
+    /// stand along the front row, <paramref name="ColumnMargin"/> in from the ends.
+    /// </summary>
+    public readonly record struct Stand(Transform3D Frame, float Length, int Rows, int Columns, float ColumnMargin,
+        float RowDepth = 0.8f, float RowRise = 0.42f);
+
+    /// <summary>The grandstands as BowlLookBuilder.gd builds them: 12 terraces, 46 m long, first bench 3.2 m behind the wall.</summary>
+    public static Stand[] BowlStands => new[]
+    {
+        new Stand(new Transform3D(Basis.Identity, new Vector3(0f, 0f, Bowl.SemiAxisZ + 3.2f)), 46f, 12, 7, 2f),
+        new Stand(new Transform3D(new Basis(Vector3.Up, Mathf.Pi), new Vector3(0f, 0f, -(Bowl.SemiAxisZ + 3.2f))), 46f, 12, 7, 2f),
+    };
+
+    /// <summary>The stands to fill (default: the Bowl's).</summary>
+    public Stand[]? Stands { get; set; }
 
     public bool Night { get; set; }
 
@@ -43,24 +56,25 @@ public partial class Crowd : Node3D
             Mesh = mesh,
         };
         var spots = new System.Collections.Generic.List<(Transform3D Xf, Color Custom)>();
-        foreach (float side in new[] { -1f, 1f })
+        foreach (var stand in Stands ?? BowlStands)
         {
-            var facing = side > 0f ? Basis.Identity : new Basis(Vector3.Up, Mathf.Pi);
-            for (int k = 0; k < Rows; k++)
+            for (int k = 0; k < stand.Rows; k++)
             {
-                float z = side * (FirstRowZ + RowDepth * k + 0.12f);
-                float y = RowRise * (k + 1) + 0.06f;
+                float z = stand.RowDepth * k + 0.12f;
+                float y = stand.RowRise * (k + 1) + 0.06f;
+                float half = stand.Length * 0.5f;
                 // Fuller in the middle rows and the middle of the stand.
-                for (float x = -StandLength * 0.5f + 0.6f; x < StandLength * 0.5f - 0.6f; x += 0.56f + (float)rng.NextDouble() * 0.12f)
+                for (float x = -half + 0.6f; x < half - 0.6f; x += 0.56f + (float)rng.NextDouble() * 0.12f)
                 {
-                    float middle = 1f - Mathf.Abs(x) / (StandLength * 0.5f);
-                    float occupancy = 0.62f + 0.25f * middle + (k is > 2 and < 9 ? 0.08f : 0f);
+                    float middle = 1f - Mathf.Abs(x) / half;
+                    float occupancy = 0.62f + 0.25f * middle + (k > 2 && k < stand.Rows - 3 ? 0.08f : 0f);
                     if (rng.NextDouble() > occupancy) continue;
                     // Keep the front row clear of the roof columns.
-                    if (k == 0 && ColumnNear(x)) continue;
-                    var basis = facing * new Basis(Vector3.Up, ((float)rng.NextDouble() - 0.5f) * 0.35f);
+                    if (k == 0 && ColumnNear(stand, x)) continue;
+                    var basis = stand.Frame.Basis * new Basis(Vector3.Up, ((float)rng.NextDouble() - 0.5f) * 0.35f);
                     float scale = 0.9f + 0.18f * (float)rng.NextDouble();
-                    var xf = new Transform3D(basis.Scaled(Vector3.One * scale), new Vector3(x + ((float)rng.NextDouble() - 0.5f) * 0.08f, y, z));
+                    var at = stand.Frame * new Vector3(x + ((float)rng.NextDouble() - 0.5f) * 0.08f, y, z);
+                    var xf = new Transform3D(basis.Scaled(Vector3.One * scale), at);
                     var custom = new Color((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble());
                     spots.Add((xf, custom));
                 }
@@ -83,11 +97,11 @@ public partial class Crowd : Node3D
         if (Night) BuildFlashes(spots, rng);
     }
 
-    private static bool ColumnNear(float x)
+    private static bool ColumnNear(Stand stand, float x)
     {
-        for (int c = 0; c < 7; c++)
+        for (int c = 0; c < stand.Columns; c++)
         {
-            float cx = -StandLength * 0.5f + 2f + c * (StandLength - 4f) / 6f;
+            float cx = -stand.Length * 0.5f + stand.ColumnMargin + c * (stand.Length - 2f * stand.ColumnMargin) / Mathf.Max(1, stand.Columns - 1);
             if (Mathf.Abs(x - cx) < 0.45f) return true;
         }
         return false;
