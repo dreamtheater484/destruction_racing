@@ -9,7 +9,7 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M7 Championship and front end — ready for your playtest
+## M7 Championship and front end — approved (2026‑10‑18: "It is very good")
 - **Play it:** double-click **Play Destruction Racing.cmd**. It replaces Play Derby.cmd and Play Racing.cmd, and the game now starts at its own front end. The first launch asks for your key layout (Classic DD PC, Arrows or WASD); after that, the title and the main menu.
   - Everything works from the keyboard: ↑/↓ choose, ←/→ change, Enter go, Esc back. The Del key deletes a championship (press it twice).
   - Your settings, championships and progress are saved in `%APPDATA%\Godot\app_userdata\Destruction Racing\` (`settings.json`, `career\slot1..3.json`, `profile.json`). A championship saves itself after every event.
@@ -84,6 +84,7 @@
   4. Single Event: try a Duel and a Total Destruction. Should Total Destruction be harder or easier?
   5. Options: does the keyboard test show all your keys? Do the graphics and sound settings do what you expect?
   6. Anything in the menus that is slow, unclear or missing?
+- **Your verdict** (2026‑10‑18): you played it and approved it. The upper-division difficulty, the Stock Car difficulty and the Sticky Keys opt-in stay open for M8.
 
 ## M6 Racing — approved (2026‑10‑18: "It's very cool!")
 - **Play it:** double-click **Play Racing.cmd** (it replaces Play Wreckin.cmd). The set-up screen:
