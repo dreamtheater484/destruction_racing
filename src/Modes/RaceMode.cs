@@ -46,6 +46,9 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     public int PlayerGridSlot { get; set; } = 12;
     /// <summary>The player's division (the roof colour; plan §4.5).</summary>
     public int PlayerDivision { get; set; } = 4;
+    public int PlayerNumber { get; set; } = 7;
+    /// <summary>Championship: each AI driver's division by name (their roof colours); null = spread over the four.</summary>
+    public IReadOnlyDictionary<string, int>? DriverDivisions { get; set; }
     public bool Headless { get; set; }
     /// <summary>The player's model (--car=&lt;id&gt;, see <see cref="CarCatalog"/>); the AI drive their own (<see cref="Drivers"/>).</summary>
     public string PlayerModel { get; set; } = "kitsune";
@@ -61,6 +64,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     /// fight for the top three (at 1.0 the AI racers out-pace an average player and only hunting pays).
     /// </summary>
     public float AiPaceScale { get; set; } = 0.97f;
+    /// <summary>The AI's division aggression (plan §10.5, <see cref="EventRequest.AiAggression"/>): how often it attacks.</summary>
+    public float AiAttackScale { get; set; } = 1f;
     /// <summary>Back-marker catch-up (plan §4.2/§10.5; off in Purist).</summary>
     public bool CatchUpEnabled { get; set; } = true;
     public double MaxDuration { get; set; } = 900;
@@ -236,16 +241,23 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
 
     public override void _Ready()
     {
-        if (GetParent() == GetTree().Root && RaceSetup.Chosen is { Event: not SpeedwayEvent.TimeTrial } chosen)
+        bool front = GetParent() == GetTree().Root && Session.Request is { IsRace: true };
+        if (front && Session.Request is { } req)
         {
-            Kind = chosen.Kind;
-            LayoutId = chosen.Layout;
-            Reverse = chosen.Reverse;
-            PlayerModel = chosen.Car;
-            PlayerLivery = chosen.Livery;
-            PlayerDivision = chosen.Division;
-            AiPaceScale = chosen.AiPace;
-            Preset = chosen.Preset;
+            Kind = req.Mode;
+            LayoutId = req.Layout;
+            Reverse = req.Reverse;
+            PlayerModel = req.Car;
+            PlayerLivery = req.Livery;
+            PlayerNumber = req.Number;
+            PlayerDivision = req.Division;
+            AiPaceScale = req.AiPace;
+            AiAttackScale = req.AiAggression;
+            Preset = req.Preset;
+            Seed = req.Seed;
+            DriverDivisions = req.DriverDivisions;
+            CarCount = 1 + Math.Clamp(req.Opponents, 0, 19);
+            if (req.Laps > 0) Laps = req.Laps;
         }
         if (GetParent() == GetTree().Root && DevTools.Instance is { } dev)
         {
@@ -321,16 +333,15 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             _rig = new CameraRig { Target = _player };
             AddChild(_rig);
             _hud = new EventHud { Mode = this, PlayerCar = _player, ViewName = () => _rig.Mode.ToString() };
-            _hud.ResultsHint = RaceSetup.Chosen != null
-                ? "V  watch the replay   ·   R  race again   ·   M  menu   ·   Q  quit"
-                : "V  watch the replay   ·   R  race again   ·   Q  quit";
-            if (RaceSetup.Chosen != null) _hud.MenuScene = RaceSetup.ScenePath;
-            _hud.ResultsKey = key =>
+            if (front)
             {
-                if (key != Key.V || _replay != null) return false;
-                StartReplay();
-                return true;
-            };
+                _hud.MenuScene = Session.FrontEndScene;
+                _hud.Championship = Session.InChampionship;
+                _hud.DivisionTable = Session.DivisionTable(EventPointsOf);
+                _hud.DivisionTitle = Session.DivisionTitle;
+            }
+            _hud.Replay = () => { if (_replay == null) StartReplay(); };
+            _hud.ReplayActive = () => _replay != null;
             AddChild(_hud);
             _recorder = new Replay.ReplayRecorder { Cars = _cars, Clock = () => _time };
             AddChild(_recorder);
@@ -364,10 +375,11 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         {
             bool isPlayer = slot == playerSlot;
             int id = isPlayer ? 1 : 2 + aiIndex;
-            int division = isPlayer ? PlayerDivision : 4 - (aiIndex % 4);
             var driver = isPlayer ? null : field[aiIndex % field.Count];
+            int division = isPlayer ? PlayerDivision
+                : DriverDivisions != null && DriverDivisions.TryGetValue(driver!.Name, out int dd) ? dd : 4 - (aiIndex % 4);
             var roof = DerbyMode.RoofColor(division);
-            var livery = driver?.LiveryFor(roof) ?? (PlayerLivery ?? DerbyMode.DefaultPlayerLivery) with { Number = 7, Roof = roof };
+            var livery = driver?.LiveryFor(roof) ?? (PlayerLivery ?? DerbyMode.DefaultPlayerLivery) with { Number = PlayerNumber, Roof = roof };
             var car = new Car
             {
                 Id = id,
@@ -394,12 +406,14 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 car.Driver = ProxyPlayer
                     ? new PlayerProxyInput(new RaceBrain(ProxyProfile, Seed * 1000 + 1) { Anticipation = 0.25f, StockCar = IsStockCar }, this, Seed * 7919 + 3)
                     : new PlayerInput();
+                if (!ProxyPlayer) GameSettings.ApplyAssists(car);
             }
             else
             {
                 var brain = new RaceBrain(driver!.Personality, Seed * 1000 + id)
                 {
                     PaceScale = AiPaceScale * (IsStockCar ? StockCarPace : 1f),
+                    AttackScale = AiAttackScale,
                     StockCar = IsStockCar,
                 };
                 _brains[id] = brain;
@@ -407,6 +421,15 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 aiIndex++;
             }
         }
+    }
+
+    /// <summary>A driver's points in this event so far, by championship key (the live division table).</summary>
+    private int EventPointsOf(string key)
+    {
+        if (key == DestructionRacing.Rules.Career.PlayerKey) return _referee.Score(_player.Id).Total;
+        foreach (var (id, d) in _drivers)
+            if (d.Name == key) return _referee.Score(id).Total;
+        return 0;
     }
 
     private static Node3D BuildBeacon()
@@ -943,6 +966,10 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             _metrics.Result.Blocks += b.Blocks;
         }
         if (Headless || DevTools.Instance?.Arg("carresults") != null) PrintCarResults(order);
+        if (GetParent() == GetTree().Root && Session.InChampionship)
+            Session.ReportResults(order.Select((id, i) => new DriverResult(
+                id == _player.Id ? DestructionRacing.Rules.Career.PlayerKey : _drivers.TryGetValue(id, out var d) ? d.Name : "?",
+                _referee.Score(id).Total, _referee.Score(id).Wrecks, i + 1)).ToList());
         foreach (var c in _cars) c.InputLocked = true;
         Engine.TimeScale = 1.0;
         _skipping = false;
@@ -968,7 +995,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 $"spin={score.Get(ScoreCategory.Spin)} wreck={score.Get(ScoreCategory.Wreck)} finish={finish:0.0} " +
                 $"retired={(_standings.IsRetired(c.Id) ? 1 : 0)} pits={_pits.StopsBy(c)} length={_time:0.0}" +
                 $" laps={_standings.LapOf(c.Id)} stuck={_stuckResets.GetValueOrDefault(c.Id)} longeststop={_longestStop.GetValueOrDefault(c.Id):0.0}" +
-                $" spun={_spunCount.GetValueOrDefault(c.Id)}"));
+                $" spun={_spunCount.GetValueOrDefault(c.Id)} who={(_drivers.TryGetValue(c.Id, out var di) ? Array.IndexOf(Drivers.All, di) : -1)}" +
+                $" wrecks={score.Wrecks}"));
         }
     }
 

@@ -57,6 +57,9 @@ public partial class EventHud : CanvasLayer
 
     public readonly record struct ResultRow(int Place, int Number, string Driver, Color Roof, int Spins, int Wrecks, int Bonus, int Total, bool IsPlayer, string Note = "");
 
+    /// <summary>One line of the live championship table (plan §13): the season so far and this event's points.</summary>
+    public readonly record struct DivisionRow(string Name, Color Roof, int Season, int Event, bool IsPlayer);
+
     public IHudMode Mode { get; set; } = null!;
     public Car PlayerCar { get; set; } = null!;
     public Func<string>? ViewName { get; set; }
@@ -66,12 +69,20 @@ public partial class EventHud : CanvasLayer
     public event Action? TallyFinished;
     /// <summary>A banner slid in (for its sting).</summary>
     public event Action? BannerShown;
-    /// <summary>Extra key on the results screen (e.g. the replay); return true when handled.</summary>
-    public Func<Key, bool>? ResultsKey { get; set; }
-    /// <summary>The hint line under the results table.</summary>
-    public string ResultsHint { get; set; } = "R  race again   ·   Q  quit";
-    /// <summary>The scene M returns to from the pause menu or the results (null: no menu).</summary>
+    /// <summary>The results screen's replay (V), set by the mode.</summary>
+    public Action? Replay { get; set; }
+    /// <summary>True while the replay plays (the HUD leaves the keys to it).</summary>
+    public Func<bool>? ReplayActive { get; set; }
+    /// <summary>The scene MENU returns to from the pause menu or the results (null: no menu).</summary>
     public string? MenuScene { get; set; }
+    public string MenuLabel { get; set; } = "MENU";
+    /// <summary>A championship event: its results are recorded, so the results offer CONTINUE, not RACE AGAIN.</summary>
+    public bool Championship { get; set; }
+    /// <summary>Championship: your division's live table (set by the mode), and its caption.</summary>
+    public Func<IReadOnlyList<DivisionRow>>? DivisionTable { get; set; }
+    public string DivisionTitle { get; set; } = "";
+    private VBoxContainer? _division;
+    private float _divisionClock;
 
     private Control _root = null!;
     private Label _points = null!, _speed = null!, _rank = null!, _rankLabel = null!, _statusLabel = null!, _status = null!, _clock = null!;
@@ -88,7 +99,7 @@ public partial class EventHud : CanvasLayer
     private int _lastCountdown = -1;
     private bool _resultsShown;
     private Tween? _bannerTween;
-    private Label _pauseKeys = null!;
+    private ActionMenu _pauseMenu = null!, _resultsMenu = null!;
     private Control _pitPanel = null!;
     private Label _pitZone = null!, _pitTime = null!, _pitKeys = null!, _pitHint = null!;
 
@@ -296,8 +307,8 @@ public partial class EventHud : CanvasLayer
         _pause = CentrePanel(new Vector2(640, 0));
         var pauseBox = new VBoxContainer();
         pauseBox.AddChild(HudStyle.Label("PAUSED", 72, HudStyle.Yellow, "ExtraBold", HorizontalAlignment.Center, 0));
-        _pauseKeys = HudStyle.Label("ESC / P  resume     ·     R  restart     ·     Q  quit", 26, HudStyle.White, "SemiBold", HorizontalAlignment.Center, 0);
-        pauseBox.AddChild(_pauseKeys);
+        _pauseMenu = new ActionMenu { Vertical = true, FontSize = 34 };
+        pauseBox.AddChild(_pauseMenu);
         _pause.AddChild(pauseBox);
         _pause.Visible = false;
 
@@ -501,8 +512,19 @@ public partial class EventHud : CanvasLayer
             foreach (var c in row) { c.Modulate = new Color(1, 1, 1, 0); grid.AddChild(c); }
             cells.Add(row);
         }
-        box.AddChild(HudStyle.Label(ResultsHint, 24, HudStyle.Grey, "SemiBold", HorizontalAlignment.Center, 0));
+        _resultsMenu = new ActionMenu { Vertical = false, FontSize = 28, Alignment = BoxContainer.AlignmentMode.Center };
+        box.AddChild(_resultsMenu);
+        var actions = new List<MenuAction>();
+        if (Championship && MenuScene != null) actions.Add(new MenuAction("CONTINUE", Key.None, () => GoTo(MenuScene)));
+        if (!Championship) actions.Add(new MenuAction("RACE AGAIN", Key.R, Restart));
+        if (Replay != null) actions.Add(new MenuAction("WATCH THE REPLAY", Key.V, () => Replay()));
+        if (!Championship && MenuScene != null) actions.Add(new MenuAction(MenuLabel, Key.M, () => GoTo(MenuScene)));
+        actions.Add(new MenuAction("QUIT", Key.Q, () => DevTools.QuitClean(GetTree(), 0)));
+        _resultsMenu.SetActions(actions);
         _results.Visible = true;
+        // --autocontinue (tests): runs the first results action (CONTINUE in a championship) after 4 s.
+        if (DevTools.Instance?.Arg("autocontinue") != null)
+            GetTree().CreateTimer(4.0, true, false, true).Timeout += () => actions[0].Run();
 
         var tween = RealTimeTween(_results);
         for (int i = cells.Count - 1; i >= 0; i--)
@@ -530,37 +552,53 @@ public partial class EventHud : CanvasLayer
 
     // ------------------------------------------------------------------ input and refresh
 
+    private void Restart()
+    {
+        var tree = GetTree();
+        tree.Paused = false;
+        Engine.TimeScale = 1.0;
+        DevTools.MarkSceneRequest();
+        tree.ReloadCurrentScene();
+    }
+
+    private void GoTo(string scene)
+    {
+        var tree = GetTree();
+        tree.Paused = false;
+        Engine.TimeScale = 1.0;
+        DevTools.MarkSceneRequest();
+        tree.ChangeSceneToFile(scene);
+    }
+
+    private void SetPaused(bool paused)
+    {
+        var tree = GetTree();
+        tree.Paused = paused;
+        _pause.Visible = paused;
+        if (!paused) return;
+        var actions = new List<MenuAction>
+        {
+            new("RESUME", Key.None, () => SetPaused(false)),
+            new("RESTART", Key.R, Restart),
+        };
+        if (MenuScene != null) actions.Add(new MenuAction(Championship ? "BACK TO THE CHAMPIONSHIP" : MenuLabel, Key.M, () => GoTo(MenuScene)));
+        actions.Add(new MenuAction("QUIT THE GAME", Key.Q, () => DevTools.QuitClean(tree, 0)));
+        _pauseMenu.SetActions(actions);
+    }
+
     public override void _UnhandledInput(InputEvent e)
     {
         if (e.IsEcho() || e is not InputEventKey { Pressed: true } key) return;
+        if (ReplayActive?.Invoke() == true) return;
         var tree = GetTree();
         if (e.IsActionPressed(Controls.Pause) && !_resultsShown)
         {
-            tree.Paused = !tree.Paused;
-            _pause.Visible = tree.Paused;
-            _pauseKeys.Text = MenuScene != null
-                ? "ESC / P  resume     ·     R  restart     ·     M  menu     ·     Q  quit"
-                : "ESC / P  resume     ·     R  restart     ·     Q  quit";
+            SetPaused(!tree.Paused);
         }
-        else if (key.PhysicalKeycode == Key.Q && (tree.Paused || _resultsShown))
+        else if (tree.Paused && _pauseMenu.HandleKey(key.PhysicalKeycode))
         {
-            DevTools.QuitClean(tree, 0);
         }
-        else if (key.PhysicalKeycode == Key.M && MenuScene != null && (tree.Paused || _resultsShown))
-        {
-            tree.Paused = false;
-            Engine.TimeScale = 1.0;
-            DevTools.MarkSceneRequest();
-            tree.ChangeSceneToFile(MenuScene);
-        }
-        else if (key.PhysicalKeycode == Key.R && (tree.Paused || _resultsShown))
-        {
-            tree.Paused = false;
-            Engine.TimeScale = 1.0;
-            DevTools.MarkSceneRequest();
-            tree.ReloadCurrentScene();
-        }
-        else if (_resultsShown && ResultsKey != null && ResultsKey(key.PhysicalKeycode))
+        else if (_resultsShown && _resultsMenu != null && _resultsMenu.HandleKey(key.PhysicalKeycode))
         {
         }
         else if (e.IsActionPressed(Controls.NextPreset))
@@ -587,10 +625,48 @@ public partial class EventHud : CanvasLayer
         set => _root.Visible = value;
     }
 
+    /// <summary>The live division table, left under the points: season points plus this event's, re-sorted twice a second.</summary>
+    private void UpdateDivision(float rdt)
+    {
+        if (DivisionTable == null) return;
+        if (_division == null)
+        {
+            var panel = HudStyle.Place(Panel(HudStyle.Yellow), 0f, 0f, new Vector2(36, 290), new Vector2(300, 0));
+            _root.AddChild(panel);
+            _division = new VBoxContainer();
+            _division.AddThemeConstantOverride("separation", -2);
+            panel.AddChild(_division);
+            _divisionClock = 1f;
+        }
+        if ((_divisionClock += rdt) < 0.5f) return;
+        _divisionClock = 0f;
+        foreach (Node c in _division.GetChildren()) c.QueueFree();
+        _division.AddChild(HudStyle.Label(DivisionTitle, 17, HudStyle.Grey, "SemiBold", outline: 0));
+        int pos = 0;
+        foreach (var r in DivisionTable())
+        {
+            pos++;
+            var row = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 8);
+            var colour = r.IsPlayer ? HudStyle.Yellow : HudStyle.White;
+            row.AddChild(HudStyle.Label($"{pos}", 20, colour, "Bold", outline: 0));
+            row.AddChild(new ColorRect { Color = r.Roof, CustomMinimumSize = new Vector2(12, 12), SizeFlagsVertical = Control.SizeFlags.ShrinkCenter });
+            var name = HudStyle.Label(r.Name, 20, colour, r.IsPlayer ? "ExtraBold" : "SemiBold", outline: 0);
+            name.CustomMinimumSize = new Vector2(130, 0);
+            row.AddChild(name);
+            var total = HudStyle.Label($"{r.Season + r.Event}", 20, colour, "ExtraBold", HorizontalAlignment.Right, 0);
+            total.CustomMinimumSize = new Vector2(48, 0);
+            row.AddChild(total);
+            if (r.Event > 0) row.AddChild(HudStyle.Label($"+{r.Event}", 18, HudStyle.Green, "Bold", outline: 0));
+            _division.AddChild(row);
+        }
+    }
+
     public override void _Process(double delta)
     {
         if (Mode == null || PlayerCar == null) return;
         float rdt = (float)(delta / Math.Max(Engine.TimeScale, 0.01));
+        UpdateDivision(rdt);
         var referee = Mode.Referee;
         int points = referee.Score(PlayerCar.Id).Total;
 

@@ -31,4 +31,6 @@ public interface IArenaView
     /// (0 with fewer than three hits).
     /// </summary>
     float TailRamShare(Car car) => 0f;
+    /// <summary>Total Destruction (DD1/DD2): every AI car hunts the player and nobody else.</summary>
+    bool HuntPlayerOnly => false;
 }

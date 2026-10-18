@@ -75,6 +75,11 @@ public sealed class RaceBrain
     /// <summary>Division pace scale for the AI (plan §10.5): Div 4 drives a little below its skill's pace.</summary>
     public float PaceScale { get; set; } = 1f;
     /// <summary>
+    /// Division aggression (plan §10.5): scales how often the AI goes for a car (the DD Code attacks and the leader
+    /// hunt). Brake-checks and defence are not scaled.
+    /// </summary>
+    public float AttackScale { get; set; } = 1f;
+    /// <summary>
     /// Stock Car (plan §10.3): contact scores nothing, so most drivers race clean. Bruisers and psychos still bump
     /// (the manual's "Bouncer"), nobody hunts the leader, and only psychos aim at crossing traffic.
     /// </summary>
@@ -596,7 +601,7 @@ public sealed class RaceBrain
                 var (ls, ll) = view.TrackPos(leader);
                 float lds = view.Track.Delta(s, ls);
                 if (lds > -LeaderHuntAhead && lds < LeaderHuntBehind && MathF.Abs(ll - lateral) < 6f
-                    && _rng.NextDouble() < 0.15f + 0.5f * _p.Opportunism * _p.Aggression)
+                    && _rng.NextDouble() < (0.15f + 0.5f * _p.Opportunism * _p.Aggression) * AttackScale)
                 {
                     _attackTarget = leader;
                     _leaderHunt = true;
@@ -630,6 +635,7 @@ public sealed class RaceBrain
             if (c.Id == view.LeaderId && !StockCar) chance += 0.25f * _p.Opportunism;                 // ×2 points
             if (c == view.Player && view.Time > 20.0) chance += 0.05f;
             if (StockCar) chance *= StockCarAggression;
+            chance *= AttackScale;
 
             if (_rng.NextDouble() < chance)
             {

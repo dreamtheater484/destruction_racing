@@ -15,15 +15,14 @@ Work in progress, built milestone by milestone (`IMPLEMENTATION_PLAN.md` §18):
 | M4 Vertical slice: the Destruction Derby (the final Bowl in three lights, crowd, derby AI, broadcast HUD, announcer, sound, music, replays) | approved |
 | M5 Car roster (nine cars, liveries and sponsors, 19 named drivers with radio taunts, balance sims) | approved |
 | M6 Racing (Crossroads Speedway, racing AI with the DD Code, Wreckin', Stock Car, Time Trial, pits, replays) | approved |
-| M7 Championship and front end (divisions, seasons, menus, showroom, options, rebinding, save and load) | next |
+| M7 Championship and front end (divisions, seasons, menus, showroom, options, rebinding, save and load, Duel, Total Destruction) | ready for your playtest |
 
 Progress notes and test results: [`docs/PROGRESS.md`](docs/PROGRESS.md).
 
 ## Running it
 1. Install the **.NET 8 SDK** and put **Godot 4.7.2 .NET** in `.engine/godot/` (see [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)).
-2. Double-click a launcher in the project folder; each one builds and starts a scene:
-   - **Play Derby.cmd**: Destruction Derby in the Bowl: pick the light (afternoon, golden hour, night), one of the nine cars, your colours and the division, then 20 cars, last car running wins. After the event, V shows the replay.
-   - **Play Racing.cmd**: Crossroads Speedway: Wreckin' Racing, Stock Car Racing or Time Trial, on the oval or the figure-8, either direction, in three lights, with any of the nine cars.
+2. Double-click **Play Destruction Racing.cmd** in the project folder: it builds and starts the game. The main menu has the Championship (Wreckin' or Stock Car, four divisions, three save slots), Single Event (Destruction Derby, Wreckin' Racing, Stock Car Racing, Duel, Total Destruction), Time Trial, Practice, Options and Credits. The first launch asks for your key layout.
+   Other launchers, for development:
    - **Play Driving Test.cmd**: free driving with the tuning panel.
    - **Damage Lab.cmd**: real crashes into a parked car, to look at the damage.
    - **Pileup Test.cmd**, **Bowl Look.cmd**, **Car Studio.cmd**, **Fog Test.cmd**, **Engine Test.cmd**: look-dev and stress scenes.

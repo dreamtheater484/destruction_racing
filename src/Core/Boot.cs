@@ -5,7 +5,7 @@ namespace DestructionRacing.Core;
 /// <summary>Entry scene: opens the scene given with --scene=..., otherwise the default scene.</summary>
 public partial class Boot : Node
 {
-    private const string DefaultScene = "res://scenes/derby/Derby.tscn";
+    private const string DefaultScene = "res://scenes/menu/FrontEnd.tscn";
 
     public override void _Ready()
     {

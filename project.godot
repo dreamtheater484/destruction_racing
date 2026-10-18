@@ -18,6 +18,7 @@ config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 [autoload]
 
 DevTools="*res://src/Core/DevTools.cs"
+GameSettings="*res://src/Core/GameSettings.cs"
 
 [display]
 

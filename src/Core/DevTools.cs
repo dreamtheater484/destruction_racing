@@ -12,6 +12,8 @@ namespace DestructionRacing.Core;
 ///   --quit-after=N            quit after N frames (for smoke tests)
 ///   --perf[=S]                print frame time (mean, 1% low), draw calls, triangles and VRAM every S s
 ///   --shot-every=S --shot-dir=out/x   save a screenshot every S seconds (stress scenes)
+///   --keys=Enter,Down,w2,Escape   press keys one by one from 1.5 s on, across scene changes (wN waits N × 0.5 s;
+///                             --menukeys is the same)
 /// </summary>
 public partial class DevTools : Node
 {
@@ -60,6 +62,7 @@ public partial class DevTools : Node
 
     public override void _Ready()
     {
+        if ((Arg("keys") ?? Arg("menukeys")) is { } keys) FeedKeys(keys);
         var version = Engine.GetVersionInfo();
         GD.Print($"[DevTools] Godot {version["string"]} | renderer {RenderingServer.GetCurrentRenderingDriverName()} " +
                  $"| GPU {RenderingServer.GetVideoAdapterName()} | physics {ProjectSettings.GetSetting("physics/3d/physics_engine")} " +
@@ -87,6 +90,27 @@ public partial class DevTools : Node
         {
             GD.Print($"[DevTools] quit after {_frame} frames");
             GetTree().Quit();
+        }
+    }
+
+    private async void FeedKeys(string script)
+    {
+        var tree = GetTree();
+        await ToSignal(tree.CreateTimer(1.5, true, false, true), SceneTreeTimer.SignalName.Timeout);
+        foreach (string raw in script.Split(','))
+        {
+            string token = raw.Trim();
+            if (token.StartsWith('w') && int.TryParse(token[1..], out int halves))
+            {
+                await ToSignal(tree.CreateTimer(halves * 0.5, true, false, true), SceneTreeTimer.SignalName.Timeout);
+                continue;
+            }
+            if (!System.Enum.TryParse(token, true, out Key key)) { GD.PushWarning($"[DevTools] unknown key {token}"); continue; }
+            var top = tree.CurrentScene is Menus.FrontEnd fe ? fe.Top.GetType().Name : tree.CurrentScene?.Name.ToString() ?? "?";
+            GD.Print($"[FrontEnd] key {key} on {top}");
+            Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = key, Keycode = key, Pressed = true });
+            Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = key, Keycode = key, Pressed = false });
+            await ToSignal(tree.CreateTimer(0.4, true, false, true), SceneTreeTimer.SignalName.Timeout);
         }
     }
 

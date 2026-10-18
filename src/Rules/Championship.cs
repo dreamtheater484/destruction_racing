@@ -75,6 +75,15 @@ public sealed class Championship
         }
     }
 
+    /// <summary>Sets a driver's season so far (loading a saved career).</summary>
+    public void Restore(int driverId, int points, int wrecks, int bestFinish)
+    {
+        var s = _standings[driverId];
+        s.Points = points;
+        s.Wrecks = wrecks;
+        s.BestFinish = bestFinish <= 0 ? int.MaxValue : bestFinish;
+    }
+
     /// <summary>Division table, sorted: points, then wrecks, then best finish (✱ A10).</summary>
     public IReadOnlyList<Standing> Table(int division) =>
         _standings.Values

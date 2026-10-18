@@ -211,6 +211,7 @@ public sealed class DerbyBrain
         foreach (var c in view.Cars)
         {
             if (c == me || !view.IsRunning(c)) continue;
+            if (view.HuntPlayerOnly && c != view.Player) continue;
             Vector3 to = c.GlobalPosition - pos;
             float d = Flat(to).Length();
             if (d < 0.1f) continue;

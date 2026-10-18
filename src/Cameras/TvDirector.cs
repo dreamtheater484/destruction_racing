@@ -33,8 +33,10 @@ public partial class TvDirector : Camera3D
         foreach (float sx in new[] { -1f, 1f })
             foreach (float sz in new[] { -1f, 1f })
                 _posts.Add(new Vector3(sx * 49f, 14f, sz * 44f));                          // floodlight towers
-        _posts.Add(new Vector3(0f, 10.5f, Bowl.SemiAxisZ + 9f));                             // grandstand roofs
-        _posts.Add(new Vector3(0f, 10.5f, -Bowl.SemiAxisZ - 9f));
+        // Above the front edge of the grandstand roofs (the roof starts ~1.8 m behind the wall at 9.4 m; a post on the
+        // roof itself saw only corrugated sheet when the action was under the stand).
+        _posts.Add(new Vector3(0f, 13f, Bowl.SemiAxisZ + 1.2f));                             // grandstand roofs
+        _posts.Add(new Vector3(0f, 13f, -Bowl.SemiAxisZ - 1.2f));
         _posts.Add(new Vector3(Bowl.SemiAxisX + 8f, 8f, 0f));                                // the scoreboard
         for (int i = 0; i < 6; i++)
         {

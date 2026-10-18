@@ -24,3 +24,9 @@ public interface ICarInput
 {
     CarControls GetControls(Car car, float delta);
 }
+
+/// <summary>A car that stands still with the brake on (the Practice targets in the Bowl).</summary>
+public sealed class ParkedDriver : ICarInput
+{
+    public CarControls GetControls(Car car, float delta) => CarControls.Parked;
+}

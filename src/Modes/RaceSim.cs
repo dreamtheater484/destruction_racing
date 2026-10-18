@@ -67,6 +67,15 @@ public partial class RaceSim : Node
         }
         _startTicks = Time.GetTicksMsec();
         GD.Print($"[Sim] {_queue.Count} races, profile {_profile}, seeds {_seed}..{_seed + _sims - 1}");
+        // For tools/dev/championship_report.py: the drivers (by their index) and where each championship starts them.
+        if (DevTools.Instance?.Arg("division") != null)
+        {
+            for (int i = 0; i < Drivers.All.Length; i++)
+                GD.Print($"[Field] {i} {Drivers.All[i].Short} {Drivers.All[i].Car} {Drivers.All[i].Archetype}");
+            foreach (var kind in new[] { Rules.ChampionshipKind.Wreckin, Rules.ChampionshipKind.StockCar })
+                GD.Print($"[Start] {kind} " + string.Join(",", Drivers.StartingDivisions(kind)
+                    .Select(d => $"{Array.FindIndex(Drivers.All, x => x.Name == d.Name)}:{d.Division}")));
+        }
         StartNext();
     }
 
@@ -119,6 +128,17 @@ public partial class RaceSim : Node
             _current.PlayerModel = Vehicles.CarCatalog.Ids[(seed * 7 + 3) % Vehicles.CarCatalog.Ids.Length];
         }
         if (DevTools.Instance?.Arg("car") is { } car) _current.PlayerModel = car;
+        // --division=1..4 (championship sims): the AI's pace of that division (plan §10.5, as the front end sets it).
+        if (int.TryParse(DevTools.Instance?.Arg("division"), out int division))
+        {
+            _current.PlayerDivision = Math.Clamp(division, 1, 4);
+            var req = new EventRequest { Division = _current.PlayerDivision };
+            _current.AiPaceScale = req.AiPace;
+            _current.AiAttackScale = req.AiAggression;
+        }
+        // --attackscale=X (calibration): the AI's division aggression, whatever the division says.
+        if (float.TryParse(DevTools.Instance?.Arg("attackscale"), NumberStyles.Float, CultureInfo.InvariantCulture, out float atk))
+            _current.AiAttackScale = atk;
         _current.DebugWallHits = DevTools.Instance?.Arg("wallhits") != null;
         _current.DebugPlayerHits = DevTools.Instance?.Arg("playerhits") != null;
         // --endurance: the 100-lap AI check (no damage; 8 cars unless --cars says otherwise).

@@ -9,6 +9,82 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## M7 Championship and front end — ready for your playtest
+- **Play it:** double-click **Play Destruction Racing.cmd**. It replaces Play Derby.cmd and Play Racing.cmd, and the game now starts at its own front end. The first launch asks for your key layout (Classic DD PC, Arrows or WASD); after that, the title and the main menu.
+  - Everything works from the keyboard: ↑/↓ choose, ←/→ change, Enter go, Esc back. The Del key deletes a championship (press it twice).
+  - Your settings, championships and progress are saved in `%APPDATA%\Godot\app_userdata\Destruction Racing\` (`settings.json`, `career\slot1..3.json`, `profile.json`). A championship saves itself after every event.
+- **The championship** (plan §4.5, `src/Rules/Career.cs`, unit-tested):
+  - Wreckin' (four races, then the Bowl finale) or Stock Car (four races), in one of three save slots, from Division 4. 20 drivers in four divisions of five; every event has all 20 cars, and you are ranked in your division. The roofs show the divisions (yellow, blue, red, black).
+  - Each division has its own calendar: the layout, direction and light of each round. Division 4 runs the oval and the figure-8 forward in daylight; Division 1 runs mostly at night, half of it in reverse.
+  - The top of your division goes up; otherwise you repeat the season. The top AI of each division goes up and the last AI of the one above comes down, so your rivals change. You are never relegated.
+  - **Promotion opens** that division's layouts, directions and lights in Single Event, Practice and Time Trial (Options → Gameplay can open everything). **Winning Division 1** opens the face-off start in the Bowl and eight metallic champion colours.
+  - **The hub:** the season's calendar, your division's table with roof colours (←/→ shows the other divisions), the stakes ("YOU LEAD BY 10 · ONE ROUND TO GO"), your car, and GARAGE to change car, colours and number between rounds.
+  - **During an event:** a live table of your division, with the points as they stand.
+  - **After it:** CONTINUE takes you to the hub, where the table counts the points in round by round. After the last round, the season review: the verdict (promoted, champion, or try again), what it opened, and who went up and down.
+- **The front end** (`src/Menus`):
+  - **Title and showroom:** your car on a turntable in a lit studio.
+  - **Car select:** the nine cars with stat bars and the DERBY / WRECKIN' / PACE verdicts. **Colours:** 16 colours (plus the champion set), the livery style and your number (the drivers' own numbers are taken).
+  - **Single Event:** Destruction Derby, Wreckin' Racing, Stock Car Racing, **Duel** (you and one rival you pick, in the Bowl) and **Total Destruction** (DD1: every car hunts you; your score is the seconds you survive plus your points, and the best is kept). Pick the venue, layout, direction, light, the number of AI cars and the division they drive like. A preview of the venue shows behind the menu. Combinations you have not opened yet say what opens them.
+  - **Practice:** the Bowl or the Speedway, with 0 to 19 AI cars. In the Bowl they can stand still as parked targets, to try the damage; on the Speedway you set the laps. **Time Trial:** as in M6, from the menu.
+  - **Options:** Display (window, borderless or exclusive full screen, vsync, frame cap, render scale with FSR), Graphics (a preset and its parts: shadows, anti-aliasing, ambient occlusion, glow, the night haze, detail), Camera (default view, field of view, shake, slow motion), Sound (master, music, effects, engines, crowd, announcer, how often the announcer speaks, radio taunts), Controls (the preset, rebinding, the keyboard test, counter-steer and traction assists), Gameplay (Easy / Normal / Hard, unlock everything).
+  - **Rebinding:** pick an action and press the new key; a key already in use swaps over. F1, F3, F5 and Enter are reserved. The screen warns about Shift (Windows' Sticky Keys prompt after five presses).
+  - **The keyboard test** (the ghosting test, plan §13): hold the keys you drive with. It draws the keyboard, counts how many keys it sees at once, and checks four combinations of your own keys that a race needs at once (such as gas + steer left + fast steer + turn-around). Some keyboards cannot report three or four keys at once; this shows whether yours can.
+  - **Credits**, read from CREDITS.md.
+  - **Pause** (the pause key): resume, restart, back to the championship or the menu, quit. **Results:** continue, race again, watch the replay, menu, quit.
+- **Division difficulty** (plan §10.5, ✱ A25):
+  - The racing AI drives faster in the higher divisions (×0.97 of its pace in Division 4 up to ×1.015 in Division 1, as in M6) and attacks more often (×0.8 in Division 4 up to ×1, the M6 level, in Division 1).
+  - Easy and Hard shift the pace by 2% and the aggression by 0.2 each way, and set how many derby AI may go for you at once (the attention budget, 2/3/4 by division).
+  - The drivers start in the divisions their sim points put them in: in Wreckin' the bruisers in heavy cars are in Division 1 and the rookies in Division 4; in Stock Car the racers in the Volants, Adler and Hikaris are in Division 1.
+- **Championship sims** (`bash tools/dev/championship.sh`): 400 events over every division's calendar, with the real field and the PlayerProxy "average fan" (in the Nordvik for Wreckin', the Ryujin for Stock Car). `championship_report.py` then plays 4,000 careers from them, with the tables, promotion and swaps as in the game.
+
+  | Target (plan §17.4) | Division 4 | Division 3 | Division 2 | Division 1 (the title) |
+  |---|---|---|---|---|
+  | Wreckin': promotion chance per season | 47% | 19% | 15% | 12% |
+  | Wreckin': median attempts (target 1–2) | **2 ✅** | **4 ❌** | **6 ❌** | **more than 12 ❌** |
+  | Wreckin': seasons decided before the Bowl finale (target ≤ 30%) | 27% ✅ | 15% ✅ | 13% ✅ | 11% ✅ |
+  | Stock Car: median attempts (target 1–2) | **never ❌** | – | – | – |
+
+  - **The Bowl finale keeps seasons alive: met.** 16% of seasons are decided before it, and the bot is still in the hunt before the finale in 35–78% of them.
+  - **Wreckin' promotion: met in Division 4 only.**
+    - The average fan scores what the average AI driver scores, in every division (the AI's points per event are 0.94–1.13 of the bot's).
+    - A season is five events among five drivers, and one event swings a lot, so even drivers each top the table about one season in five. Division 4 has the rookies and the calmest AI, and the bot goes up in 47% of seasons there. Higher up its rivals are as good as it is: 19%, 15%, and 12% for the title.
+    - 17% of average-fan careers win the title within 12 seasons (median 10 seasons). A player better than the bot climbs faster.
+  - **What I tried for Wreckin'** (each on 24–48 paired races or the full sims):
+    - Sorting the starting divisions by strength: kept; it adds only about 2 points of promotion chance, because the drivers are close (45–62 points an event).
+    - The AI's pace: it hardly changes Wreckin' points, which come from spins.
+    - AI that never go for the player: no change. The bot's wrecks (about a third of Division 4 races) come from traffic and walls, not from being hunted.
+    - The AI's aggression: kept as the division ramp above. At ×0.8 in Division 4 the bot's season points went from 250 to 305 against rookies on 193–234.
+    - Each event pool holds 10–20 races, so a pool's mean is only good to about ±10%. That's too coarse to tune Divisions 3–1 any finer.
+    - Scaling the AI's points offline shows what the target needs: the AI about 20% below the average fan in every division. In the game that means calmer AI everywhere, with fewer spins and less chaos than the M6 races you approved. That's your call (question 2 below).
+  - **Stock Car: the bot can't measure it.**
+    - Every bot that drives through the keyboard path finishes about 18th of 20: the average fan in the Ryujin or in the Kitsune, and the skilled bot too. In M6 it was 17.8.
+    - It rides a metre off the outside wall at 120–140 km/h, and its small steering errors put it into the wall (hits of up to 800 kJ). Then it pits or retires.
+    - Neither an AI 12% slower nor an AI that never bumps changed that.
+    - So Division 4 Stock Car is the M6 field you played, with less bumping (×0.8 aggression), and your playtest has to judge it (question 3).
+- **Load times** (plan §17.4: load ≤ 5 s, restart ≤ 3 s; windowed, RTX 5090): **met.**
+  - The title is on screen 1.5–1.7 s after the game starts. The launcher builds first, which takes a few seconds more.
+  - From START in the menu, a race is on screen in 1.4 s (the green light follows the 3 s countdown), and a derby in 0.8 s.
+  - A restart takes 1.4 s for a race and 0.5 s for a derby.
+  - The menus run at 740–900 fps. The venue preview keeps the Speedway cached (VRAM 600 → 920 MB, no more on later visits).
+- **Not done (deviations):**
+  - **Sticky Keys** (plan §14): the opt-in "suppress the Sticky Keys shortcut while playing" is not built. Testing it would mean changing your Windows accessibility settings, which I don't do on your machine. No preset uses Shift, and the rebinding screen warns if you bind it. It can come in M8 if you want it; you would test it.
+  - The **Infield road course** (from M6) is still not built.
+  - **Promotion attempts** (plan §17.4): met in Division 4 only, and Stock Car can't be measured with the bot (above).
+- **Acceptance** (plan §18): "A full championship playable from start to finish". Both championships play from the first round through the season review and on into the next season. Checked in windowed runs:
+  - the hub, and events started from it;
+  - the results going back to the hub and the tally;
+  - a promotion in the season review;
+  - a slot that saves after each event and loads again.
+
+  No whole career to the title was played by hand; the sims play thousands.
+- **For your playtest:**
+  1. Start a Wreckin' championship and play a season through to the Bowl. Is the hub clear (the table, the stakes, the calendar)? Does the tally after each round work for you?
+  2. Is Division 4 the right difficulty for you at Normal? Did you go up first time? Higher up, an average player needs four to six seasons per division (the bot's numbers). Is that a fair climb, or should the AI in Divisions 3–1 be calmer, so you go up in one or two (with fewer spins in the races)? Easy already makes them calmer.
+  3. Try a Stock Car championship too. Where do you finish in Division 4, and can you top the five yellow roofs? The bot can't tell me: it finishes at the back.
+  4. Single Event: try a Duel and a Total Destruction. Should Total Destruction be harder or easier?
+  5. Options: does the keyboard test show all your keys? Do the graphics and sound settings do what you expect?
+  6. Anything in the menus that is slow, unclear or missing?
+
 ## M6 Racing — approved (2026‑10‑18: "It's very cool!")
 - **Play it:** double-click **Play Racing.cmd** (it replaces Play Wreckin.cmd). The set-up screen:
   - **EVENT:** Wreckin' Racing, Stock Car Racing or Time Trial.

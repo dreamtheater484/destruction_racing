@@ -90,7 +90,42 @@ public static class Drivers
         return field;
     }
 
-    /// <summary>The player's livery palette (DerbySetup's keyboard grid): 16 base colours, 2 rows of 8.</summary>
+    public static DriverInfo? ByName(string name) => All.FirstOrDefault(d => d.Name == name);
+
+    /// <summary>
+    /// Where the 19 drivers start a new championship (plan §4.5): Division 1 holds the five who score most in that
+    /// championship, Division 4 the four who score least, beside the player. Set from the championship sims (M7):
+    /// Wreckin' points follow weight and toughness, Stock Car points follow pace.
+    /// </summary>
+    public static IReadOnlyList<(string Name, int Division)> StartingDivisions(Rules.ChampionshipKind kind)
+    {
+        string[][] order = kind == Rules.ChampionshipKind.StockCar ? StockCarStart : WreckinStart;
+        var list = new List<(string, int)>();
+        for (int d = 0; d < order.Length; d++)
+            foreach (string surname in order[d])
+                list.Add((All.Single(x => x.Short == surname).Name, d + 1));
+        return list;
+    }
+
+    // The starting divisions (M7 championship sims, 400 events): each championship's drivers sorted by their mean
+    // points per event in it, the strongest five in Division 1. The seasons' swaps reshuffle them from there.
+    private static readonly string[][] WreckinStart =
+    {
+        new[] { "Kettering", "Lindqvist", "O'Rourke", "Buck", "Kowalczyk" },
+        new[] { "Ferretti", "Delgado", "Tank", "Price", "Smet" },
+        new[] { "Okuda", "Hasegawa", "Lacombe", "Hollmann", "Moriyama" },
+        new[] { "Vos", "Reid", "Saeki", "Tanabe" },
+    };
+
+    private static readonly string[][] StockCarStart =
+    {
+        new[] { "Lacombe", "Ferretti", "Hollmann", "Moriyama", "Tanabe" },
+        new[] { "Vos", "Saeki", "Okuda", "Hasegawa", "Reid" },
+        new[] { "Price", "Lindqvist", "Kowalczyk", "Kettering", "O'Rourke" },
+        new[] { "Tank", "Buck", "Delgado", "Smet" },
+    };
+
+    /// <summary>The player's livery palette (the keyboard grid): 16 base colours, 2 rows of 8.</summary>
     public static readonly Color[] Palette =
     {
         C(204, 20, 15), C(235, 110, 20), C(240, 195, 20), C(40, 150, 60), C(25, 90, 50), C(50, 160, 210), C(25, 60, 160), C(20, 30, 70),

@@ -1,0 +1,164 @@
+using System.Linq;
+using DestructionRacing.Audio;
+using DestructionRacing.Vehicles;
+using Godot;
+
+namespace DestructionRacing.Core;
+
+/// <summary>
+/// Applies the player's <see cref="Settings"/> (autoload): the window, the renderer (shadows, anti-aliasing, the
+/// environment effects of every venue as it loads), the audio buses, the key layout and the assists.
+/// The settings only take effect when the game runs through the front end (no <c>--scene</c>) or with
+/// <c>--usersettings</c>: dev, test, capture and sim runs keep the defaults, so they stay reproducible.
+/// </summary>
+public partial class GameSettings : Node
+{
+    public static Settings Current { get; private set; } = new();
+    public static bool Active { get; private set; }
+    private static GameSettings? _instance;
+
+    private static readonly int[] DirectionalShadow = { 2048, 4096, 8192, 8192 };
+    private static readonly int[] PositionalShadow = { 2048, 4096, 4096, 8192 };
+    private static readonly RenderingServer.ShadowQuality[] SoftShadow =
+    {
+        RenderingServer.ShadowQuality.SoftVeryLow, RenderingServer.ShadowQuality.SoftLow,
+        RenderingServer.ShadowQuality.SoftMedium, RenderingServer.ShadowQuality.SoftHigh,
+    };
+    private static readonly float[] LodThreshold = { 4f, 2f, 1f };
+
+    public override void _EnterTree()
+    {
+        _instance = this;
+        ProcessMode = ProcessModeEnum.Always;
+        Active = DevTools.Instance?.Arg("scene") == null || DevTools.Instance?.Arg("usersettings") != null;
+        if (Active) Current = Settings.Load();
+        GetTree().NodeAdded += OnNodeAdded;
+    }
+
+    public override void _Ready()
+    {
+        if (Active) ApplyAll();
+    }
+
+    /// <summary>Saves and applies a changed copy of the settings (the options screen).</summary>
+    public static void Commit(Settings settings)
+    {
+        Current = settings;
+        settings.Save();
+        if (Active) _instance?.ApplyAll();
+    }
+
+    /// <summary>Sets the graphics values of a preset (Custom leaves them).</summary>
+    public static void UsePreset(Settings s, GraphicsPreset preset)
+    {
+        s.GraphicsPreset = (int)preset;
+        switch (preset)
+        {
+            case GraphicsPreset.Low:
+                s.Shadows = 0; s.AntiAliasing = 1; s.AmbientOcclusion = 0; s.Glow = true; s.VolumetricFog = false; s.Detail = 0; s.RenderScale = 77;
+                break;
+            case GraphicsPreset.Medium:
+                s.Shadows = 1; s.AntiAliasing = 2; s.AmbientOcclusion = 1; s.Glow = true; s.VolumetricFog = false; s.Detail = 1; s.RenderScale = 100;
+                break;
+            case GraphicsPreset.High:
+                s.Shadows = 2; s.AntiAliasing = 2; s.AmbientOcclusion = 2; s.Glow = true; s.VolumetricFog = true; s.Detail = 2; s.RenderScale = 100;
+                break;
+            case GraphicsPreset.Ultra:
+                s.Shadows = 3; s.AntiAliasing = 3; s.AmbientOcclusion = 2; s.Glow = true; s.VolumetricFog = true; s.Detail = 2; s.RenderScale = 100;
+                break;
+        }
+    }
+
+    private void ApplyAll()
+    {
+        var s = Current;
+        bool display = DisplayServer.GetName() != "headless";
+        // --windowed (test runs): keep the window, whatever the settings say.
+        if (display && DevTools.Instance?.Arg("windowed") == null)
+        {
+            DisplayServer.WindowSetMode(s.WindowMode switch
+            {
+                0 => DisplayServer.WindowMode.Windowed,
+                2 => DisplayServer.WindowMode.ExclusiveFullscreen,
+                _ => DisplayServer.WindowMode.Fullscreen,
+            });
+        }
+        if (display) DisplayServer.WindowSetVsyncMode(s.VSync ? DisplayServer.VSyncMode.Enabled : DisplayServer.VSyncMode.Disabled);
+        Engine.MaxFps = s.MaxFps;
+        var root = GetTree().Root;
+        float scale = Mathf.Clamp(s.RenderScale, 50, 100) / 100f;
+        root.Scaling3DMode = scale < 0.999f ? Viewport.Scaling3DModeEnum.Fsr : Viewport.Scaling3DModeEnum.Bilinear;
+        root.Scaling3DScale = scale;
+        int shadows = Mathf.Clamp(s.Shadows, 0, 3);
+        RenderingServer.DirectionalShadowAtlasSetSize(DirectionalShadow[shadows], true);
+        RenderingServer.DirectionalSoftShadowFilterSetQuality(SoftShadow[shadows]);
+        RenderingServer.PositionalSoftShadowFilterSetQuality(SoftShadow[shadows]);
+        root.PositionalShadowAtlasSize = PositionalShadow[shadows];
+        root.Msaa3D = s.AntiAliasing switch { 2 => Viewport.Msaa.Msaa2X, 3 => Viewport.Msaa.Msaa4X, _ => Viewport.Msaa.Disabled };
+        root.ScreenSpaceAA = s.AntiAliasing == 1 ? Viewport.ScreenSpaceAAEnum.Fxaa : Viewport.ScreenSpaceAAEnum.Disabled;
+        root.MeshLodThreshold = LodThreshold[Mathf.Clamp(s.Detail, 0, 2)];
+        foreach (var env in FindAll<WorldEnvironment>(root)) ApplyEnvironment(env);
+
+        AudioMix.MasterGain = s.MasterVolume / 100f;
+        AudioMix.MusicGain = s.MusicVolume / 100f;
+        AudioMix.EffectsGain = s.EffectsVolume / 100f;
+        AudioMix.EnginesGain = s.EnginesVolume / 100f;
+        AudioMix.CrowdGain = s.CrowdVolume / 100f;
+        AudioMix.AnnouncerGain = s.AnnouncerVolume / 100f;
+        AudioMix.Ensure();
+        AudioMix.Refresh();
+
+        Controls.CustomMap = Controls.GameActions.ToDictionary(a => a,
+            a => s.CustomKeys.TryGetValue(a, out var keys) ? keys.Select(k => (Key)k).ToArray() : Controls.PresetMap(ControlPreset.Arrows)[a]);
+        Controls.Apply(Controls.Parse(s.ControlPreset));
+        if (DevTools.Instance?.Arg("taunts") == null) AI.Taunts.Frequency = (AI.Taunts.Level)Mathf.Clamp(s.Taunts, 0, 2);
+    }
+
+    private static void OnNodeAdded(Node node)
+    {
+        if (Active && node is WorldEnvironment env) ApplyEnvironment(env);
+    }
+
+    /// <summary>Switches the venue's own effects off where the settings say so (and back on: the originals are kept).</summary>
+    private static void ApplyEnvironment(WorldEnvironment node)
+    {
+        if (node.Environment is not { } env) return;
+        var s = Current;
+        bool Orig(string key, bool value)
+        {
+            if (!env.HasMeta(key)) env.SetMeta(key, value);
+            return env.GetMeta(key).AsBool();
+        }
+        bool ssao = Orig("dr_ssao", env.SsaoEnabled), ssil = Orig("dr_ssil", env.SsilEnabled);
+        bool glow = Orig("dr_glow", env.GlowEnabled), fog = Orig("dr_vfog", env.VolumetricFogEnabled);
+        env.SsaoEnabled = ssao && s.AmbientOcclusion >= 1;
+        env.SsilEnabled = ssil && s.AmbientOcclusion >= 2;
+        env.GlowEnabled = glow && s.Glow;
+        env.VolumetricFogEnabled = fog && s.VolumetricFog;
+    }
+
+    /// <summary>The player's assists on the player's own car (plan §14.3); the bots keep the defaults.</summary>
+    public static void ApplyAssists(Car car)
+    {
+        if (!Active) return;
+        if (Current.CounterSteer == 0) car.Tuning.CounterSteerAssist = 0f;
+        else if (Current.CounterSteer == 2) car.Tuning.CounterSteerAssist = 0.7f;
+        if (!Current.TractionControl) car.Tuning.TractionControl = 1.2f;
+    }
+
+    /// <summary>Announcer frequency for <see cref="Announcer.Frequency"/>: off, less, normal.</summary>
+    public static float AnnouncerFrequency => !Active ? 1f : Current.AnnouncerFrequency switch { 0 => 0f, 1 => 0.5f, _ => 1f };
+
+    public static float ShakeScale => Active ? Current.Shake / 100f : 1f;
+    public static float FovOffset => Active ? Current.FovOffset : 0f;
+    public static bool SlowMotion => !Active || Current.SlowMotion;
+
+    private static System.Collections.Generic.IEnumerable<T> FindAll<T>(Node root) where T : Node
+    {
+        foreach (Node child in root.GetChildren())
+        {
+            if (child is T t) yield return t;
+            foreach (var n in FindAll<T>(child)) yield return n;
+        }
+    }
+}

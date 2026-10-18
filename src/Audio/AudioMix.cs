@@ -11,8 +11,10 @@ public static class AudioMix
 {
     public const string Music = "Music", Announcer = "Announcer", World = "World", Sfx = "Sfx", Engines = "Engines", Crowd = "Crowd";
 
-    /// <summary>Base levels (dB); the options screen (M7) will set these.</summary>
+    /// <summary>Base levels (dB) of the mix.</summary>
     public static float MusicDb = -9f, AnnouncerDb = -1f, SfxDb = 0f, EnginesDb = -5f, CrowdDb = -7f;
+    /// <summary>The volume sliders of the options screen (0..1 on top of the mix).</summary>
+    public static float MasterGain = 1f, MusicGain = 1f, EffectsGain = 1f, EnginesGain = 1f, CrowdGain = 1f, AnnouncerGain = 1f;
 
     private static AudioEffectLowPassFilter? _slowMoFilter;
     private static float _duckAnnouncer, _duckCrash, _slowMo;
@@ -57,13 +59,20 @@ public static class AudioMix
         Apply();
     }
 
+    /// <summary>Applies changed sliders at once (the options screen; events call <see cref="Update"/> every frame).</summary>
+    public static void Refresh() => Apply();
+
+    private static float Db(float gain) => gain <= 0.001f ? -80f : 20f * Mathf.Log(gain) / Mathf.Log(10f);
+
     private static void Apply()
     {
-        Set(Music, MusicDb - 7f * _duckAnnouncer - 5f * _duckCrash);
-        Set(Announcer, AnnouncerDb);
-        Set(Sfx, SfxDb);
-        Set(Engines, EnginesDb - 3f * _duckAnnouncer);
-        Set(Crowd, CrowdDb - 4f * _duckAnnouncer);
+        AudioServer.SetBusVolumeDb(0, Db(MasterGain));
+        AudioServer.SetBusMute(0, MasterGain <= 0.001f);
+        Set(Music, MusicDb + Db(MusicGain) - 7f * _duckAnnouncer - 5f * _duckCrash);
+        Set(Announcer, AnnouncerDb + Db(AnnouncerGain));
+        Set(Sfx, SfxDb + Db(EffectsGain));
+        Set(Engines, EnginesDb + Db(EnginesGain) - 3f * _duckAnnouncer);
+        Set(Crowd, CrowdDb + Db(CrowdGain) - 4f * _duckAnnouncer);
         int world = AudioServer.GetBusIndex(World);
         if (world < 0 || _slowMoFilter == null) return;
         bool on = _slowMo > 0.01f;

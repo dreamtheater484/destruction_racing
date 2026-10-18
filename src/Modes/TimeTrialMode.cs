@@ -23,6 +23,7 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
     public string CarId { get; set; } = "kitsune";
     public BowlPreset Preset { get; set; } = BowlPreset.Afternoon;
     public Livery? PlayerLivery { get; set; }
+    public int PlayerNumber { get; set; } = 7;
     public bool Headless { get; set; }
     public bool ProxyPlayer { get; set; }
     public Personality ProxyProfile { get; set; } = Personality.AverageFan;
@@ -119,13 +120,14 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
 
     public override void _Ready()
     {
-        if (GetParent() == GetTree().Root && RaceSetup.Chosen is { Event: SpeedwayEvent.TimeTrial } chosen)
+        if (GetParent() == GetTree().Root && Session.Request is { Kind: EventKind.TimeTrial } req)
         {
-            LayoutId = chosen.Layout;
-            Reverse = chosen.Reverse;
-            CarId = chosen.Car;
-            PlayerLivery = chosen.Livery;
-            Preset = chosen.Preset;
+            LayoutId = req.Layout;
+            Reverse = req.Reverse;
+            CarId = req.Car;
+            PlayerLivery = req.Livery;
+            PlayerNumber = req.Number;
+            Preset = req.Preset;
         }
         if (GetParent() == GetTree().Root && DevTools.Instance is { } dev)
         {
@@ -153,11 +155,11 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
         BestGhost = Persist ? Ghost.Load(Ghost.PathFor(_key)) : null;
         if (BestGhost != null && BestGhost.Car != CarId) BestGhost = null;
 
-        var livery = (PlayerLivery ?? DerbyMode.DefaultPlayerLivery) with { Number = 7, Roof = DerbyMode.RoofColor(4) };
+        var livery = (PlayerLivery ?? DerbyMode.DefaultPlayerLivery) with { Number = PlayerNumber, Roof = PlayerLivery?.Roof ?? DerbyMode.RoofColor(4) };
         _car = new Car
         {
             Id = 1,
-            Number = 7,
+            Number = PlayerNumber,
             PaintColor = livery.Paint,
             RoofColor = livery.Roof ?? Colors.Yellow,
             Livery = livery,
@@ -171,6 +173,7 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
         _car.Driver = ProxyPlayer
             ? new PlayerProxyInput(new RaceBrain(ProxyProfile, Seed * 1000 + 1) { Anticipation = 0.25f }, this, Seed * 7919 + 3)
             : new PlayerInput();
+        if (!ProxyPlayer) GameSettings.ApplyAssists(_car);
         ResetTracking();
 
         var impacts = new ImpactSystem { Clock = () => _clock };

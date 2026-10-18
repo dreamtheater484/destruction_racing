@@ -42,10 +42,11 @@ public partial class CameraRig : Camera3D
         Current = true;
         Near = 0.05f;
         Far = 4000f;
+        if (GameSettings.Active && Mode == View.Chase) Mode = (View)Mathf.Clamp(GameSettings.Current.DefaultView, 0, 3);
     }
 
-    /// <summary>Adds camera shake (0..1), e.g. from big hits.</summary>
-    public void AddShake(float amount) => _shake = Mathf.Min(1f, _shake + amount);
+    /// <summary>Adds camera shake (0..1), e.g. from big hits; scaled by the camera-shake option.</summary>
+    public void AddShake(float amount) => _shake = Mathf.Min(1f, _shake + amount * GameSettings.ShakeScale);
 
     /// <summary>A quick FOV kick (0..1) for big hits (plan §11).</summary>
     public void Punch(float amount) => _fovPunch = Mathf.Min(1f, Mathf.Max(_fovPunch, amount));
@@ -125,6 +126,7 @@ public partial class CameraRig : Camera3D
 
         bool attached = Mode is View.Bumper or View.InCar;
 
+        fov += GameSettings.FovOffset;
         _baseFov = Mathf.Lerp(_baseFov, fov + Mathf.Min(speed * 0.15f, 6f), 1f - Mathf.Exp(-4f * dt));
         _fovPunch = Mathf.MoveToward(_fovPunch, 0f, dt * 4f);
         Fov = _baseFov + 9f * _fovPunch * _fovPunch;

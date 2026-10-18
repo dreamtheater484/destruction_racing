@@ -21,6 +21,8 @@ public partial class TimeTrialHud : CanvasLayer
     private readonly Label[] _sectors = new Label[3];
     private VBoxContainer _popups = null!;
     private Control _pause = null!;
+    private ActionMenu _pauseMenu = null!;
+    private static bool FromMenu => Modes.Session.Request is { Kind: Modes.EventKind.TimeTrial };
     private float _sectorFlash;
 
     public override void _Ready()
@@ -95,9 +97,8 @@ public partial class TimeTrialHud : CanvasLayer
         pause.GrowHorizontal = pause.GrowVertical = Control.GrowDirection.Both;
         var pauseBox = new VBoxContainer();
         pauseBox.AddChild(HudStyle.Label("PAUSED", 72, HudStyle.Yellow, "ExtraBold", HorizontalAlignment.Center, 0));
-        pauseBox.AddChild(HudStyle.Label(RaceSetup.Chosen != null
-            ? "ESC / P  resume     ·     R  restart     ·     M  menu     ·     Q  quit"
-            : "ESC / P  resume     ·     R  restart     ·     Q  quit", 26, HudStyle.White, "SemiBold", HorizontalAlignment.Center, 0));
+        _pauseMenu = new ActionMenu { Vertical = true, FontSize = 34 };
+        pauseBox.AddChild(_pauseMenu);
         pause.AddChild(pauseBox);
         pause.Visible = false;
         _pause = pause;
@@ -143,23 +144,10 @@ public partial class TimeTrialHud : CanvasLayer
         var tree = GetTree();
         if (e.IsActionPressed(Controls.Pause))
         {
-            tree.Paused = !tree.Paused;
-            _pause.Visible = tree.Paused;
+            SetPaused(!tree.Paused);
         }
-        else if (tree.Paused && key.PhysicalKeycode == Key.R)
+        else if (tree.Paused && _pauseMenu.HandleKey(key.PhysicalKeycode))
         {
-            tree.Paused = false;
-            _pause.Visible = false;
-            Mode.Restart();
-        }
-        else if (tree.Paused && key.PhysicalKeycode == Key.Q)
-        {
-            DevTools.QuitClean(tree, 0);
-        }
-        else if (tree.Paused && key.PhysicalKeycode == Key.M && RaceSetup.Chosen != null)
-        {
-            tree.Paused = false;
-            tree.ChangeSceneToFile(RaceSetup.ScenePath);
         }
         else if (e.IsActionPressed(Controls.NextPreset))
         {
@@ -167,6 +155,28 @@ public partial class TimeTrialHud : CanvasLayer
         }
         else return;
         GetViewport().SetInputAsHandled();
+    }
+
+    private void SetPaused(bool paused)
+    {
+        var tree = GetTree();
+        tree.Paused = paused;
+        _pause.Visible = paused;
+        if (!paused) return;
+        var actions = new System.Collections.Generic.List<MenuAction>
+        {
+            new("RESUME", Key.None, () => SetPaused(false)),
+            new("RESTART", Key.R, () => { SetPaused(false); Mode.Restart(); }),
+        };
+        if (FromMenu)
+            actions.Add(new MenuAction("MENU", Key.M, () =>
+            {
+                tree.Paused = false;
+                DevTools.MarkSceneRequest();
+                tree.ChangeSceneToFile(Modes.Session.FrontEndScene);
+            }));
+        actions.Add(new MenuAction("QUIT THE GAME", Key.Q, () => DevTools.QuitClean(tree, 0)));
+        _pauseMenu.SetActions(actions);
     }
 
     public override void _Process(double delta)

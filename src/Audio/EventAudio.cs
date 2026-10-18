@@ -41,7 +41,7 @@ public partial class EventAudio : Node
         SfxLibrary.Preload();
         Pool = new SfxPool();
         AddChild(Pool);
-        Announcer = new Announcer();
+        Announcer = new Announcer { Frequency = Core.GameSettings.AnnouncerFrequency };
         AddChild(Announcer);
         Music = new MusicPlayer();
         AddChild(Music);

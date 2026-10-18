@@ -903,6 +903,7 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A22 | AI pace in Division 4 | The racing AI drives at ×0.97 of its skill's pace (division scaling, §10.5) | At ×1 the AI racers out‑pace an average player, so only hunting paid; at ×0.97 racer and hunter bots score within ±15% |
 | A23 | Crossover and wall ends | The walls open where the figure‑8 legs cross; where a wall resumes it is flared (≈8°) and the four corners are closed | Blunt wall ends at the opening wrecked cars that drifted into the gap; DD1 footage shows no detail |
 | A24 | Race end | The race ends when the player finishes; if the player is wrecked, when the winner takes the flag. Everyone else is classified by distance | Not documented; keeps "skip to results" short |
+| A25 | Division difficulty | The racing AI's pace ×0.97 → ×1.015 and its aggression (how often it attacks) ×0.8 → ×1 from Division 4 to Division 1; Easy and Hard shift them by 0.02 and 0.2. The drivers start in the divisions their sim points put them in | Wreckin' points come from spins, so pace alone hardly moves them. The average‑fan bot scores at the field's mean; ×0.8 in Division 4 meets the promotion target there (M7 sims) |
 
 ---
 
