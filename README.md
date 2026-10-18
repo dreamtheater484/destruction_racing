@@ -14,7 +14,8 @@ Work in progress, built milestone by milestone (`IMPLEMENTATION_PLAN.md` §18):
 | M3 Full damage and VFX (parts that come off, glass, lights, smoke, fire, sparks, debris) | approved |
 | M4 Vertical slice: the Destruction Derby (the final Bowl in three lights, crowd, derby AI, broadcast HUD, announcer, sound, music, replays) | approved |
 | M5 Car roster (nine cars, liveries and sponsors, 19 named drivers with radio taunts, balance sims) | approved |
-| M6 Racing (Crossroads Speedway, racing AI with the DD Code, Wreckin', Stock Car, Time Trial, pits, replays) | ready for your playtest |
+| M6 Racing (Crossroads Speedway, racing AI with the DD Code, Wreckin', Stock Car, Time Trial, pits, replays) | approved |
+| M7 Championship and front end (divisions, seasons, menus, showroom, options, rebinding, save and load) | next |
 
 Progress notes and test results: [`docs/PROGRESS.md`](docs/PROGRESS.md).
 

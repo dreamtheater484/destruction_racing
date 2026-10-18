@@ -9,7 +9,7 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
-## M6 Racing — ready for you to play
+## M6 Racing — approved (2026‑10‑18: "It's very cool!")
 - **Play it:** double-click **Play Racing.cmd** (it replaces Play Wreckin.cmd). The set-up screen:
   - **EVENT:** Wreckin' Racing, Stock Car Racing or Time Trial.
   - **LAYOUT and DIRECTION:** the oval or the figure-8, forward or reverse.
@@ -121,13 +121,7 @@
   - Race targets: 25 of 29 met (above). The misses are the Stock Car spread on both layouts, the Stock Car late battles on the oval, and the early-wreck rate on the figure-8 (near the line).
   - The derby still meets every target. Endurance is met on the oval. On the figure-8, one car of 16 was pinned and wrecked, and cars needed 10 recoveries after crashes.
   - Balance: no car is top 3 in every mode. Derby and Wreckin' are within ±15%. In Stock Car the Volant is at +38%.
-- **Please play** (double-click **Play Racing.cmd**) and tell me:
-  1. Wreckin' Racing on both layouts: does it feel like DD1 (the spins, the crossover, hunting the leader)?
-  2. Stock Car: on the figure-8 the pack is spread out by lap 2. Does it still feel like pack racing, and are the last laps on the oval close enough?
-  3. The Volant in Stock Car: too strong? If so, the next lever I would try is its size (a longer, wider body).
-  4. The laps: 29 s on the oval and 35 s on the figure-8 (the plan said about 35 and 45). Too short?
-  5. The pit stop mini-game, Time Trial (medals and the ghost) and the replays (V).
-  6. A night race, and a derby once more: the righting rule changed for both (3 s).
+- **Your verdict** (2026‑10‑18): you played it and approved it. The Volant (+38% in Stock Car) and the lap lengths stay as they are.
 
 ## M5 Car roster — approved (2026‑10‑15: "I follow your recommendation. Now continue")
 - **Look at it yourself:**
