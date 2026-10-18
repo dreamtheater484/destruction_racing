@@ -19,14 +19,14 @@ public sealed class Settings
     public bool VSync { get; set; } = true;
     /// <summary>Frame cap; 0 = none.</summary>
     public int MaxFps { get; set; }
-    /// <summary>3D resolution in percent of the window (below 100 upscaled with AMD FSR 1).</summary>
+    /// <summary>3D resolution in percent of the window (below 100 upscaled with AMD FSR 1, or FSR 2 with that anti-aliasing).</summary>
     public int RenderScale { get; set; } = 100;
 
     // Graphics: <see cref="Graphics"/> sets these from a preset; changing one makes the preset "custom".
     public int GraphicsPreset { get; set; } = (int)Core.GraphicsPreset.High;
     /// <summary>0 low … 3 ultra: the shadow map sizes and the soft-shadow filter.</summary>
     public int Shadows { get; set; } = 2;
-    /// <summary>0 off, 1 FXAA, 2 MSAA ×2, 3 MSAA ×4.</summary>
+    /// <summary>0 off, 1 FXAA, 2 MSAA ×2, 3 MSAA ×4 + SMAA, 4 TAA, 5 AMD FSR 2 (temporal, also the upscaler).</summary>
     public int AntiAliasing { get; set; } = 2;
     /// <summary>0 off, 1 SSAO, 2 SSAO + SSIL (the venues' bounce light).</summary>
     public int AmbientOcclusion { get; set; } = 2;
@@ -35,9 +35,13 @@ public sealed class Settings
     public bool VolumetricFog { get; set; } = true;
     /// <summary>0 low, 1 medium, 2 high: how early the models switch to their simpler LODs.</summary>
     public int Detail { get; set; } = 2;
+    /// <summary>The film look (plan §8.4): each light's colour grade, a fine grain and a soft vignette.</summary>
+    public bool FilmLook { get; set; } = true;
+    /// <summary>Motion blur on the camera's movement (plan §8.4), 0 off … 100 full.</summary>
+    public int MotionBlur { get; set; } = 40;
 
     // Camera
-    /// <summary>The view an event starts in (CameraRig.View: 0 chase, 1 far chase, 2 bumper, 3 in-car).</summary>
+    /// <summary>The view an event starts in (CameraRig.View: 0 chase, 1 far chase, 2 bumper, 3 in-car, 4 arena).</summary>
     public int DefaultView { get; set; }
     /// <summary>Field of view added to every view, in degrees (−10 … +15).</summary>
     public int FovOffset { get; set; }
@@ -72,6 +76,23 @@ public sealed class Settings
     public int Difficulty { get; set; } = 1;
     /// <summary>Every layout, direction and light in Single Event, Practice and Time Trial without the championship.</summary>
     public bool UnlockAll { get; set; }
+    /// <summary>The back-marker catch-up in races (plan §4.2/§10.5; Purist: off).</summary>
+    public bool CatchUp { get; set; } = true;
+
+    /// <summary>
+    /// The Purist preset (plan §3): every gameplay-affecting assist off (counter-steer, traction control, the
+    /// back-marker catch-up, the slow motion on wrecks). Not stored: it is on when all four are off.
+    /// </summary>
+    public static bool IsPurist(Settings s) => s.CounterSteer == 0 && !s.TractionControl && !s.CatchUp && !s.SlowMotion;
+
+    /// <summary>Turns the Purist preset on (all assists off) or off (the default assists back).</summary>
+    public static void SetPurist(Settings s, bool on)
+    {
+        s.CounterSteer = on ? 0 : 1;
+        s.TractionControl = !on;
+        s.CatchUp = !on;
+        s.SlowMotion = !on;
+    }
 
     // The last garage of Single Event, Time Trial and Practice
     public string LastCar { get; set; } = "kitsune";

@@ -16,12 +16,14 @@ public partial class FxPool : Node3D
     private readonly Dictionary<Burst, int> _next = new();
     private static Shader? _spark, _shard, _smoke, _fire;
 
-    /// <summary>The pool of the current scene, created on first use.</summary>
+    private static readonly NodePath PoolPath = "FxPool";
+
+    /// <summary>The pool of the current scene, created on first use (asked for every frame: the path is made once).</summary>
     public static FxPool Get(Node from)
     {
         var tree = from.GetTree();
         Node scene = tree.CurrentScene ?? tree.Root;
-        if (scene.GetNodeOrNull<FxPool>("FxPool") is { } pool) return pool;
+        if (scene.GetNodeOrNull<FxPool>(PoolPath) is { } pool) return pool;
         pool = new FxPool { Name = "FxPool" };
         scene.AddChild(pool);
         return pool;
@@ -263,7 +265,54 @@ public partial class FxPool : Node3D
     {
         var m = Mat(ref _smoke, "fx_smoke");
         m.SetShaderParameter("billow", billow);
+        m.SetShaderParameter("noise_tex", SmokeNoise());
         return new QuadMesh { Size = new Vector2(size, size), Material = m };
+    }
+
+    private static ImageTexture? _smokeNoise;
+
+    /// <summary>
+    /// The smoke's billow noise (fx_smoke.gdshader): 4 octaves of value noise (smoothstep between hashed lattice
+    /// values, amplitudes 0.5, 0.25, 0.125, 0.0625), 8 cells across and tiling, baked once.
+    /// </summary>
+    public static ImageTexture SmokeNoise()
+    {
+        if (_smokeNoise != null) return _smokeNoise;
+        const int size = 256, cells = 8;
+        var data = new byte[size * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float sum = 0f, amp = 0.5f;
+                for (int o = 0; o < 4; o++)
+                {
+                    int period = cells << o;
+                    float px = (float)x / size * period, py = (float)y / size * period;
+                    int ix = (int)px, iy = (int)py;
+                    float fx = px - ix, fy = py - iy;
+                    fx = fx * fx * (3f - 2f * fx);
+                    fy = fy * fy * (3f - 2f * fy);
+                    float a = Hash(ix, iy, period, o), b = Hash(ix + 1, iy, period, o);
+                    float c = Hash(ix, iy + 1, period, o), d = Hash(ix + 1, iy + 1, period, o);
+                    sum += amp * Mathf.Lerp(Mathf.Lerp(a, b, fx), Mathf.Lerp(c, d, fx), fy);
+                    amp *= 0.5f;
+                }
+                data[y * size + x] = (byte)Mathf.Clamp(Mathf.RoundToInt(sum * 255f), 0, 255);
+            }
+        var image = Image.CreateFromData(size, size, false, Image.Format.R8, data);
+        image.GenerateMipmaps();
+        _smokeNoise = ImageTexture.CreateFromImage(image);
+        return _smokeNoise;
+    }
+
+    private static float Hash(int x, int y, int period, int octave)
+    {
+        x = ((x % period) + period) % period;
+        y = ((y % period) + period) % period;
+        uint h = (uint)(x * 374761393 + y * 668265263 + octave * 1442695041);
+        h = (h ^ (h >> 13)) * 1274126177u;
+        h ^= h >> 16;
+        return (h & 0xFFFFFF) / 16777216f;
     }
 
     /// <summary>

@@ -123,6 +123,57 @@ public class SpinTrackerTests
     }
 
     [Fact]
+    public void In_a_pileup_the_strongest_simultaneous_hit_takes_the_spin()
+    {
+        // Three cars hit the victim in the same physics step, reported in any order.
+        foreach (var order in new[] { new[] { 1, 2, 3 }, new[] { 3, 2, 1 }, new[] { 2, 3, 1 } })
+        {
+            var tracker = new SpinTracker(Tuning);
+            var energy = new Dictionary<int, float> { [1] = 15_000f, [2] = 40_000f, [3] = 25_000f };
+            foreach (int a in order) tracker.RegisterHit(a, 0.5, energy[a], 12f, false);
+            var events = Run(tracker, 0.51, 0.8, _ => 300f);
+            events.AddRange(Run(tracker, 1.31, 1.0, _ => 0f));
+            Assert.Equal(2, Assert.Single(events, e => e.Kind == SpinEventKind.Awarded).AttackerId);
+        }
+    }
+
+    [Fact]
+    public void In_a_pileup_a_later_hit_before_the_rotation_still_takes_the_credit()
+    {
+        var tracker = new SpinTracker(Tuning);
+        tracker.RegisterHit(1, 0.5, 40_000f, 12f, false);
+        tracker.RegisterHit(2, 0.5, 20_000f, 12f, false);    // same instant, weaker: no
+        tracker.RegisterHit(3, 0.55, 12_000f, 12f, false);   // the next step, before it spins: the last hit counts
+        var events = Run(tracker, 0.56, 0.8, _ => 300f);
+        events.AddRange(Run(tracker, 1.36, 1.0, _ => 0f));
+        Assert.Equal(3, Assert.Single(events, e => e.Kind == SpinEventKind.Awarded).AttackerId);
+    }
+
+    [Fact]
+    public void A_rollover_is_not_a_spin()
+    {
+        // A car rolling over sideways turns about its long axis; the world-up part of that (the yaw the modes feed
+        // in, AngularVelocity.Y) only wobbles around zero.
+        var tracker = new SpinTracker(Tuning);
+        tracker.RegisterHit(4, 0, 30_000f, 14f, false);
+        var events = Run(tracker, 0.01, 1.5, t => 25f * MathF.Sin((float)t * 9f));
+        events.AddRange(Run(tracker, 1.51, 1.0, _ => 0f));
+        Assert.DoesNotContain(events, e => e.Kind == SpinEventKind.Awarded);
+    }
+
+    [Fact]
+    public void A_car_spinning_on_its_roof_scores_like_any_spin()
+    {
+        var tracker = new SpinTracker(Tuning);
+        tracker.RegisterHit(5, 0, 30_000f, 14f, false);
+        // It rolls (no yaw) for half a second, then slides round on its roof.
+        var events = Run(tracker, 0.01, 0.5, t => 20f * MathF.Sin((float)t * 9f));
+        events.AddRange(Run(tracker, 0.51, 0.8, _ => 260f));
+        events.AddRange(Run(tracker, 1.31, 1.0, _ => 0f));
+        Assert.Equal(SpinTier.Half, Assert.Single(events, e => e.Kind == SpinEventKind.Awarded).Tier);
+    }
+
+    [Fact]
     public void Max_duration_closes_a_never_ending_spin()
     {
         var tracker = new SpinTracker(Tuning);

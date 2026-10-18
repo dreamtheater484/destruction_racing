@@ -11,7 +11,7 @@ namespace DestructionRacing.Tools;
 /// Interactive: arrows orbit, W/S zoom, 1-3 preset, N/Z/C normal/zebra/clay, L livery, T turntable, P photo,
 /// D random dent, B derby damage, X repair, Tab next car, H hide the key guide.
 /// Batch: --shots=out/studio [--car=kitsune] [--presets=studio,outdoor] [--modes=normal,zebra] [--damage=derby]
-///        [--views=q34f,side,...] renders every combination and quits.
+///        [--views=q34f,side,...] [--wear=0.6] renders every combination and quits.
 /// </summary>
 public partial class PhotoStudio : Node3D
 {
@@ -60,6 +60,9 @@ public partial class PhotoStudio : Node3D
         AddChild(_turntable);
         LoadCar(carId);
         if (int.TryParse(dev?.Arg("livery"), out int liv) && liv > 0) SetLivery(liv);
+        // --wear=X: the livery's age (0..1), e.g. to check the rust from age.
+        if (float.TryParse(dev?.Arg("wear"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float wear))
+            _car.ApplyLivery(LiveriesFor(_carId)[_livery] with { Wear = wear, Dirt = 0.3f });
         if (dev?.Arg("damage") is { } dmg) ApplyDamagePreset(dmg);
 
         _world = new WorldEnvironment();

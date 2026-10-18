@@ -84,7 +84,9 @@ public partial class EventAudio : Node
         }
         if (Mode is DerbyMode derby) AddChild(new DerbyCommentary { Mode = derby, Announcer = Announcer });
         else if (Mode is RaceMode race) AddChild(new RaceCommentary { Mode = race, Announcer = Announcer });
+        else if (Mode is TimeTrialMode tt) AddChild(new TimeTrialCommentary { Mode = tt, Announcer = Announcer });
         Announcer.Log = Core.DevTools.Instance?.Arg("audiolog") != null;
+        if (Core.DevTools.Instance?.Arg("mixlog") != null) AddChild(new MixMeter());
         if (Announcer.Log)
             GD.Print($"[Audio] {SfxLibrary.Count} sound ids, {Announcer.LineCount} announcer lines, {Music.TrackCount} music tracks, " +
                      $"{_engines.Count(e => e != null)} engine voices, buses {AudioServer.BusCount}");

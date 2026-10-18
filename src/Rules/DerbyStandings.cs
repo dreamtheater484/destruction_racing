@@ -68,10 +68,12 @@ public sealed class DerbyStandings
     }
 
     /// <summary>Ends the derby early (e.g. a time limit): the running cars are placed by points, best first.</summary>
-    public void EndByPoints(IReadOnlyDictionary<int, int> points)
+    public void EndByPoints(IReadOnlyDictionary<int, int> points, IReadOnlyDictionary<int, float>? health = null)
     {
         if (Winner != null) return;
-        var ordered = _running.OrderByDescending(c => points.TryGetValue(c, out int p) ? p : 0).ToList();
+        // A time limit (plan §4.1): points, then the car in the best shape.
+        var ordered = _running.OrderByDescending(c => points.TryGetValue(c, out int p) ? p : 0)
+            .ThenByDescending(c => health != null && health.TryGetValue(c, out float h) ? h : 0f).ToList();
         for (int i = 0; i < ordered.Count; i++) _place[ordered[i]] = i + 1;
         Winner = ordered.Count > 0 ? ordered[0] : null;
         WinnerSurvived = Winner != null;

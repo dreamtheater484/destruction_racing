@@ -69,21 +69,33 @@ public sealed class GranularVoice
 {
     public float Rpm { get; set; }
     public float Load { get; set; }
-    public GrainBank Bank { get; }
+    public GrainBank Bank { get; private set; }
 
-    private readonly float[] _acc;
+    private float[] _acc = Array.Empty<float>();
     private long _read, _write;            // absolute sample positions; _acc is a ring
     private readonly Random _rng;
-    private readonly int[,] _last;
+    private int[,] _last = new int[0, 2];
     private float[] _scratch = new float[4096];
 
     public GranularVoice(GrainBank bank, int seed = 1)
     {
-        Bank = bank;
-        Rpm = bank.IdleRpm;
-        _acc = new float[bank.SampleRate * 2];
         _rng = new Random(seed);
-        _last = new int[bank.Rpms.Length, 2];
+        Bank = bank;
+        SetBank(bank);
+        Rpm = bank.IdleRpm;
+    }
+
+    /// <summary>
+    /// Another engine on this voice, keeping its buffers: the event's voices follow the nearest cars, and a new
+    /// voice per switch put a 384 kB ring on the .NET large-object heap each time (full GCs, M8).
+    /// </summary>
+    public void SetBank(GrainBank bank)
+    {
+        Bank = bank;
+        if (_acc.Length != bank.SampleRate * 2) _acc = new float[bank.SampleRate * 2];
+        else Array.Clear(_acc);
+        _read = _write = 0;
+        if (_last.GetLength(0) != bank.Rpms.Length) _last = new int[bank.Rpms.Length, 2];
         for (int i = 0; i < bank.Rpms.Length; i++) { _last[i, 0] = -1; _last[i, 1] = -1; }
     }
 
@@ -161,8 +173,10 @@ public partial class GranularEngine : AudioStreamPlayer3D
 
     private GranularVoice? _voice;
     private AudioStreamGeneratorPlayback? _playback;
-    private float[] _mono = new float[2048];
-    private Vector2[] _frames = new Vector2[2048];
+    /// <summary>The generator is fed in blocks of this many frames, so the push buffer is never reallocated.</summary>
+    private const int Block = 128;
+    private readonly float[] _mono = new float[Block];
+    private readonly Vector2[] _frames = new Vector2[Block];
 
     public override void _Ready()
     {
@@ -178,21 +192,21 @@ public partial class GranularEngine : AudioStreamPlayer3D
         EngineName = name;
         float rpm = Rpm, load = Load;
         var bank = GrainBank.Load(name);
-        _voice = new GranularVoice(bank, (int)GetInstanceId()) { Rpm = rpm, Load = load };
+        if (_voice == null) _voice = new GranularVoice(bank, (int)GetInstanceId());
+        else _voice.SetBank(bank);
+        _voice.Rpm = rpm;
+        _voice.Load = load;
     }
 
     public override void _Process(double delta)
     {
         if (_playback == null || _voice == null) return;
-        int n = _playback.GetFramesAvailable();
-        while (n > 0)
+        // Whole blocks only (what is left waits for the next frame: under 3 ms of the 80 ms buffer).
+        for (int n = _playback.GetFramesAvailable(); n >= Block; n -= Block)
         {
-            int chunk = Math.Min(n, _mono.Length);
-            _voice.Render(_mono.AsSpan(0, chunk));
-            if (_frames.Length != chunk) _frames = new Vector2[chunk];
-            for (int i = 0; i < chunk; i++) _frames[i] = new Vector2(_mono[i], _mono[i]);
+            _voice.Render(_mono);
+            for (int i = 0; i < Block; i++) _frames[i] = new Vector2(_mono[i], _mono[i]);
             _playback.PushBuffer(_frames);
-            n -= chunk;
         }
     }
 }

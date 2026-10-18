@@ -55,6 +55,9 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
     public RulesConfig Rules { get; set; } = RulesConfig.Standard;
     /// <summary>Safety stop for sims; the Bowl itself has no time limit (✱ A8).</summary>
     public double MaxDuration { get; set; } = 600;
+    /// <summary>The Single Event time limit (s, 0 = none, plan §4.1): then the most points wins, then the least damage.</summary>
+    public double TimeLimit { get; set; }
+    public double? TimeLeft => TimeLimit > 0 ? Math.Max(0.0, TimeLimit - _time) : null;
     public float CountdownTime { get; set; } = 3f;
     /// <summary>Debug: print every running car's state every N seconds (0 = off).</summary>
     public double DumpEvery { get; set; }
@@ -76,6 +79,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
     /// <summary>Practice: the AI cars stand still as targets (a free damage test).</summary>
     public bool ParkedTargets { get; set; }
     public bool HuntPlayerOnly => TotalDestruction;
+    /// <summary>Total Destruction: the run just ended beat the best score (the announcer's record call).</summary>
+    public bool TotalDestructionRecord { get; private set; }
 
     public event Action<DerbyMode>? Finished;
     /// <summary>Every measured hit (car-car and car-wall), after the referee saw it.</summary>
@@ -185,7 +190,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
 
     // ------------------------------------------------------------------ IArenaView
 
-    public IReadOnlyList<Car> Cars => _cars;
+    public List<Car> Cars => _cars;
     public bool IsRunning(Car car) => _phase != Phase.Over && !_referee.IsWrecked(car.Id);
     public int? LeaderId => _leader;
     public double Time => _time;
@@ -231,6 +236,9 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
                 Rival = req.Kind == EventKind.Duel ? req.Rival : null;
                 CarCount = req.Kind == EventKind.Duel ? 2 : 1 + Math.Clamp(req.Opponents, 0, 19);
                 ParkedTargets = req.Parked;
+                // The game has no time limit unless you set one (plan §4.1, A8); the sims keep their safety stop.
+                TimeLimit = req.TimeLimit;
+                MaxDuration = req.TimeLimit > 0 ? req.TimeLimit : double.PositiveInfinity;
             }
             if (dev.Arg("proxy") != null) ProxyPlayer = true;
             if (int.TryParse(dev.Arg("seed"), out int seed)) Seed = seed;
@@ -238,6 +246,13 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
             if (dev.Arg("randomcars") != null) RandomCars = true;
             if (dev.Arg("preset") is { } preset) Preset = Bowl.Parse(preset);
             if (int.TryParse(dev.Arg("division"), out int division)) Division = Math.Clamp(division, 1, 4);
+            // --duel[=NAME] and --totaldestruction: the two Bowl variants, started directly (tests, captures).
+            if (dev.Arg("duel") is { } duel)
+            {
+                Rival = Drivers.ByName(duel)?.Name ?? Drivers.All[0].Name;
+                CarCount = 2;
+            }
+            if (dev.Arg("totaldestruction") != null) TotalDestruction = true;
         }
         // --pinned=S (experiments): how long a car may rock in place before it counts as immobilised.
         if (float.TryParse(DevTools.Instance?.Arg("pinned"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float pinned))
@@ -306,6 +321,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
                 _hud.DivisionTitle = Session.DivisionTitle;
             }
             _hud.Replay = () => { if (_replay == null) StartReplay(); };
+            _hud.Highlights = () => { if (_replay == null) StartReplay(highlights: true); };
             _hud.ReplayActive = () => _replay != null;
         }
     }
@@ -498,7 +514,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
         else if (TotalDestruction && _referee.IsWrecked(_player.Id)) EndEvent(timedOut: false);
         else if (_time >= MaxDuration)
         {
-            _standings.EndByPoints(_cars.ToDictionary(c => c.Id, c => _referee.Score(c.Id).Total));
+            _standings.EndByPoints(_cars.ToDictionary(c => c.Id, c => _referee.Score(c.Id).Total),
+                _cars.ToDictionary(c => c.Id, c => (c.Health(DamageZone.Front) + c.Health(DamageZone.Rear) + c.Health(DamageZone.Left) + c.Health(DamageZone.Right)) / 4f));
             EndEvent(timedOut: true);
         }
     }
@@ -527,6 +544,8 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
             case RefereeEventKind.SpinScored when e.Car == _player.Id:
                 _hud?.Popup(e.Doubled ? $"LEADER ×2   SPIN {(int)e.Tier}   +{e.Points}" : $"SPIN {(int)e.Tier}   +{e.Points}",
                     e.Doubled ? new Color(1f, 0.8f, 0.2f) : Colors.White);
+                if (_hud != null && _byId.TryGetValue(e.Other, out var spun))
+                    WorldPopup.Show(this, spun, e.Doubled ? $"×2  +{e.Points}" : $"SPIN {(int)e.Tier}  +{e.Points}", e.Doubled ? new Color(1f, 0.8f, 0.2f) : Colors.White);
                 break;
             case RefereeEventKind.Damage when e.Car == _player.Id:
                 _hud?.PulseZone(e.Zone);
@@ -540,8 +559,11 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
                 string by = e.Other > 0 ? $" by #{_byId[e.Other].Number}" : "";
                 _hud?.Feed($"#{victim.Number} WRECKED{by}{(e.Points > 0 ? $"  +{e.Points}" : "")}");
                 if (e.Other == _player.Id)
+                {
                     _hud?.Popup(e.Doubled ? $"LEADER ×2   WRECKED #{victim.Number}   +{e.Points}" : $"WRECKED #{victim.Number}   +{e.Points}",
                         new Color(1f, 0.45f, 0.2f));
+                    if (_hud != null) WorldPopup.Show(this, victim, $"WRECKED  +{e.Points}", new Color(1f, 0.45f, 0.2f));
+                }
                 if (e.Car == _player.Id) OnPlayerWrecked();
                 break;
             }
@@ -560,7 +582,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
     }
 
     /// <summary>
-    /// Anti-stall director (plan §10.4): while 5+ cars run and nobody has hit anyone for 6 s, wake the passive ones.
+    /// Anti-stall director (plan §10.4): while 5+ cars run and nobody has hit anyone for 4 s, wake the passive ones.
     /// In the final cars, after 12 s without a real hit (7 s in the final duel), every AI is nudged to attack
     /// forwards for a while — towards the other car, never steered for it.
     /// </summary>
@@ -587,8 +609,12 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
         if (_beacon == null) return;
         var leader = _leader is int id ? _byId[id] : null;
         _beacon.Visible = leader != null && IsRunning(leader);
-        if (leader != null)
-            _beacon.GlobalPosition = leader.GlobalPosition + Vector3.Up * (2.0f + 0.15f * Mathf.Sin((float)_time * 4f));
+        if (leader == null) return;
+        _beacon.GlobalPosition = leader.GlobalPosition + Vector3.Up * (2.0f + 0.15f * Mathf.Sin((float)_time * 4f));
+        // Sized in the world from afar, capped near the lens: from a camera on the wall a few metres away the
+        // full-size marker filled a third of the frame.
+        float d = GetViewport().GetCamera3D() is { } cam ? cam.GlobalPosition.DistanceTo(_beacon.GlobalPosition) : 20f;
+        _beacon.Scale = Vector3.One * Mathf.Clamp(d / 14f, 0.3f, 1f);
     }
 
     public void DumpState()
@@ -635,7 +661,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
     public void ToggleSpectateCamera() => SetSpectateCamera(!_spectateTv);
 
     /// <summary>The replay (results screen, V): from just before the player's wreck, or the last 30 seconds.</summary>
-    private void StartReplay()
+    private void StartReplay(bool highlights = false)
     {
         if (_recorder == null || _recorder.Times.Count == 0) return;
         double start = _playerWreckTime >= 0 ? _playerWreckTime - 8.0 : _recorder.Duration - 30.0;
@@ -646,6 +672,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
             StartFocus = _player,
             StartTime = Math.Max(0.0, start),
             Rig = _rig,
+            Highlights = highlights,
         };
         if (Sound != null) _replay.ImpactPlayed += Sound.PlayReplayImpact;
         _replay.Closed += () =>
@@ -691,6 +718,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
             double survived = _standings.EliminatedAt(_player.Id) ?? _time;
             int score = (int)survived + mine.Total;
             bool best = score > Profile.Current.TotalDestructionBest;
+            TotalDestructionRecord = best;
             if (best && !Headless) Profile.NoteTotalDestruction(score);
             heading = "Total Destruction  –  Results";
             summary = $"YOU SURVIVED {(int)survived / 60}:{(int)survived % 60:00}   ·   {mine.Total} POINTS   ·   SCORE {score}" + (best ? "   ·   NEW BEST!" : "");
@@ -698,7 +726,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
         _hud?.ShowResults(heading, "Survivor", results, summary);
         // Tests (--autoreplay): open the replay a moment after the results.
         if (!Headless && DevTools.Instance?.Arg("autoreplay") != null)
-            GetTree().CreateTimer(1.5, true, false, true).Timeout += () => { if (_replay == null) StartReplay(); };
+            GetTree().CreateTimer(1.5, true, false, true).Timeout += () => { if (_replay == null) StartReplay(DevTools.Instance?.Arg("autoreplay") == "highlights"); };
         Finished?.Invoke(this);
         Ended?.Invoke();
     }

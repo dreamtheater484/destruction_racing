@@ -1,15 +1,30 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 
 namespace DestructionRacing.Vehicles;
+
+/// <summary>One change to a car's damage volumes, kept for replays (<see cref="CarDamageVisual.Journal"/>).</summary>
+public readonly record struct DamageOp(byte Kind, Vector3 Point, Vector3 Push, float Radius, float Amount);
 
 /// <summary>
 /// Visual damage of one car, in car-local space: a dent volume (rgb = displacement in metres, a = crumple) and
 /// a wear volume (r = scraped paint, g = rust, b = soot), uploaded as 3D textures that every car shader samples
 /// (assets/shaders/car_deform.gdshaderinc, car_paint.gdshader). All parts dent together because they share it.
+/// With a <see cref="Journal"/> every change is also kept, so a replay can rebuild the volumes as they were at
+/// any moment (plan §15.5: damage events re-applied deterministically).
 /// </summary>
 public sealed class CarDamageVisual
 {
+    private const byte OpDent = 0, OpWear = 1, OpRust = 4;   // OpWear + channel: 1 scrape, 2 rust, 3 soot
+
+    /// <summary>Every change since <see cref="StartJournal"/>, in order; null = not kept (sims, tools).</summary>
+    public List<DamageOp>? Journal { get; private set; }
+    /// <summary>How many journal entries the volumes show: all of them, unless a replay went back in time.</summary>
+    public int Shown { get; private set; }
+
+    public void StartJournal() => Journal ??= new List<DamageOp>();
+
     public const int NX = 32, NY = 24, NZ = 80;
     public Vector3 Min { get; }
     public Vector3 Size { get; }
@@ -102,8 +117,60 @@ public sealed class CarDamageVisual
     /// </summary>
     public void AddDent(Vector3 point, Vector3 push, float radius)
     {
+        if (Record(new DamageOp(OpDent, point, push, radius, 0f))) DoDent(point, push, radius);
+    }
+
+    /// <summary>
+    /// Keeps a change in the journal. False while a replay shows an earlier moment: nothing new may land on the
+    /// past (the cars don't take damage in a replay; this guards tools and stray calls).
+    /// </summary>
+    private bool Record(DamageOp op)
+    {
+        if (Journal == null) return true;
+        if (Shown < Journal.Count) return false;
+        Journal.Add(op);
+        Shown = Journal.Count;
+        return true;
+    }
+
+    /// <summary>
+    /// Shows the volumes as they were after the first <paramref name="count"/> journal entries (replays): going
+    /// back clears them and re-applies from the start, going forward applies only the new entries.
+    /// </summary>
+    public void ReplayTo(int count)
+    {
+        if (Journal == null) return;
+        count = Math.Clamp(count, 0, Journal.Count);
+        if (count == Shown) return;
+        if (count < Shown)
+        {
+            ClearVolumes();
+            Shown = 0;
+        }
+        for (int n = Shown; n < count; n++)
+        {
+            var op = Journal[n];
+            if (op.Kind == OpDent) DoDent(op.Point, op.Push, op.Radius);
+            else if (op.Kind == OpRust) DoRust(op.Amount);
+            else DoWear(op.Point, op.Radius, op.Kind - OpWear, op.Amount);
+        }
+        Shown = count;
+    }
+
+    /// <summary>Time in the dents and the volume uploads, all cars (the deformation budget, plan §16), in Stopwatch ticks.</summary>
+    public static long Ticks;
+
+    private void DoDent(Vector3 point, Vector3 push, float radius)
+    {
         float depth = push.Length();
         if (depth < 1e-4f || radius < 1e-3f) return;
+        long start = System.Diagnostics.Stopwatch.GetTimestamp();
+        DoDentVoxels(point, push, radius, depth);
+        Ticks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
+    }
+
+    private void DoDentVoxels(Vector3 point, Vector3 push, float radius, float depth)
+    {
         Range(point, radius, out int i0, out int i1, out int j0, out int j1, out int k0, out int k1);
         for (int k = k0; k <= k1; k++)
         for (int j = j0; j <= j1; j++)
@@ -161,12 +228,22 @@ public sealed class CarDamageVisual
     /// <summary>Lets exposed metal rust (for old wrecks and the end of a long derby).</summary>
     public void AgeRust(float amount)
     {
+        if (Record(new DamageOp(OpRust, Vector3.Zero, Vector3.Zero, 0f, amount))) DoRust(amount);
+    }
+
+    private void AddWear(Vector3 point, float radius, int channel, float amount)
+    {
+        if (Record(new DamageOp((byte)(OpWear + channel), point, Vector3.Zero, radius, amount))) DoWear(point, radius, channel, amount);
+    }
+
+    private void DoRust(float amount)
+    {
         for (int o = 0; o < _wear.Length; o += 4)
             if (_wear[o] > 0.3f) _wear[o + 1] = MathF.Min(1f, _wear[o + 1] + amount * (_wear[o] - 0.3f) * 1.4f);
         MarkWear(0, NZ - 1);
     }
 
-    private void AddWear(Vector3 point, float radius, int channel, float amount)
+    private void DoWear(Vector3 point, float radius, int channel, float amount)
     {
         Range(point, radius, out int i0, out int i1, out int j0, out int j1, out int k0, out int k1);
         for (int k = k0; k <= k1; k++)
@@ -181,7 +258,24 @@ public sealed class CarDamageVisual
         MarkWear(k0, k1);
     }
 
+    /// <summary>A fingerprint of both volumes (the replay self-test: rebuilt from the journal they must match).</summary>
+    public ulong Checksum()
+    {
+        ulong h = 14695981039346656037UL;
+        foreach (float f in _dent) h = (h ^ BitConverter.SingleToUInt32Bits(f)) * 1099511628211UL;
+        foreach (float f in _wear) h = (h ^ BitConverter.SingleToUInt32Bits(f)) * 1099511628211UL;
+        return h;
+    }
+
+    /// <summary>A pristine car (tools). With a journal it starts over too.</summary>
     public void Clear()
+    {
+        Journal?.Clear();
+        Shown = 0;
+        ClearVolumes();
+    }
+
+    private void ClearVolumes()
     {
         Array.Clear(_dent);
         Array.Clear(_wear);
@@ -204,8 +298,10 @@ public sealed class CarDamageVisual
             if (_uploadsThisFrame >= UploadsPerFrame && frame - _dirtySince < MaxUploadDelay) return;
             _uploadsThisFrame++;
         }
+        long start = System.Diagnostics.Stopwatch.GetTimestamp();
         if (_dentDirty) { EncodeDent(); DentTexture.Update(_dentImages); }
         if (_wearDirty) { EncodeWear(); WearTexture.Update(_wearImages); }
+        Ticks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
         _dentDirty = _wearDirty = false;
     }
 

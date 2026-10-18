@@ -79,12 +79,7 @@ public partial class DerbyPresenter : Node
         var rig = Mode.Rig;
         if (rig == null || !Involves(i, rig.Target)) return;
         if (i.Energy >= BigHit) rig.Punch(Mathf.Clamp(i.Energy / 140_000f, 0.25f, 1f));
-        if (i.Energy >= HugeHit && Involves(i, Mode.PlayerCar))
-        {
-            var cam = rig.GetViewport().GetCamera3D();
-            var screen = cam != null ? cam.UnprojectPosition(i.Point) - rig.GetViewport().GetVisibleRect().Size * 0.5f : Vector2.Right;
-            _fx.Flash(Mathf.Clamp(i.Energy / 160_000f, 0.5f, 1f), screen);
-        }
+        if (i.Energy >= HugeHit && Involves(i, Mode.PlayerCar)) _fx.HugeHit(i.Point, i.Energy);
     }
 
     private void OnRefereeEvent(RefereeEvent e)

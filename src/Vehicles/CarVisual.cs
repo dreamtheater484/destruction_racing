@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DestructionRacing.Fx;
 using DestructionRacing.Rules;
 using Godot;
@@ -84,14 +85,111 @@ public partial class CarVisual : Node3D
     private float _colliderFront = -1f, _colliderRear = -1f;
     private Vector3 _enginePoint;
     private GpuParticles3D _smoke = null!, _flames = null!, _scrape = null!;
+    /// <summary>The engine plumes (the perf A/B hides them).</summary>
+    public static readonly StringName SmokeGroup = "dr_smoke";
     private readonly GpuParticles3D?[] _hubSparks = new GpuParticles3D?[4];
     private OmniLight3D _fireLight = null!;
-    private float _scrapeTimer, _fireTime, _time;
+    private float _scrapeTimer, _fireTime, _time, _wreckAge;
     private bool _wreckSeen, _rolled;
     private Vector3 _lastVelocity;
     private Dictionary<Material, Material>? _frozenThisFrame;
 
     private static readonly string[] WheelNames = { "Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR" };
+
+    /// <summary>A glass or lamp change, kept for replays: kind 0 a pane cracks (value), 1 a pane bursts, 2 a lamp breaks.</summary>
+    private readonly record struct GlassOp(byte Kind, int Index, float Value);
+    private List<GlassOp>? _glassJournal;
+    private int _glassShown;
+
+    /// <summary>
+    /// Keeps every damage change from now on (the dent and wear volumes, glass, lamps), so a replay can show the
+    /// car as it was at any moment (plan §15.5). Parts that come off replay as debris tracks (ReplayRecorder).
+    /// </summary>
+    public void StartJournal()
+    {
+        Model.Damage.StartJournal();
+        _glassJournal ??= new List<GlassOp>();
+    }
+
+    /// <summary>The damage as it is shown now: the volumes' fingerprint and the broken glass and lamps (replay self-test).</summary>
+    public string DamageSignature() =>
+        $"{Model.Damage.Checksum():x16}/" + string.Concat(_panes.Select(p => p.Gone ? "x" : p.Crack > 0.05f ? "c" : ".")) + "/" +
+        string.Concat(_lamps.Select(l => l.Broken ? "x" : "."));
+
+    /// <summary>How many volume and glass changes the journals hold (the recorder stores them per frame).</summary>
+    public int DamageOps => Model.Damage.Journal?.Count ?? 0;
+    public int GlassOps => _glassJournal?.Count ?? 0;
+
+    /// <summary>
+    /// Replays: the damage as it was after the first <paramref name="damageOps"/> volume changes and
+    /// <paramref name="glassOps"/> glass changes. Going forward with <paramref name="effects"/> bursts the glass
+    /// that breaks on the way (playing); going back puts it together again.
+    /// </summary>
+    public void ReplayDamageTo(int damageOps, int glassOps, bool effects)
+    {
+        Model.Damage.ReplayTo(damageOps);
+        if (_glassJournal == null) return;
+        glassOps = Math.Clamp(glassOps, 0, _glassJournal.Count);
+        if (glassOps < _glassShown)
+        {
+            foreach (var pane in _panes)
+            {
+                if (pane.Mesh.GetParent() is DebrisPiece) continue;
+                pane.Crack = 0f;
+                pane.Gone = false;
+                pane.Mesh.SetInstanceShaderParameter("pane_crack", 0f);
+                pane.Mesh.SetInstanceShaderParameter("pane_gone", 0f);
+            }
+            foreach (var lamp in _lamps)
+            {
+                lamp.Broken = false;
+                lamp.Mesh.SetInstanceShaderParameter("lamp_broken", 0f);
+            }
+            _glassShown = 0;
+            effects = false;
+        }
+        for (int n = _glassShown; n < glassOps; n++)
+        {
+            var op = _glassJournal[n];
+            if (op.Kind == 2)
+            {
+                if (op.Index < 0 || op.Index >= _lamps.Count) continue;
+                var lamp = _lamps[op.Index];
+                lamp.Broken = true;
+                lamp.Mesh.SetInstanceShaderParameter("lamp_broken", 1f);
+                if (effects) FxPool.Get(this).Glass(lamp.Mesh.GlobalTransform * lamp.Box.GetCenter(), Car.GlobalBasis.Z * (lamp.Front ? -1f : 1f), 0.15f);
+                continue;
+            }
+            if (op.Index < 0 || op.Index >= _panes.Count) continue;
+            var p = _panes[op.Index];
+            if (p.Mesh.GetParent() is DebrisPiece) continue;
+            if (op.Kind == 0)
+            {
+                p.Crack = op.Value;
+                p.Mesh.SetInstanceShaderParameter("pane_crack", Mathf.Min(op.Value, 0.85f));
+            }
+            else
+            {
+                p.Gone = true;
+                p.Mesh.SetInstanceShaderParameter("pane_gone", 1f);
+                if (effects) FxPool.Get(this).Glass(p.Mesh.GlobalTransform * p.Box.GetCenter(), Vector3.Up * 0.3f, 0.6f);
+            }
+        }
+        _glassShown = glassOps;
+    }
+
+    /// <summary>Keeps a glass change; false while a replay shows an earlier moment (the past doesn't change).</summary>
+    private bool RecordGlass(GlassOp op)
+    {
+        if (_glassJournal == null) return true;
+        if (_glassShown < _glassJournal.Count) return false;
+        _glassJournal.Add(op);
+        _glassShown = _glassJournal.Count;
+        return true;
+    }
+
+    /// <summary>The car's velocity as the effects see it: the recorded speed along the car in a replay.</summary>
+    private Vector3 MoveVelocity => Car.IsReplaying ? -Car.GlobalBasis.Z * Car.ReplaySpeed : Car.LinearVelocity;
 
     public CarVisual(Car car, string modelId, Livery livery, string plate)
     {
@@ -402,6 +500,7 @@ public partial class CarVisual : Node3D
             ? new Vector3(0f, hood.End.Y + 0.05f, hood.Position.Z + hood.Size.Z * 0.35f)
             : new Vector3(0f, Spec.Body.Size.Y * 0.65f, Spec.Body.Position.Z + 0.8f);
         _smoke = FxPool.Smoke();
+        _smoke.AddToGroup(SmokeGroup);
         AddChild(_smoke);
         _flames = FxPool.Flames();
         AddChild(_flames);
@@ -414,6 +513,10 @@ public partial class CarVisual : Node3D
             LightEnergy = 0f,
             LightVolumetricFogEnergy = 0f,    // flickering light: no fog ghosting (plan §8.1)
             ShadowEnabled = false,
+            // A 5 m glow: far from the camera it is the flames that show, not the light (a light costs every pixel it reaches).
+            DistanceFadeEnabled = true,
+            DistanceFadeBegin = 30f,
+            DistanceFadeLength = 10f,
             Visible = false,
         };
         AddChild(_fireLight);
@@ -467,7 +570,8 @@ public partial class CarVisual : Node3D
             if (d > 1.1f) continue;
             pane.Crack += e * (1.1f - d) * 1.4f;
             if (pane.Crack >= 1f || (e > 0.5f && d < 0.5f)) Shatter(pane, intoCar);
-            else if (pane.Crack > 0.05f) pane.Mesh.SetInstanceShaderParameter("pane_crack", Mathf.Min(pane.Crack, 0.85f));
+            else if (pane.Crack > 0.05f && RecordGlass(new GlassOp(0, _panes.IndexOf(pane), pane.Crack)))
+                pane.Mesh.SetInstanceShaderParameter("pane_crack", Mathf.Min(pane.Crack, 0.85f));
         }
         foreach (var lamp in _lamps)
             if (!lamp.Broken && e > 0.06f && Distance(lamp.Box, p) < 0.45f) Break(lamp);
@@ -511,6 +615,7 @@ public partial class CarVisual : Node3D
 
     private void Shatter(Pane pane, Vector3 intoCar)
     {
+        if (!RecordGlass(new GlassOp(1, _panes.IndexOf(pane), 0f))) return;
         pane.Gone = true;
         pane.Mesh.SetInstanceShaderParameter("pane_gone", 1f);
         Vector3 centre = pane.Mesh.GlobalTransform * pane.Box.GetCenter();
@@ -521,6 +626,7 @@ public partial class CarVisual : Node3D
 
     private void Break(Lamp lamp)
     {
+        if (!RecordGlass(new GlassOp(2, _lamps.IndexOf(lamp), 0f))) return;
         lamp.Broken = true;
         lamp.Mesh.SetInstanceShaderParameter("lamp_broken", 1f);
         Vector3 c = lamp.Mesh.GlobalTransform * lamp.Box.GetCenter();
@@ -612,7 +718,7 @@ public partial class CarVisual : Node3D
         Vector3 v = Car.LinearVelocity + Car.AngularVelocity.Cross(centre - Car.GlobalPosition) + extraVelocity;
         Vector3 w = new Vector3(Rand() - 0.5f, Rand() - 0.5f, Rand() - 0.5f) * 8f;
         if (part.Kind is PartKind.Wheel or PartKind.Hubcap) w = Car.GlobalBasis.X * (-Car.ForwardSpeed / Mathf.Max(Spec.WheelRadius, 0.1f));
-        DebrisPool.Get(this).Spawn(part.Kind.ToString(), part.Nodes, centre, basis, shape, part.Mass, v, w);
+        DebrisPool.Get(this).Spawn(part.Kind.ToString(), part.Nodes, centre, basis, shape, part.Mass, v, w, Car);
         part.Pivot?.QueueFree();
         part.Pivot = null;
         var fx = FxPool.Get(this);
@@ -700,14 +806,16 @@ public partial class CarVisual : Node3D
         float dt = Mathf.Max((float)delta, 1e-4f);
         _time += dt;
         _frozenThisFrame = null;
+        if (GetViewport().GetCamera3D() is { } camera) CarModel.SetLens(camera.Fov);
         UpdateWheels();
         UpdateCrush(dt);
         Vector3 accel = (Car.LinearVelocity - _lastVelocity) / dt;
         _lastVelocity = Car.LinearVelocity;
         if (accel.Length() > 200f) accel = accel.Normalized() * 200f;
-        UpdatePartStates();
+        // In a replay the parts that came off are debris tracks and the roof dent is in the journal.
+        if (!Car.IsReplaying) UpdatePartStates();
         SwingParts(dt, ToModelDir(accel));
-        UpdateRollover();
+        if (!Car.IsReplaying) UpdateRollover();
         UpdateEffects(dt);
         UpdateReverseLamps();
         if (_scrapeTimer > 0f && (_scrapeTimer -= dt) <= 0f) _scrape.Emitting = false;
@@ -750,7 +858,8 @@ public partial class CarVisual : Node3D
             _colliderRear = _crush[1];
             Car.SetCrushCollider(0.42f * _crush[0], 0.42f * _crush[1]);
         }
-        // Heavy crush takes the lamps and the screens at that end.
+        // Heavy crush takes the lamps and the screens at that end (in a replay the journal does it, on time).
+        if (Car.IsReplaying) return;
         foreach (var lamp in _lamps)
             if (!lamp.Broken && (lamp.Front ? _crush[0] : _crush[1]) > 0.5f) Break(lamp);
         foreach (var pane in _panes)
@@ -782,17 +891,29 @@ public partial class CarVisual : Node3D
         var fx = FxPool.Get(this);
         float front = Car.Health(DamageZone.Front);
         bool wrecked = Car.IsWrecked;
+        if (!wrecked && _wreckSeen && Car.IsReplaying)
+        {
+            // The replay went back to before the wreck: the lamps come on again, and the wreck can happen again.
+            _wreckSeen = false;
+            _lampsDark = false;
+            _fireTime = 0f;
+            _wreckAge = 0f;
+            UpdateLampGlow();
+        }
         if (wrecked && !_wreckSeen)
         {
             _wreckSeen = true;
             _lampsDark = true;
             UpdateLampGlow();
-            _fireTime = 9f;                       // DD2: a wreck burns for a while, then smoulders
+            // DD2: a wreck burns for a while, then smoulders; longer when the engine bay was already gone. (It used to
+            // burn for good below 8 % front: late in a derby a field of fires and their lights cost 3 ms a frame.)
+            _fireTime = front < 0.08f ? 25f : 9f;
             fx.Sparks(ToWorld(_enginePoint), Vector3.Up, 0.6f);
             fx.Dust(ToWorld(_enginePoint), 0.6f);
         }
         if (_fireTime > 0f) _fireTime -= dt;
-        bool fire = front < 0.08f || _fireTime > 0f;
+        if (wrecked) _wreckAge += dt;
+        bool fire = (!wrecked && front < 0.08f) || _fireTime > 0f;
         Burning = fire;
         ScrapeLevel = Mathf.Max(0f, ScrapeLevel - dt * 6f);
 
@@ -800,7 +921,15 @@ public partial class CarVisual : Node3D
         var pm = (ParticleProcessMaterial)_smoke.ProcessMaterial;
         Color colour;
         float ratio;
-        if (wrecked || front < 0.15f) { colour = new Color(0.05f, 0.05f, 0.05f, 0.72f); ratio = 1f; }
+        if (wrecked)
+        {
+            // Black while it burns, then it smoulders: over 20 s the plume thins to half the puffs (late in a derby a
+            // dozen full columns were the most expensive thing on screen, and hid the cars still running).
+            float smoulder = Mathf.Snapped(Mathf.Clamp((_wreckAge - 9f) / 20f, 0f, 1f), 0.1f);
+            colour = new Color(0.05f, 0.05f, 0.05f, Mathf.Lerp(0.72f, 0.62f, smoulder));
+            ratio = Mathf.Lerp(1f, 0.5f, smoulder);
+        }
+        else if (front < 0.15f) { colour = new Color(0.05f, 0.05f, 0.05f, 0.72f); ratio = 1f; }
         else if (front < 0.35f) { colour = new Color(0.4f, 0.4f, 0.41f, 0.55f); ratio = 0.8f; }
         else { colour = new Color(0.92f, 0.92f, 0.92f, 0.32f); ratio = 0.55f; }
         bool smoking = front < 0.6f || wrecked;
@@ -809,7 +938,7 @@ public partial class CarVisual : Node3D
         if (smoking)
         {
             // At speed the puffs are spread along the trail: make them bigger so it stays one plume.
-            float k = 1f + Mathf.Clamp(Car.LinearVelocity.Length() / 12f, 0f, 1.2f);
+            float k = 1f + Mathf.Clamp(MoveVelocity.Length() / 12f, 0f, 1.2f);
             if (Mathf.Abs(pm.ScaleMax - 1.1f * k) > 0.05f) { pm.ScaleMin = 0.6f * k; pm.ScaleMax = 1.1f * k; }
         }
         if (_smoke.Emitting != smoking) _smoke.Emitting = smoking;
@@ -819,7 +948,8 @@ public partial class CarVisual : Node3D
         if (fire)
         {
             // The draught of a moving car lays the flames back over the bodywork.
-            var wind = new Vector3(-Car.LinearVelocity.X, 0f, -Car.LinearVelocity.Z) * 0.5f;
+            var vel = MoveVelocity;
+            var wind = new Vector3(-vel.X, 0f, -vel.Z) * 0.5f;
             if (wind.Length() > 9f) wind = wind.Normalized() * 9f;
             ((ParticleProcessMaterial)_flames.ProcessMaterial).Gravity = new Vector3(0f, 2.5f, 0f) + wind;
         }
@@ -831,7 +961,8 @@ public partial class CarVisual : Node3D
         }
 
         // A corner on its hub grinds sparks out of the floor.
-        float speed = Car.LinearVelocity.Length();
+        Vector3 move = MoveVelocity;
+        float speed = move.Length();
         for (int i = 0; i < 4; i++)
         {
             bool lost = Car.Damage != null && Car.Damage.IsWheelLost((Rules.Wheel)i);
@@ -845,7 +976,7 @@ public partial class CarVisual : Node3D
             }
             Vector3 hub = Car.ToGlobal(new Vector3(Car.WheelCentre(i).X, Car.GroundY + 0.08f, Car.WheelCentre(i).Z));
             bool grinding = speed > 1.5f && hub.Y < 0.35f;
-            Vector3 back = speed > 0.1f ? -Car.LinearVelocity.Normalized() : Vector3.Zero;
+            Vector3 back = speed > 0.1f ? -move.Normalized() : Vector3.Zero;
             sparks.GlobalTransform = new Transform3D(FxPool.BasisAlong((Vector3.Up + back * 0.8f).Normalized()), new Vector3(hub.X, 0.05f, hub.Z));
             sparks.AmountRatio = Mathf.Clamp(speed / 10f, 0.2f, 1f);
             if (sparks.Emitting != grinding) sparks.Emitting = grinding;

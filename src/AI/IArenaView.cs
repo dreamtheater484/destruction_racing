@@ -7,7 +7,8 @@ namespace DestructionRacing.AI;
 /// <summary>What a derby AI may know about the event (provided by the mode).</summary>
 public interface IArenaView
 {
-    IReadOnlyList<Car> Cars { get; }
+    /// <summary>The event's cars (a List, not an interface: every tick's foreach would box its enumerator).</summary>
+    List<Car> Cars { get; }
     bool IsRunning(Car car);
     /// <summary>Points leader (×2 target), if any.</summary>
     int? LeaderId { get; }

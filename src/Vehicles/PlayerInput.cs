@@ -10,7 +10,7 @@ namespace DestructionRacing.Vehicles;
 public sealed class PlayerInput : ICarInput
 {
     /// <summary>Which keys are held, by action name. Defaults to the keyboard; the PlayerProxy bot injects its own.</summary>
-    public System.Func<string, bool> IsHeld { get; set; } = action => Input.IsActionPressed(action);
+    public System.Func<string, bool> IsHeld { get; set; } = action => Input.IsActionPressed(Controls.Name(action));
 
     public float SteerRampIn { get; set; } = 4.5f;      // per second
     public float SteerReturn { get; set; } = 8f;        // per second

@@ -12,9 +12,11 @@ namespace DestructionRacing.UI;
 public interface IHudMode
 {
     Referee Referee { get; }
-    IReadOnlyList<Car> Cars { get; }
+    List<Car> Cars { get; }
     double Time { get; }
     double CountdownLeft { get; }
+    /// <summary>Time left when the event has a time limit (the clock counts down); null = the clock counts up.</summary>
+    double? TimeLeft => null;
     bool PlayerOut { get; }
     string DriverName(Car car);
     /// <summary>The big number top centre (points place in the derby, race position in a race).</summary>
@@ -71,6 +73,8 @@ public partial class EventHud : CanvasLayer
     public event Action? BannerShown;
     /// <summary>The results screen's replay (V), set by the mode.</summary>
     public Action? Replay { get; set; }
+    /// <summary>The highlights reel (results, H): the three biggest moments in slow motion.</summary>
+    public Action? Highlights { get; set; }
     /// <summary>True while the replay plays (the HUD leaves the keys to it).</summary>
     public Func<bool>? ReplayActive { get; set; }
     /// <summary>The scene MENU returns to from the pause menu or the results (null: no menu).</summary>
@@ -92,7 +96,7 @@ public partial class EventHud : CanvasLayer
     private VBoxContainer _popups = null!, _feed = null!, _radio = null!;
     private DamageDiagram _diagram = null!;
     private Control _pause = null!, _wrecked = null!, _standings = null!, _results = null!, _banner = null!;
-    private Label _bannerTitle = null!, _bannerSub = null!, _wreckedTitle = null!;
+    private Label _bannerTitle = null!, _bannerSub = null!, _wreckedTitle = null!, _wreckedSub = null!;
     private GridContainer _standingsGrid = null!;
     private Label _standingsText = null!;
     private float _spinTimer, _shownPoints, _pointsFlash, _countdownScale;
@@ -108,6 +112,8 @@ public partial class EventHud : CanvasLayer
 
     public override void _Ready()
     {
+        // Above the screen effects (ScreenFx, layer 5), so the grain, the flash and the blur leave the HUD alone.
+        Layer = 7;
         ProcessMode = ProcessModeEnum.Always;
         _root = new Control { Theme = HudStyle.Theme, MouseFilter = Control.MouseFilterEnum.Ignore };
         _root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
@@ -299,7 +305,8 @@ public partial class EventHud : CanvasLayer
         ((VBoxContainer)_wrecked).AddThemeConstantOverride("separation", -8);
         _wreckedTitle = HudStyle.Label("WRECKED", 96, HudStyle.Red, "ExtraBold", HorizontalAlignment.Center, 12);
         _wrecked.AddChild(_wreckedTitle);
-        _wrecked.AddChild(HudStyle.Label("RACE OVER", 38, HudStyle.White, "Bold", HorizontalAlignment.Center, 8));
+        _wreckedSub = HudStyle.Label("YOU'RE OUT", 38, HudStyle.White, "Bold", HorizontalAlignment.Center, 8);
+        _wrecked.AddChild(_wreckedSub);
         _wrecked.AddChild(HudStyle.Label("←/→  watch another car    ·    T  TV / chase camera    ·    SPACE  ×2 speed    ·    ENTER  skip to the results", 24, HudStyle.Yellow, "SemiBold", HorizontalAlignment.Center, 6));
         _wrecked.Visible = false;
         _root.AddChild(_wrecked);
@@ -454,10 +461,14 @@ public partial class EventHud : CanvasLayer
 
     public void PulseZone(DamageZone zone) => _diagram.Pulse(zone);
 
-    public void ShowWrecked(string headline = "WRECKED  –  RACE OVER")
+    /// <summary>The banner when the player is out: "TITLE – SUBTITLE" (the derby's default, a race's "WRECKED – DNF").</summary>
+    public void ShowWrecked(string headline = "WRECKED  –  YOU'RE OUT")
     {
         _wrecked.Visible = true;
-        _wreckedTitle.Text = headline.Split('–')[0].Trim();
+        var parts = headline.Split('–');
+        _wreckedTitle.Text = parts[0].Trim();
+        _wreckedSub.Text = parts.Length > 1 ? parts[1].Trim() : "";
+        _wreckedSub.Visible = parts.Length > 1;
         _wrecked.Modulate = new Color(1, 1, 1, 0);
         RealTimeTween(_wrecked).TweenProperty(_wrecked, "modulate:a", 1.0, 0.4);
     }
@@ -518,6 +529,7 @@ public partial class EventHud : CanvasLayer
         if (Championship && MenuScene != null) actions.Add(new MenuAction("CONTINUE", Key.None, () => GoTo(MenuScene)));
         if (!Championship) actions.Add(new MenuAction("RACE AGAIN", Key.R, Restart));
         if (Replay != null) actions.Add(new MenuAction("WATCH THE REPLAY", Key.V, () => Replay()));
+        if (Highlights != null) actions.Add(new MenuAction("HIGHLIGHTS", Key.H, () => Highlights()));
         if (!Championship && MenuScene != null) actions.Add(new MenuAction(MenuLabel, Key.M, () => GoTo(MenuScene)));
         actions.Add(new MenuAction("QUIT", Key.Q, () => DevTools.QuitClean(GetTree(), 0)));
         _resultsMenu.SetActions(actions);
@@ -686,7 +698,7 @@ public partial class EventHud : CanvasLayer
         _statusLabel.Text = Mode.HudStatusLabel;
         _statusLabel.Visible = Mode.HudStatusLabel.Length > 0;
         _status.Text = Mode.HudStatusValue;
-        var t = TimeSpan.FromSeconds(Mode.Time);
+        var t = TimeSpan.FromSeconds(Mode.TimeLeft is { } left ? Math.Ceiling(left) : Mode.Time);
         _clock.Text = $"{(int)t.TotalMinutes}:{t.Seconds:00}";
         _leaderTag.Visible = !_resultsShown && !Mode.PlayerOut && referee.Leader == PlayerCar.Id && points > 0;
         // More cars on you than the opening budget allows: worth knowing (plan §10.4 caps it at 2/3/4).
@@ -737,7 +749,7 @@ public partial class EventHud : CanvasLayer
         _help.Visible = showHelp && !_resultsShown;
         _help.Text = Controls.Describe(Controls.Current) + "   ·   Tab standings · F3 next layout";
 
-        _standings.Visible = !_resultsShown && Input.IsActionPressed(Controls.Standings);
+        _standings.Visible = !_resultsShown && Input.IsActionPressed(Controls.Name(Controls.Standings));
         if (_standings.Visible) RefreshStandings();
     }
 

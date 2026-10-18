@@ -26,6 +26,7 @@ public partial class DerbyCommentary : Node
     private int? _leader;
     private double _lastHitAnywhere;
     private bool _crunchCalled;
+    private int _minutesSurvived;
 
     public override void _Ready()
     {
@@ -85,7 +86,15 @@ public partial class DerbyCommentary : Node
 
     private void OnCountdown(int n)
     {
-        if (n == 3) CallOnce("intro", Announcer.Priority.Normal);
+        if (n != 3) return;
+        // One intro: the Duel's or Total Destruction's own, the championship's, or the Bowl's (the twenty-car
+        // lines only with a full field).
+        string pick = Mode.Rival != null ? "duel_intro"
+            : Mode.TotalDestruction ? "td_intro"
+            : Session.IsFinale ? "champ_finale"
+            : Session.InChampionship && _rng.NextDouble() < 0.5 ? "champ_round"
+            : Mode.CarCount >= 20 && _rng.NextDouble() < 0.35 ? "intro_full" : "intro";
+        CallOnce(pick, Announcer.Priority.Normal);
     }
 
     private void OnStarted() => Announcer.Say("start", Announcer.Priority.High);
@@ -191,9 +200,22 @@ public partial class DerbyCommentary : Node
 
     private void OnFinished(DerbyMode mode)
     {
+        if (Announcer.Log) GD.Print($"[Commentary] finished at {mode.Time:0.0} s: winner {mode.Standings.Winner}, player out {mode.PlayerOut}");
+        // The end calls wait for the wreck call that usually comes with the finish.
+        if (mode.TotalDestruction && mode.PlayerOut)
+        {
+            Announcer.Say(mode.TotalDestructionRecord ? "td_record" : "td_end", Announcer.Priority.Critical, maxWait: 8.0);
+            return;
+        }
         if (mode.Standings.Winner is not int w || mode.CarById(w) is not { } winner) return;
-        if (winner == mode.PlayerCar && mode.Standings.WinnerSurvived) Announcer.Say("player_wins", Announcer.Priority.Critical);
-        else if (Announcer.HasLine($"winner_num_{winner.Number:00}")) Announcer.SayLine($"winner_num_{winner.Number:00}", Announcer.Priority.Critical);
+        if (mode.Rival != null)
+        {
+            bool won = winner == mode.PlayerCar && mode.Standings.WinnerSurvived;
+            Announcer.Say(won ? "duel_player_wins" : "duel_player_loses", Announcer.Priority.Critical, maxWait: 8.0);
+            return;
+        }
+        if (winner == mode.PlayerCar && mode.Standings.WinnerSurvived) Announcer.Say("player_wins", Announcer.Priority.Critical, maxWait: 8.0);
+        else if (Announcer.HasLine($"winner_num_{winner.Number:00}")) Announcer.SayLine($"winner_num_{winner.Number:00}", Announcer.Priority.Critical, maxWait: 8.0);
         else Announcer.Say("results", Announcer.Priority.Critical);
     }
 
@@ -209,9 +231,17 @@ public partial class DerbyCommentary : Node
             else if (Mode.CarById(id) is { } car) CallNumber("leader_num", car, "new_leader", 25.0, Announcer.Priority.Filler);
         }
         _leader = leader;
-        // Ganged up on.
-        if (Mode.Hud is { Hunters: >= 3 } && !Mode.PlayerOut) Call("hunted", 35.0);
-        // A lull while plenty of cars are left: get stuck in!
+        // Ganged up on (not in Total Destruction, where everyone always is).
+        if (!Mode.TotalDestruction && Mode.Hud is { Hunters: >= 3 } && !Mode.PlayerOut) Call("hunted", 35.0);
+        // A lull while plenty of cars are left: get stuck in! In the Duel, two cars circling.
         if (Mode.Remaining >= 5 && now - _lastHitAnywhere > 5.0 && now > 12.0) Call("lull", 25.0, Announcer.Priority.Filler);
+        if (Mode.Rival != null && now - _lastHitAnywhere > 7.0 && now > 10.0) Call("duel_lull", 30.0, Announcer.Priority.Filler);
+        // Total Destruction: every minute survived.
+        if (Mode.TotalDestruction && !Mode.PlayerOut && (int)(now / 60.0) > _minutesSurvived)
+        {
+            _minutesSurvived = (int)(now / 60.0);
+            Announcer.Say(_minutesSurvived switch { 1 => "td_one_minute", 2 => "td_two_minutes", 3 => "td_three_minutes", _ => "td_still_alive" },
+                Announcer.Priority.High, maxWait: 5.0);
+        }
     }
 }

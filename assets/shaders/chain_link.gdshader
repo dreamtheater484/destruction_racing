@@ -14,6 +14,9 @@ void fragment() {
 	float a = 1.0 - smoothstep(wire - fw, wire + fw, d);
 	float far = clamp(4.0 * wire, 0.0, 1.0) * 0.8;
 	a = mix(a, far, smoothstep(0.25, 0.7, fw));
+	// Close to the lens (a chase camera by the fence) the wire is far out of focus: the mesh melts into its average
+	// cover instead of filling the frame with diamonds.
+	a = mix(far, a, smoothstep(0.8, 2.5, -VERTEX.z));
 	ALBEDO = colour;
 	METALLIC = 0.6;
 	ROUGHNESS = 0.45;

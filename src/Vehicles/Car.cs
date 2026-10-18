@@ -50,6 +50,8 @@ public partial class Car : RigidBody3D
     /// <summary>The referee's toughness for this car (plan §9.3): from its model's rating, 1 with --sametuning or the grey box.</summary>
     public float RefereeToughness => DestructionRacing.Core.DevTools.Instance?.Arg("sametuning") != null ? 1f : CarCatalog.ToughnessOf(ModelId);
     public ICarInput? Driver { get; set; }
+    /// <summary>Time in every car's driver (the AI's budget, plan §16), in Stopwatch ticks, for <c>--perf</c>.</summary>
+    public static long DriverTicks;
     /// <summary>
     /// Where a flipped car is put back on its wheels (plan §6.0: on track, the nearest track point); null, or a null
     /// result, rights it in place (the Bowl). Wrecks are always righted in place.
@@ -116,9 +118,7 @@ public partial class Car : RigidBody3D
     private static readonly float[] GearTopSpeed = { 0f, 16f, 28f, 40f, 54f, 72f };
 
     private readonly Wheel[] _wheels = new Wheel[4];
-    private Godot.Collections.Array<Rid> _exclude = new();
     // Reused every tick: allocating RefCounted query objects per wheel per tick floods the .NET finalizer.
-    private PhysicsRayQueryParameters3D _rayQuery = null!;
     private float _upsideDownTime;
     private float _gripLoss;        // 0..1, decays after a hit
     private float _pullDeg;         // smoothed steering pull from side damage
@@ -138,6 +138,8 @@ public partial class Car : RigidBody3D
     private sealed class Wheel
     {
         public Vector3 Mount;
+        /// <summary>The suspension ray: a RayCast3D on the car, updated by hand (no garbage, unlike a space query).</summary>
+        public RayCast3D? Ray;
         public bool Front;
         public bool Left;
         public float Compression;
@@ -170,8 +172,6 @@ public partial class Car : RigidBody3D
         LinearDamp = 0f;
         AngularDampMode = DampMode.Replace;
         AngularDamp = 0.6f;
-        _exclude = new Godot.Collections.Array<Rid> { GetRid() };
-        _rayQuery = new PhysicsRayQueryParameters3D { CollisionMask = WorldLayer, Exclude = _exclude };
 
         for (int i = 0; i < 4; i++) _wheels[i] = new Wheel { Front = i < 2, Left = i % 2 == 0, Index = (Rules.Wheel)i };
         // --greybox (sims, tests): every car is the grey box, for comparing tuning against the M1 baselines.
@@ -336,6 +336,18 @@ public partial class Car : RigidBody3D
         Righted?.Invoke(this);
     }
 
+    /// <summary>A suspension ray: updated by hand, on the world layer, ignoring this car (as the space query was).</summary>
+    private RayCast3D MakeRay()
+    {
+        var ray = new RayCast3D
+        {
+            Enabled = false, ExcludeParent = true, CollisionMask = WorldLayer,
+            CollideWithBodies = true, CollideWithAreas = false, HitFromInside = false, HitBackFaces = true,
+        };
+        AddChild(ray);
+        return ray;
+    }
+
     public override void _PhysicsProcess(double delta)
     {
         float dt = (float)delta;
@@ -348,7 +360,9 @@ public partial class Car : RigidBody3D
         Vector3 comWorld = xf * CenterOfMass;
         Vector3 v = LinearVelocity;
 
+        long aiStart = System.Diagnostics.Stopwatch.GetTimestamp();
         var c = Driver?.GetControls(this, dt) ?? CarControls.Parked;
+        DriverTicks += System.Diagnostics.Stopwatch.GetTimestamp() - aiStart;
         if (InputLocked) c = CarControls.Parked;
         // A wrecked car's engine is dead: it coasts to a stop and stays as an obstacle.
         if (IsWrecked) c = new CarControls { Brake = 0.35f, Hold = true };
@@ -424,7 +438,6 @@ public partial class Car : RigidBody3D
             : 0f;
 
         // Pass 1: suspension raycasts.
-        var space = GetWorld3D().DirectSpaceState;
         float rayLength = t.RestLength + _wheelRadius;
         int grounded = 0, drivenGrounded = 0;
         foreach (var w in _wheels)
@@ -437,14 +450,19 @@ public partial class Car : RigidBody3D
                 continue;
             }
             Vector3 mountWorld = xf * w.Mount;
-            _rayQuery.From = mountWorld;
-            _rayQuery.To = mountWorld - up * rayLength;
-            var hit = space.IntersectRay(_rayQuery);
-            if (hit.Count > 0)
+            // The same ray as a space query from the mount down the car's own up axis, on the world only, but
+            // without its garbage: a query's result (a Dictionary) and string keys are tracked wrappers, and four
+            // rays per car every tick kept the .NET GC busy (50-100 ms collections, M8).
+            var ray = w.Ray ??= MakeRay();
+            if (ray.Position != w.Mount) ray.Position = w.Mount;
+            var target = new Vector3(0f, -rayLength, 0f);
+            if (ray.TargetPosition != target) ray.TargetPosition = target;
+            ray.ForceRaycastUpdate();
+            if (ray.IsColliding())
             {
                 w.Grounded = true;
-                w.ContactPoint = (Vector3)hit["position"];
-                w.ContactNormal = (Vector3)hit["normal"];
+                w.ContactPoint = ray.GetCollisionPoint();
+                w.ContactNormal = ray.GetCollisionNormal();
                 w.Compression = Mathf.Clamp(rayLength - mountWorld.DistanceTo(w.ContactPoint), 0f, t.RestLength);
                 grounded++;
                 if (IsDriven(w)) drivenGrounded++;
@@ -600,6 +618,9 @@ public partial class Car : RigidBody3D
                      $"ω before={Mathf.RadToDeg(AngularVelocity.Y):0}°/s assist={Mathf.RadToDeg(yawImpulse / Inertia.Y * t.SpinAssist * w):0}°/s");
         if (w <= 0f) return;
         AngularVelocity += Vector3.Up * (yawImpulse / Inertia.Y * t.SpinAssist * w);
+        // The same cap as every tick: hits come after the tick's clamp, and several in one tick (a pileup) stacked
+        // to twice the cap for that tick (M8 stress test).
+        if (AngularVelocity.Length() > t.MaxAngularSpeed) AngularVelocity = AngularVelocity.Normalized() * t.MaxAngularSpeed;
         // Saturates on taps (a 12 km/h side tap is ~2.5 kN·s): DD spins cars from light contact.
         float strength = Mathf.Clamp(impulse.Length() / 2500f, 0f, 1f);
         _gripLoss = MathF.Max(_gripLoss, strength * (rearHalf ? 1f : 0.4f));

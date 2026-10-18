@@ -16,12 +16,16 @@ public sealed record Garage(string Car = "kitsune", int Colour = 0, int Style = 
     public Livery Livery(int division)
     {
         var paint = PlayerColours.Colour(Colour);
-        return new Livery(paint, Drivers.Contrast(paint), Style, Metallic: PlayerColours.IsChampion(Colour) ? 0.75f : 0f,
+        return new Livery(paint, Drivers.Contrast(paint), Style, Metallic: PlayerColours.IsMetallic(Colour) ? 0.75f : 0f,
             Wear: 0.15f, Dirt: 0.25f, Number: Number, Roof: DerbyMode.RoofColor(division), Sponsor: 2);
     }
 }
 
-/// <summary>The player's colour choices: the 16 colours of the palette, plus the champion set once Division 1 is won.</summary>
+/// <summary>
+/// The player's colour choices: the 16 colours of the palette, the champion set once Division 1 is won, and a
+/// medal colour for each Time Trial medal earned (plan §4.4: medals unlock liveries). Index 0–15 palette, 16–23
+/// champion, 24–26 bronze, silver and gold medal.
+/// </summary>
 public static class PlayerColours
 {
     private static Color C(int r, int g, int b) => new(r / 255f, g / 255f, b / 255f);
@@ -34,10 +38,37 @@ public static class PlayerColours
 
     public static readonly string[] ChampionNames = { "GOLD", "CHROME", "CANDY RED", "MIDNIGHT", "PEARL", "GUNMETAL", "RACING GREEN", "ELECTRIC BLUE" };
 
-    public static int Count(bool champion) => Drivers.Palette.Length + (champion ? Champion.Length : 0);
-    public static bool IsChampion(int index) => index >= Drivers.Palette.Length;
+    /// <summary>The Time Trial medal colours: bronze, silver and gold, metallic.</summary>
+    public static readonly Color[] Medal = { C(150, 92, 46), C(200, 204, 210), C(232, 184, 40) };
+    public static readonly string[] MedalNames = { "BRONZE MEDAL", "SILVER MEDAL", "GOLD MEDAL" };
+
+    private static int ChampionStart => Drivers.Palette.Length;
+    private static int MedalStart => ChampionStart + Champion.Length;
+
+    /// <summary>The colours open to the player, in order: the palette, the champion set, the medal colours earned.</summary>
+    public static IReadOnlyList<int> Available(bool champion, int bestMedal)
+    {
+        var list = Enumerable.Range(0, Drivers.Palette.Length).ToList();
+        if (champion) list.AddRange(Enumerable.Range(ChampionStart, Champion.Length));
+        list.AddRange(Enumerable.Range(MedalStart, Math.Clamp(bestMedal, 0, Medal.Length)));
+        return list;
+    }
+
+    public static IReadOnlyList<int> Available() => Available(Profile.ChampionOpen, Profile.MedalsOpen);
+
+    public static bool IsChampion(int index) => index >= ChampionStart && index < MedalStart;
+    public static bool IsMetallic(int index) => index >= ChampionStart;
+
     public static Color Colour(int index) =>
-        index < Drivers.Palette.Length ? Drivers.Palette[Math.Max(0, index)] : Champion[Math.Min(index - Drivers.Palette.Length, Champion.Length - 1)];
+        index < ChampionStart ? Drivers.Palette[Math.Max(0, index)]
+        : index < MedalStart ? Champion[index - ChampionStart]
+        : Medal[Math.Min(index - MedalStart, Medal.Length - 1)];
+
+    /// <summary>The colour's name on the colours page.</summary>
+    public static string Name(int index) =>
+        index < ChampionStart ? $"{index + 1} OF {Drivers.Palette.Length}"
+        : index < MedalStart ? ChampionNames[index - ChampionStart]
+        : MedalNames[Math.Min(index - MedalStart, Medal.Length - 1)];
 }
 
 /// <summary>A saved championship: the career, the player's garage and when it was last played.</summary>
@@ -141,6 +172,8 @@ public sealed class Profile
     public bool Champion { get; set; }
     /// <summary>The best Total Destruction score (seconds survived plus points).</summary>
     public int TotalDestructionBest { get; set; }
+    /// <summary>The best Time Trial medal earned anywhere: 0 none, 1 bronze, 2 silver, 3 gold.</summary>
+    public int BestMedal { get; set; }
 
     private static Profile? _current;
     public static Profile Current => _current ??= Load();
@@ -168,6 +201,15 @@ public sealed class Profile
         p.Write();
     }
 
+    /// <summary>A Time Trial medal; true when it is the best so far (a new medal colour opens).</summary>
+    public static bool NoteMedal(int medal)
+    {
+        if (medal <= Current.BestMedal) return false;
+        Current.BestMedal = Math.Min(medal, PlayerColours.Medal.Length);
+        Current.Write();
+        return true;
+    }
+
     public static void NoteTotalDestruction(int score)
     {
         if (score <= Current.TotalDestructionBest) return;
@@ -186,4 +228,6 @@ public sealed class Profile
         Core.GameSettings.Current.UnlockAll || Unlocks.IsOpen(Current.BestDivision, venue, reverse, light);
 
     public static bool ChampionOpen => Core.GameSettings.Current.UnlockAll || Current.Champion;
+    /// <summary>How many medal colours are open (all with the Unlock-all option).</summary>
+    public static int MedalsOpen => Core.GameSettings.Current.UnlockAll ? PlayerColours.Medal.Length : Current.BestMedal;
 }

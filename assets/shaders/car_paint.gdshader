@@ -303,6 +303,18 @@ void fragment() {
 			rough = mix(rough, 0.6 + 0.2 * streak, t);
 		}
 		float rusting = clamp(dmg.g * 1.4 + (fbm(p * 5.0) - 0.5) * 0.6, 0.0, 1.0) * step(0.32, scrape + dmg.g);
+		// Rust from age (pre-existing wear, plan §9.4): an old car rusts low down first (the sills, the bottoms of
+		// the doors and wings, the arch lips) in ragged patches, and in small blisters higher up. A car under about
+		// a third worn has none.
+		float age = smoothstep(0.28, 0.65, wear);
+		if (age > 0.0) {
+			float low_body = 1.0 - smoothstep(0.22, 0.5, p.y);
+			float patches = fbm(p * 3.1 + 19.0);
+			float edge = fbm(p * 14.0 + 5.0);
+			float sill = clamp((low_body * age * (0.5 + patches) - 0.4 + (edge - 0.5) * 0.35) * 4.0, 0.0, 1.0);
+			float blister = age * smoothstep(0.8, 0.9, vnoise(p * 22.0 + 3.0)) * smoothstep(0.55, 0.7, patches);
+			rusting = max(rusting, max(sill, blister) * (1.0 - decal * 0.6));
+		}
 		base = mix(base, rust, rusting);
 		rough = mix(rough, 0.9, rusting);
 		metal = mix(metal, 0.0, rusting);

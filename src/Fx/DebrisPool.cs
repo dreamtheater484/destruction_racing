@@ -9,6 +9,8 @@ public partial class DebrisPiece : RigidBody3D
     public string Kind { get; set; } = "";
     public double Born { get; set; }
     public float SlowTime { get; set; }
+    /// <summary>The car it came off (replays put it back there for the time before it came off).</summary>
+    public Node3D? From { get; set; }
 }
 
 /// <summary>
@@ -27,14 +29,19 @@ public partial class DebrisPool : Node3D
     public int MaxPieces { get; set; } = 150;
     public int Count => _pieces.Count;
 
+    /// <summary>A piece came off (the replay recorder starts its track).</summary>
+    public static event System.Action<DebrisPiece>? Spawned;
+
     private readonly List<DebrisPiece> _pieces = new();
     private double _time;
+
+    private static readonly NodePath PoolPath = "DebrisPool";
 
     public static DebrisPool Get(Node from)
     {
         var tree = from.GetTree();
         Node scene = tree.CurrentScene ?? tree.Root;
-        if (scene.GetNodeOrNull<DebrisPool>("DebrisPool") is { } pool) return pool;
+        if (scene.GetNodeOrNull<DebrisPool>(PoolPath) is { } pool) return pool;
         pool = new DebrisPool { Name = "DebrisPool" };
         scene.AddChild(pool);
         return pool;
@@ -45,7 +52,7 @@ public partial class DebrisPool : Node3D
     /// collider of <paramref name="size"/> centred at <paramref name="centre"/> (world space, oriented by <paramref name="basis"/>).
     /// </summary>
     public DebrisPiece Spawn(string kind, IEnumerable<Node3D> visuals, Vector3 centre, Basis basis, Shape3D shape,
-        float mass, Vector3 velocity, Vector3 angularVelocity)
+        float mass, Vector3 velocity, Vector3 angularVelocity, Node3D? from = null)
     {
         while (_pieces.Count >= MaxPieces)
         {
@@ -63,6 +70,7 @@ public partial class DebrisPool : Node3D
             PhysicsMaterialOverride = new PhysicsMaterial { Friction = 0.7f, Bounce = 0.15f },
             AngularDamp = 0.4f,
             LinearDamp = 0.05f,
+            From = from,
         };
         AddChild(piece);
         piece.GlobalTransform = new Transform3D(basis, centre);
@@ -71,6 +79,7 @@ public partial class DebrisPool : Node3D
         piece.LinearVelocity = velocity;
         piece.AngularVelocity = angularVelocity;
         _pieces.Add(piece);
+        Spawned?.Invoke(piece);
         return piece;
     }
 

@@ -138,17 +138,23 @@ public partial class LiveryPage : MenuPage
     /// <summary>Race numbers the 19 drivers carry are taken.</summary>
     private static readonly HashSet<int> Taken = Drivers.All.Select(d => d.Number).ToHashSet();
 
-    private int Colours => PlayerColours.Count(Profile.ChampionOpen);
+    private readonly IReadOnlyList<int> _colours = PlayerColours.Available();
 
     protected override void Build()
     {
         Menu.CaptionWidth = 220;
         Menu.Add(new MenuItem("COLOUR")
         {
-            Value = () => PlayerColours.IsChampion(_garage.Colour) ? PlayerColours.ChampionNames[_garage.Colour - Drivers.Palette.Length] : $"{_garage.Colour + 1} OF {Drivers.Palette.Length}",
-            Change = d => Set(_garage with { Colour = (_garage.Colour + d + Colours) % Colours }),
+            Value = () => PlayerColours.Name(_garage.Colour),
+            Change = d =>
+            {
+                int i = Math.Max(0, IndexOf(_garage.Colour));
+                Set(_garage with { Colour = _colours[(i + d + _colours.Count) % _colours.Count] });
+            },
             Swatch = () => PlayerColours.Colour(_garage.Colour),
-            Hint = () => Profile.ChampionOpen ? "Your paint: ←/→ through the palette and the champion's metallic set." : "Your paint: ←/→ through the palette. Winning Division 1 adds a metallic champion set.",
+            Hint = () => "Your paint: ←/→ through the colours." +
+                (Profile.ChampionOpen ? "" : " Winning Division 1 adds a metallic champion set.") +
+                (Profile.MedalsOpen >= PlayerColours.Medal.Length ? "" : " Time Trial medals add bronze, silver and gold."),
         });
         Menu.Add(new MenuItem("STYLE")
         {
@@ -167,7 +173,7 @@ public partial class LiveryPage : MenuPage
         _grid = new GridContainer { Columns = 8 };
         _grid.AddThemeConstantOverride("h_separation", 6);
         _grid.AddThemeConstantOverride("v_separation", 6);
-        for (int i = 0; i < Colours; i++)
+        for (int i = 0; i < _colours.Count; i++)
         {
             var sw = new Panel { CustomMinimumSize = new Vector2(66, 34) };
             _swatches.Add(sw);
@@ -180,6 +186,12 @@ public partial class LiveryPage : MenuPage
         Box.AddChild(margin);
         Box.MoveChild(margin, 0);
         Paint();
+    }
+
+    private int IndexOf(int colour)
+    {
+        for (int i = 0; i < _colours.Count; i++) if (_colours[i] == colour) return i;
+        return -1;
     }
 
     private static int NextNumber(int n, int d)
@@ -202,10 +214,10 @@ public partial class LiveryPage : MenuPage
     {
         for (int i = 0; i < _swatches.Count; i++)
         {
-            bool on = i == _garage.Colour;
+            bool on = _colours[i] == _garage.Colour;
             _swatches[i].AddThemeStyleboxOverride("panel", new StyleBoxFlat
             {
-                BgColor = PlayerColours.Colour(i),
+                BgColor = PlayerColours.Colour(_colours[i]),
                 BorderColor = on ? HudStyle.Yellow : new Color(0f, 0f, 0f, 0.6f),
                 BorderWidthLeft = on ? 4 : 1, BorderWidthRight = on ? 4 : 1, BorderWidthTop = on ? 4 : 1, BorderWidthBottom = on ? 4 : 1,
             });

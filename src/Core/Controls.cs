@@ -18,6 +18,18 @@ public enum ControlPreset
 
 public static class Controls
 {
+    private static readonly System.Collections.Generic.Dictionary<string, StringName> Names = new();
+
+    /// <summary>
+    /// The action as a StringName, made once: Input.IsActionPressed with a string makes and tracks a new one on
+    /// every call, garbage for the .NET GC several times per frame (M8).
+    /// </summary>
+    public static StringName Name(string action)
+    {
+        if (!Names.TryGetValue(action, out var name)) Names[action] = name = action;
+        return name;
+    }
+
     public const string Accelerate = "accelerate";
     public const string Brake = "brake";
     public const string Reverse = "reverse";

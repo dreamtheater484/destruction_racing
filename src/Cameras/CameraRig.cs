@@ -5,7 +5,8 @@ using Godot;
 namespace DestructionRacing.Cameras;
 
 /// <summary>
-/// The 4 in-game views of DD (plan §15.4) plus look-back. The camera always stays upright.
+/// The 4 in-game views of DD (plan §15.4), the high arena view (plan §4.1: DD's camera was too close) and look-back.
+/// The camera always stays upright.
 /// Chase framings are measured from DD1/DD2 PC gameplay video (docs/reference_feel.md).
 /// </summary>
 public partial class CameraRig : Camera3D
@@ -18,7 +19,11 @@ public partial class CameraRig : Camera3D
         ChaseFar,
         Bumper,
         InCar,
+        /// <summary>High and well back, looking down over the car: the arena around you (plan §4.1).</summary>
+        Arena,
     }
+
+    private const int Views = 5;
 
     public Car? Target { get; set; }
     public View Mode { get; set; } = View.Chase;
@@ -42,7 +47,7 @@ public partial class CameraRig : Camera3D
         Current = true;
         Near = 0.05f;
         Far = 4000f;
-        if (GameSettings.Active && Mode == View.Chase) Mode = (View)Mathf.Clamp(GameSettings.Current.DefaultView, 0, 3);
+        if (GameSettings.Active && Mode == View.Chase) Mode = (View)Mathf.Clamp(GameSettings.Current.DefaultView, 0, Views - 1);
     }
 
     /// <summary>Adds camera shake (0..1), e.g. from big hits; scaled by the camera-shake option.</summary>
@@ -55,7 +60,7 @@ public partial class CameraRig : Camera3D
     {
         if (e.IsActionPressed(Controls.CameraNext) && !e.IsEcho())
         {
-            Mode = (View)(((int)Mode + 1) % 4);
+            Mode = (View)(((int)Mode + 1) % Views);
             GetViewport().SetInputAsHandled();
         }
     }
@@ -69,7 +74,7 @@ public partial class CameraRig : Camera3D
         Vector3 flatFwd = new Vector3(carFwd.X, 0f, carFwd.Z);
         if (flatFwd.LengthSquared() < 1e-4f) flatFwd = _smoothedHeading;
         flatFwd = flatFwd.Normalized();
-        bool lookBack = Input.IsActionPressed(Controls.LookBack);
+        bool lookBack = Input.IsActionPressed(Controls.Name(Controls.LookBack));
 
         // Heading follows the car body, not the velocity, like DD's chase cam; smoothed.
         _smoothedHeading = _initialised ? _smoothedHeading.Slerp(flatFwd, 1f - Mathf.Exp(-6f * dt)).Normalized() : flatFwd;
@@ -115,6 +120,12 @@ public partial class CameraRig : Camera3D
                 position = xf * new Vector3(-0.38f, 0.72f, lookBack ? 0.2f : 0.35f);
                 lookAt = position + (lookBack ? xf.Basis.Z : -xf.Basis.Z) * 10f;
                 fov = 70f;
+                break;
+            case View.Arena:
+                // About 14 m back and 9 m up, looking down at the road a few metres ahead of the car.
+                position = anchor - heading * 13.5f + Vector3.Up * 9f;
+                lookAt = anchor + heading * 5f;
+                fov = 58f;
                 break;
             default:
                 // DD1 PC: ~9 m behind the car centre, ~2 m above the ground, pitched ~2.5° down, vfov ~55°.

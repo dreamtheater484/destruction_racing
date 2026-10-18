@@ -54,6 +54,8 @@ public partial class Announcer : Node
         Load();
     }
 
+    public override void _ExitTree() => AudioMix.DuckForAnnouncer(0f);
+
     private void Load()
     {
         if (!FileAccess.FileExists(Dir + "manifest.json")) return;
@@ -86,8 +88,10 @@ public partial class Announcer : Node
         if (priority == Priority.Filler && _rng.NextDouble() > Frequency * 0.6) return;
         if (_player.Playing && priority > _playingPriority && priority >= Priority.High)
         {
+            // Cut the line off and drop what waits behind it, but not the calls as important as this one
+            // (the result after the last wreck).
             _player.Stop();
-            _queue.Clear();
+            _queue.RemoveAll(q => q.Priority < priority);
         }
         _queue.RemoveAll(q => q.Category == category);
         _queue.Add((category, priority, _clock + maxWait));

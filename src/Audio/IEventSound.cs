@@ -10,7 +10,8 @@ namespace DestructionRacing.Audio;
 /// <summary>What <see cref="EventAudio"/> listens to: an event with cars, a player, a referee and a crowd (the derby, the races).</summary>
 public interface IEventSound
 {
-    IReadOnlyList<Car> Cars { get; }
+    /// <summary>The event's cars (a List, not an interface: every tick's foreach would box its enumerator).</summary>
+    List<Car> Cars { get; }
     Car PlayerCar { get; }
     bool PlayerOut { get; }
     double Time { get; }

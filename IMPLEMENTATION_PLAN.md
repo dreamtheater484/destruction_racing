@@ -267,7 +267,7 @@ The DD1 PS manual teaches five tactics. Each one **must reliably work** for the 
   - Spin points go to the last attacker within the window. A new hit during a spin steals attribution only above `SPIN_STEAL_E`.
   - Wall spins and self‑spins score nothing.
   - Wreck credit goes to whoever dealt the most damage in the last 5 s (none for walls).
-- **Anti‑farming:** hits on wrecked or stationary cars score 0, and spins count only if the victim was driving (above `SPIN_MIN_SPEED`) when hit.
+- **Anti‑farming:** hits on wrecked cars score 0, and spins count only if the victim was driving (above `SPIN_MIN_SPEED`) when hit, so a stopped car can't be spun for points. Wrecking a stopped car that is still running scores the wreck, as finishing off a stuck car did in DD (M8 decision, for your review).
 - **Tests:** unit tests replay recorded traces covering tiers, attribution, steals, wall spins, spins during rollovers, and pileups with 3+ simultaneous contacts.
 
 ---
@@ -293,9 +293,9 @@ The DD1 PS manual teaches five tactics. Each one **must reliably work** for the 
 - **Damage per hit:** `dmg = k × max(0, E − E_threshold)^0.8 / (zoneToughness × carToughness)`.
   - The zone comes from the contact point and normal in car‑local space, with spill‑over on corner hits.
   - Both cars take damage, so **ramming with your front costs engine**. In a one‑sided ram the attacker takes 70% of it ✱ (M4 calibration); in a head‑on both take it in full, so the last‑moment turn (T5) still pays.
-- **Zone toughness:** Front 1.0, Sides 1.2, **Rear 2.5**. That makes reverse‑ramming strong but not invincible. It is tuned against the reference feel sheet's "hits to wreck" values.
+- **Zone toughness:** Front 1.0, Sides 1.5 (1.2 in v2 of this plan; 1.5 since M0, and every derby sim since was tuned with it), **Rear 2.5**. That makes reverse‑ramming strong but not invincible. It is tuned against the reference feel sheet's "hits to wreck" values.
 - **Effects:**
-  - **Front:** power × f(health). Below 60%: steam. Below 35%: grey smoke and stutter. Below 15%: black smoke, misfires, hood loose. Below 8%: **fire**. At 0: **wrecked**.
+  - **Front:** power × f(health). Below 60%: steam. Below 35%: grey smoke and stutter. Below 15%: black smoke, misfires. Below 20%: hood loose. Below 8%: **fire**. At 0: **wrecked**.
   - **Sides:** toe pull proportional to damage; both sides damaged → maximum lock scaled down to about 35%.
   - **Rear:** up to −30% acceleration and top speed. Below 25%, rear wheels can detach on further hits.
   - **Wheels:** wobble and camber; at 0 the wheel detaches and the corner drops onto a hub skid point (sparks, drag, strong pull).
@@ -539,7 +539,7 @@ All names are **fictional working titles**, to be checked against real model nam
 - **Utility‑based target selection:** distance and closing angle, exposed weak zones, **finishing a wreck**, revenge, the ×2 leader, and the **player‑attention budget**.
 - **Behaviours:** `Hunt`, `Ram`, `ReverseRam` (high self‑preservation, more often as front health drops), `LastSecondTurn` (T5), `Squeeze` (T4), `Evade`, `Circle`, `UseCover` (a wreck as a shield), `Recover`.
 - **Player‑attention budget:** at most N AI target the player at once (N = 2/3/4 by division). It is measured as a frustration metric (§17.4). A player who camps or hides gets more attention, so hiding doesn't work.
-- **Anti‑stall director:** while 5+ cars remain, if no hit happens anywhere for 6 s, the most passive AI become more aggressive. For the final duel, it nudges both cars together without forcing them.
+- **Anti‑stall director:** while 5+ cars remain, if no hit happens anywhere for 4 s (6 s before the M1b tuning), the most passive AI become more aggressive. For the final duel, it nudges both cars together without forcing them.
 
 ### 10.5 Difficulty
 - **Scaling:** division 4 → 1 scales skill, aggression and reaction time, and a global Easy / Normal / Hard (DD1 had three) shifts the whole curve.
@@ -887,7 +887,7 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A6 | Promotion threshold | 1st in the division | DD1 FAQ |
 | A7 | Hitting a wrecked car in DD1 | 0 | DD2 rule |
 | A8 | Bowl time limit | None | None found |
-| A9 | Immobilised = wrecked after 10 s | Yes: below 0.5 m/s, or trying to move but still within 1.5 m of where it was (M3: two cars locked together rocked in place for minutes) | Prevents stalls; the derby always ends |
+| A9 | Immobilised = wrecked after 10 s (20 s rocking in place) | Yes: below 0.5 m/s, or trying to move but still within 1.5 m of where it was (M3: two cars locked together rocked in place for minutes) | Prevents stalls; the derby always ends |
 | A10 | Championship tie‑break | More wrecks, then best finish | Not documented |
 | A11 | DD2 race end | Continues until the player finishes or is wrecked | Fandom only |
 | ~~A12~~ | DD2 pit limits | **Resolved:** Wreckin' once, Stock Car as often as you like, 5 s each | DD2 PC manual |
@@ -897,13 +897,20 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A16 | Spin hit threshold | 3 kJ (≈ 11 km/h closing): taps score spins, as in DD | Reference feel: a rear‑quarter tap spins the leader |
 | A17 | Grinding and scraping | Repeat contact of the same pair within 0.8 s deals 30%; sliding contact above 20 km/h grinds the touching zone; the squeezer gets the credit (DD Code T4) | Keeps pile‑ups from stripping every car, makes squeezes pay |
 | A18 | Damage on a destroyed zone | Half of it reaches the front (engine) | Without it, cars with destroyed sides and rear could never be finished off |
-| A19 | Opening crunch and first minute | Derby damage starts at ×0.5 at GO and ramps to ×1 over 75 s (calibration; M1b had ×0.6 over 60 s, re-checked with reproducible sims in M1c) | Frustration targets: player wrecked in 30 s ≤ 5%, in 60 s ≤ 15% |
+| A19 | Opening crunch and first minute | Derby damage starts at ×0.4 at GO and ramps to ×1 over 90 s (calibration; M1b had ×0.6 over 60 s, M1c–M3 ×0.5 over 75 s, M4 ×0.4 over 90 s for the harder-hitting derby AI) | Frustration targets: player wrecked in 30 s ≤ 5%, in 60 s ≤ 15% |
 | A20 | DD2 Fast Steer at derby speeds | Loosens the rear and adds yaw torque below ~80 km/h, so sharp turns (DD Code T5) are possible | The DD2 manual only says "fast steering" |
 | A21 | Race damage | All damage in a race is ×0.5 (`RaceDamageScale`, calibration) | At ×1 the PlayerProxy was wrecked before half distance in 83–100% of races (target ≤ 10%): race contact is constant and incidental, the derby curve assumes deliberate rams |
 | A22 | AI pace in Division 4 | The racing AI drives at ×0.97 of its skill's pace (division scaling, §10.5) | At ×1 the AI racers out‑pace an average player, so only hunting paid; at ×0.97 racer and hunter bots score within ±15% |
 | A23 | Crossover and wall ends | The walls open where the figure‑8 legs cross; where a wall resumes it is flared (≈8°) and the four corners are closed | Blunt wall ends at the opening wrecked cars that drifted into the gap; DD1 footage shows no detail |
 | A24 | Race end | The race ends when the player finishes; if the player is wrecked, when the winner takes the flag. Everyone else is classified by distance | Not documented; keeps "skip to results" short |
 | A25 | Division difficulty | The racing AI's pace ×0.97 → ×1.015 and its aggression (how often it attacks) ×0.8 → ×1 from Division 4 to Division 1; Easy and Hard shift them by 0.02 and 0.2. The drivers start in the divisions their sim points put them in | Wreckin' points come from spins, so pace alone hardly moves them. The average‑fan bot scores at the field's mean; ×0.8 in Division 4 meets the promotion target there (M7 sims) |
+| A26 | Who takes the damage | In a one-sided ram the attacker takes 70% of the hit's damage; in a head-on both take all of it | The manuals say ramming hurts the rammer's front; the share is ours, checked with a 40 km/h T-bone probe (M4) |
+| A27 | Stock Car AI pace | ×1.03 of the Wreckin' pace | DD1: the AI is faster in Stock Car; the factor is ours |
+| A28 | Crash cushions | Water barrels on the pit-wall noses and the soft island tips at the crossover deal 30% of the damage | Not in DD; they keep the wall ends of the shared layouts from wrecking cars outright (M6) |
+| A29 | Pit repair rate | 3.5 health per press (half on the wheels), at most 15 presses a second, 5 s per stop | DD2 gives the 5 s limit, not the rate |
+| A30 | Car triangle budget | LOD0 283k–400k triangles a car (tyres with real tread 14k each, rims 12k, bumpers 18k, body 45k–63k); Godot's generated LODs go down to 12k–17k. Only the body, panels, bumpers, tyres and rims cast shadows; the small parts are hidden beyond 70 m (further through a long lens) | Plan §16 says LOD0 ≤ 60k. The 4K Ultra target holds without new models; lighter tyres and rims if the mid-range PCs need them (M8) |
+| A31 | Shadowed lights at night | The 10 floodlights cast shadows (the M6 night look you approved) | Plan §16 says ≤ 6; 4K Ultra stays ≥ 120 fps after the M8 draw-call cuts |
+| A32 | Spin cap after hits | The car's 14 rad/s spin cap also applies after a hit's spin assist (a 360° still takes 0.45 s) | The pileup stress test found 29 rad/s spins that broke its checks (M8) |
 
 ---
 

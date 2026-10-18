@@ -91,7 +91,7 @@ public class RefereeTests
         r.OnCarHit(0, Ram(1, 2, 60_000f, LeftSide));
         Assert.True(r.Damage(1).Health(DamageZone.Front) < DamageState.MaxHealth);
         Assert.True(r.Damage(2).Health(DamageZone.Left) < DamageState.MaxHealth);
-        // Side toughness 1.2: the victim's side loses less than the attacker's front.
+        // Side toughness 1.5: the victim's side loses less than the attacker's front.
         Assert.True(r.Damage(2).Health(DamageZone.Left) > r.Damage(1).Health(DamageZone.Front));
     }
 
@@ -308,5 +308,15 @@ public class DerbyStandingsTests
         s.EndByPoints(new Dictionary<int, int> { [1] = 10, [2] = 40 });
         Assert.Equal(new[] { 2, 1, 3 }, s.FinishingOrder());
         Assert.True(s.IsOver);
+    }
+
+    [Fact]
+    public void A_time_limit_breaks_a_points_tie_on_remaining_health()
+    {
+        var s = new DerbyStandings(new[] { 1, 2, 3 });
+        s.EndByPoints(new Dictionary<int, int> { [1] = 25, [2] = 25, [3] = 10 },
+            new Dictionary<int, float> { [1] = 0.3f, [2] = 0.8f, [3] = 1f });
+        Assert.Equal(new[] { 2, 1, 3 }, s.FinishingOrder());
+        Assert.Equal(2, s.Winner);
     }
 }

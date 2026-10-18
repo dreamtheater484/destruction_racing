@@ -89,6 +89,7 @@ public partial class EventSetupPage : MenuPage
     public enum Flow { Single, Practice, TimeTrial }
 
     private readonly Flow _flow;
+    private static readonly int[] TimeLimits = { 0, 180, 300, 600 };
     private static readonly EventKind[] SingleKinds = { EventKind.Derby, EventKind.Wreckin, EventKind.StockCar, EventKind.Duel, EventKind.TotalDestruction };
 
     public EventSetupPage(Flow flow) => _flow = flow;
@@ -204,6 +205,19 @@ public partial class EventSetupPage : MenuPage
                 return $"{r.Name} ({r.Nation}), a {r.Archetype.ToLowerInvariant()}, in the {car?.FullName ?? r.Car}.";
             },
         });
+        Menu.Add(new MenuItem("TIME LIMIT")
+        {
+            Value = () => FrontEndState.TimeLimit == 0 ? "NONE" : $"{FrontEndState.TimeLimit / 60} MIN",
+            Change = d =>
+            {
+                int i = Array.IndexOf(TimeLimits, FrontEndState.TimeLimit);
+                FrontEndState.TimeLimit = TimeLimits[(Math.Max(0, i) + d + TimeLimits.Length) % TimeLimits.Length];
+            },
+            Visible = () => _flow == Flow.Single && Kind is EventKind.Derby or EventKind.Duel,
+            Hint = () => FrontEndState.TimeLimit == 0
+                ? "No limit: the last car running wins, as in DD."
+                : "When the time runs out, the most points wins (then the car with the least damage).",
+        });
         Menu.Add(new MenuItem("AI CARS")
         {
             Value = () => FrontEndState.Opponents == 0 ? "NONE" : $"{FrontEndState.Opponents}",
@@ -299,6 +313,7 @@ public partial class EventSetupPage : MenuPage
             Rival = kind == EventKind.Duel ? Drivers.All[FrontEndState.Rival].Name : null,
             FaceOff = InBowl && FrontEndState.FaceOff && !FrontEndState.Parked && kind != EventKind.Duel,
             Parked = _flow == Flow.Practice && InBowl && FrontEndState.Parked,
+            TimeLimit = _flow == Flow.Single && kind is EventKind.Derby or EventKind.Duel ? FrontEndState.TimeLimit : 0,
             Laps = laps,
             Seed = (int)(Time.GetUnixTimeFromSystem() % 100000),
         };

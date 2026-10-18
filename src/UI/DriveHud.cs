@@ -17,6 +17,8 @@ public partial class DriveHud : CanvasLayer
 
     public override void _Ready()
     {
+        // Above the screen effects (ScreenFx, layer 5), so the grain, the flash and the blur leave the HUD alone.
+        Layer = 7;
         ProcessMode = ProcessModeEnum.Always;
         _speed = MakeLabel(48, new Vector2(40, 30));
         _info = MakeLabel(20, new Vector2(42, 96));

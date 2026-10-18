@@ -9,6 +9,69 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## M8 Polish — ready for your review (2026‑10‑19)
+- **Play it:** double-click **Play Destruction Racing.cmd**, as in M7. Your settings and championships carry over. The new options are on Options → Graphics (FILM LOOK, MOTION BLUR, the longer anti-aliasing list).
+- **Replays and highlights** (plan §15.5):
+  - A replay now shows the damage as it happened: every dent, scrape, broken window and lamp at its moment, and the parts that came off fly again along their own paths. A self-test rebuilds every car's damage from the replay and compares it with the car as the event left it: **20/20 cars bit for bit**, in a derby and in a race.
+  - **HIGHLIGHTS** on the results screen (H): the three biggest moments of the event (big hits, wrecks, rollovers, flying parts), each at half speed from the TV cameras; → skips to the next.
+  - A free camera in the replay (C): the arrows turn it, +/− zoom.
+- **The final mix** (plan §12), measured with a loudness meter on every bus (`--mixlog`, integrated level about LUFS):
+  - The announcer about −17 on top; the engines −22 to −21; the crowd −26 to −25; the music −25 at the start, rising to −19 at the finale. The master is about −18, and only the derby's biggest crashes reach the limiter.
+  - The engines dip 4 dB and the music 7 dB under the announcer.
+  - **The music:** the eight tracks measured −16.3 to −19.5 dB, so some were 3 dB louder than others. Each is now matched to −18. Your own music files are assumed to be louder (a modern master) and turned down to match.
+- **The full announcer set** (Kokoro TTS, as before): 58 new lines, 509 in all.
+  - **The Duel:** the intro, lulls, your win or loss. **Total Destruction:** the intro, the minute calls, "still alive", the end and a new record (no more "hunted" calls, since everyone hunts you).
+  - **The championship:** round and finale intros, promotion, the title and a missed promotion (in the season review).
+  - **Time Trial:** the intro, a new best lap, each medal the first time you reach it, an invalid lap.
+- **The look** (plan §8):
+  - **A colour grade per light:** golden hour a little warmer with blue in the shadows; night with lifted blue-green shadows and a touch more saturation; the afternoon left as it was.
+  - **FILM LOOK** (on by default): a soft vignette and fine grain in the mid-tones. **MOTION BLUR** (40% by default, 0–100%): blur along each pixel's own motion, so the speed reads; none on camera cuts.
+  - **Depth of field** in the TV and replay cameras (the stands soft behind a sharp car), the showroom and the venue preview behind the menus. Never while you drive.
+  - **Huge hits:** a short zoom-blur pulse from the impact point, on top of the camera punch and the flash.
+  - **Rust:** an old livery (wear) now rusts along the sills and blisters on the panels; decals cover it.
+  - **Anti-aliasing:** OFF, FXAA, MSAA ×2, MSAA ×4 + SMAA, TAA, or AMD FSR 2 (upscaling with its own anti-aliasing).
+- **The fidelity checklist** (`docs/fidelity_checklist.md`, plan §17.2): every DD rule, its status and its evidence. M8 built the open items it found:
+  - an optional **TIME LIMIT** for a Single Event derby (none, 3, 5 or 10 min: then points, then the car in the best shape);
+  - the high **ARENA** camera (the camera key cycles to it: 13.5 m back and 9 m up, for the wider view DD's camera lacked);
+  - **world popups** over the car you spun or wrecked;
+  - **medal colours:** Time Trial medals open bronze, silver and gold paint in the garage;
+  - pileup and rollover tests for the spin scoring (4 new unit tests, 102 in all).
+- **The Purist preset** (Options → Gameplay → PURIST): all four gameplay assists off in one go (counter-steer, traction control, the back-marker catch-up and the slow motion). The AI keep their own assists.
+- **Performance** (plan §16; the full checklist with every number is in `docs/m8_checklists.md`). At 4K Ultra on your PC:
+
+  | Scene | Mean fps per 10 s window |
+  |---|---|
+  | Derby, afternoon | 140–263 |
+  | Derby, night | 144–203 (seed 3); 103–202 (seed 4, one window of 19 below 120) |
+  | Race, afternoon / night | 262–311 / 146–227 |
+  | 20-car pileup | 193–206 |
+
+  - **Garbage collection:** the hot code made a little .NET garbage with every engine call (every ray, string name and dictionary), every physics tick, and now and then a full garbage collection froze the game for 50–130 ms. That per-tick garbage is gone; in the pileup the pauses dropped from 103–141 ms to 5 ms.
+  - **Draw calls:** only the body, panels, bumpers, tyres and rims cast shadows, and the small parts are hidden beyond 70 m (further through a long lens). The night race went from 95–156 to 133–198 fps.
+  - **The smoke** was the most expensive thing late in a night derby (GPU 9–14 ms, 72–110 fps). It is now lit per corner instead of per pixel and skips its empty fringe: it costs 2.0 ms instead of 4.8 ms in the heaviest stretch, and looks the same.
+  - **Wrecks** burn for 9 s (25 s if the engine bay was already gone), then smoulder, and the plume thins over 20 s. Before, every wreck with its front below 8% burned for good, and late in a derby ten fires and their lights cost about 3 ms. Fire lights also fade out beyond 30 m.
+  - **Budgets:** physics 0.6–0.8 ms a tick, AI ≤ 0.17 ms, deformation ≤ 0.22 ms, at most about 2,900 particles, VRAM 2.0–2.7 GB: all inside.
+- **Beauty** (plan §17.3): passes (`docs/m8_checklists.md`). Fixed on the way:
+  - The low TV cameras stood 12 cm behind the catch fence, so the long lens filled the frame with giant wire diamonds. They now stand on the wall cap, inside the fence.
+  - The leader's beacon filled a third of the frame when it passed close to a camera; its size is now capped up close.
+  - A wrecked player in the Bowl read "WRECKED – RACE OVER"; now "WRECKED – YOU'RE OUT" (a race: "WRECKED – DNF").
+- **Not done (deviations):**
+  - **Car triangles** (✱ A30): 283k–400k a car at full detail against the plan's 60k. The tyres have real tread (14k each), the rims are 12k, the bumpers 18k; Godot's generated LODs bring them down to 12k–17k. The 4K target holds, so I left the cars as you approved them. Lighter tyres and rims would be the fix if a mid-range PC needs it.
+  - **Shadowed lights** (✱ A31): 10 floodlights at night against the plan's 6. That's the M6 night look, and it stays above 120 fps.
+  - **The spin cap after hits** (✱ A32): the pileup test found spins of 29 rad/s; the car's 14 rad/s cap now also holds after a hit.
+  - **Mid-range and minimum PCs** (RTX 3060, GTX 1660): can't be measured on this PC. The 4K Ultra headroom suggests they are within reach; this needs testers (M9).
+  - **Sticky Keys** opt-in: still not built. It changes a Windows setting; say if you want it.
+  - **Anti-farming** (plan §5 changed, for your review): wrecking a stopped car that is still running scores the wreck, as finishing off a stuck car did in DD. Spinning a stopped car scores nothing, and hits on wrecks still score nothing.
+- **Acceptance** (plan §18): "Performance and beauty checklists pass". The performance checklist passes on this PC, with the two budget deviations above and one night-derby window at 103 fps. The beauty checklist passes on stills; the motion checks (LOD popping, fog ghosting) are for your eyes.
+- **For your playtest:**
+  1. The look: do you like the grade, the grain and vignette (FILM LOOK) and the motion blur at 40%? Try them off and on in Options → Graphics.
+  2. Watch a replay, and press H at the results for the highlights. Do the three moments it picks feel like the best ones?
+  3. The mix: is the music loud enough against the engines and the crowd, and the announcer clear on top?
+  4. Try a Duel, a Total Destruction and a Time Trial for the new announcer lines.
+  5. Do the new ARENA camera and the world popups work for you?
+  6. Anti-farming: is it right that finishing off a stopped car scores the wreck?
+  7. Still open from M7: the upper-division difficulty and the Stock Car difficulty.
+
 ## M7 Championship and front end — approved (2026‑10‑18: "It is very good")
 - **Play it:** double-click **Play Destruction Racing.cmd**. It replaces Play Derby.cmd and Play Racing.cmd, and the game now starts at its own front end. The first launch asks for your key layout (Classic DD PC, Arrows or WASD); after that, the title and the main menu.
   - Everything works from the keyboard: ↑/↓ choose, ←/→ change, Enter go, Esc back. The Del key deletes a championship (press it twice).

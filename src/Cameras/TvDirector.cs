@@ -41,7 +41,9 @@ public partial class TvDirector : Camera3D
         for (int i = 0; i < 6; i++)
         {
             float t = Mathf.Tau * (i + 0.5f) / 6f;
-            _posts.Add(Bowl.Ellipse(t, 0.6f) + Vector3.Up * 2.4f);                            // trackside, low
+            // Trackside, low: on the wall cap, inside the catch fence (at 0.48 m). Behind it, 12 cm from the wire, the long
+            // lens blew every diamond of the mesh up to a quarter of the frame.
+            _posts.Add(Bowl.Ellipse(t, 0.2f) + Vector3.Up * 2.4f);
         }
     }
 
@@ -82,6 +84,8 @@ public partial class TvDirector : Camera3D
         _fov = Mathf.Lerp(_fov, FovFor(_posts[_current].DistanceTo(_look)), 1f - Mathf.Exp(-3f * rdt));
         Fov = _fov;
         GlobalTransform = new Transform3D(Basis.Identity, _posts[_current]).LookingAt(_look, Vector3.Up);
+        // A long lens: the car sharp, the stands behind it soft.
+        Fx.Focus.On(this, Focus.GlobalPosition + Vector3.Up * 0.6f, 0.06f);
     }
 
     private static float FovFor(float distance) => Mathf.Clamp(Mathf.RadToDeg(2f * Mathf.Atan(7.5f / Mathf.Max(distance, 1f))), 9f, 60f);

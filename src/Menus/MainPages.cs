@@ -264,6 +264,8 @@ public static class FrontEndState
     public static int Opponents { get; set; } = 19;
     public static bool Parked { get; set; }
     public static bool FaceOff { get; set; }
+    /// <summary>The derby and duel time limit in Single Event, seconds (0 = none).</summary>
+    public static int TimeLimit { get; set; }
     public static int Rival { get; set; }
     public static int PracticeLaps { get; set; } = 5;
 }

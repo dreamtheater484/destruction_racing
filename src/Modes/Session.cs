@@ -41,6 +41,8 @@ public sealed record EventRequest
     public bool FaceOff { get; init; }
     /// <summary>Practice in the Bowl: the AI cars stand still as targets.</summary>
     public bool Parked { get; init; }
+    /// <summary>A derby or duel time limit in seconds (Single Event; 0 = none, plan §4.1).</summary>
+    public int TimeLimit { get; init; }
     /// <summary>Laps; 0 = the layout's own.</summary>
     public int Laps { get; init; }
     public int Seed { get; init; } = 1;
@@ -107,6 +109,8 @@ public static class Session
     }
 
     public static bool InChampionship => Request is { Origin: EventOrigin.Championship } && Career != null;
+    /// <summary>The last round of the season (the announcer's finale call).</summary>
+    public static bool IsFinale => InChampionship && Career!.Career.EventIndex >= Career.Career.Events.Count - 1;
 
     /// <summary>
     /// The live division table for the event HUD (plan §13): the season points as they were before this event plus

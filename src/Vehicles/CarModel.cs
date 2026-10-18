@@ -64,6 +64,7 @@ public readonly record struct NumberPlacement(float DoorZ, float DoorY, float Do
 /// </summary>
 public sealed class CarModel
 {
+    private static readonly StringName CrushParam = "crush";   // set every frame while a crunch lands: made once
     public Node3D Root { get; }
     public ShaderMaterial Paint { get; }
     /// <summary>Simulated wood (the Homestead's sides): the paint shader with grain, so decals and damage match.</summary>
@@ -147,6 +148,7 @@ public sealed class CarModel
                 if (shared.TryGetValue(name, out var mat)) mi.SetSurfaceOverrideMaterial(s, mat);
                 else GD.PushWarning($"[CarModel] {mi.Name}: no game material for '{name}'");
             }
+            ApplyDrawHints(mi);
         }
         foreach (var n in Descendants<Node3D>(root)) _nodes.TryAdd(n.Name, n);
 
@@ -182,7 +184,7 @@ public sealed class CarModel
     public void SetCrush(float front, float rear, float left, float right)
     {
         Crush = new Vector4(front, rear, left, right);
-        foreach (var m in _deforming) m.SetShaderParameter("crush", Crush);
+        foreach (var m in _deforming) m.SetShaderParameter(CrushParam, Crush);
         _attachedDirty = true;
     }
 
@@ -285,11 +287,62 @@ public sealed class CarModel
                 RotationDegrees = new Vector3(0f, front ? 180f : 0f, 0f),
                 Shaded = true,
                 DoubleSided = false,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
             };
+            HideBeyond(label);
             plate.AddChild(label);
             _attached.Add((label, label.Position));
         }
         _attachedDirty = true;
+    }
+
+    /// <summary>
+    /// Draw calls (M8 performance): each surface is a draw call in the main pass and in every light's shadow pass,
+    /// and a car has about 60. Only the body, the panels, the bumpers, the tyres and the rims cast shadows (the
+    /// small parts' shadows don't show); the handles, wipers, plates, indicators and the exhaust are not drawn
+    /// beyond 70 m, where they are a pixel or two through the chase camera (further through a long lens: see
+    /// <see cref="SetLens"/>). The 10 shadowed floodlights at night went from ~8000 draw calls.
+    /// </summary>
+    private static void ApplyDrawHints(GeometryInstance3D g)
+    {
+        string n = g.Name;
+        bool caster = n is "Body" or "Hood" or "Trunk" or "Bumper_F" or "Bumper_R" or "Roof_Rack"
+            || n.StartsWith("Door_") || n.StartsWith("Fender_") || n.EndsWith("_Tyre") || n.EndsWith("_Rim");
+        if (!caster) g.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+        if (n.StartsWith("Handle_") || n.StartsWith("Wiper_") || n.StartsWith("Plate_") || n.StartsWith("Light_Indicator_") || n == "Exhaust")
+            HideBeyond(g);
+    }
+
+    private const float SmallPartsRange = 70f;
+    private static readonly List<GeometryInstance3D> SmallParts = new();
+    private static float _lensZoom = 1f;
+    private static ulong _lensFrame;
+
+    private static void HideBeyond(GeometryInstance3D g)
+    {
+        g.VisibilityRangeEnd = SmallPartsRange * _lensZoom;
+        g.VisibilityRangeEndMargin = 4f;
+        if (SmallParts.Count > 4000) SmallParts.RemoveAll(x => !GodotObject.IsInstanceValid(x));
+        SmallParts.Add(g);
+    }
+
+    /// <summary>
+    /// A visibility range is a distance, blind to the lens: through the TV cameras' long lenses a car 90 m away
+    /// fills the frame, and its plate and handles would vanish. Called every frame with the current camera's
+    /// vertical field of view, this scales the small parts' range with the zoom against a 70° chase view, in steps
+    /// (×1, 2, 4, 8, 16), so a zooming camera touches the ranges only when it crosses one.
+    /// </summary>
+    public static void SetLens(float fovDegrees)
+    {
+        ulong frame = Engine.GetProcessFrames();
+        if (frame == _lensFrame) return;
+        _lensFrame = frame;
+        float zoom = Mathf.Tan(Mathf.DegToRad(35f)) / Mathf.Tan(Mathf.DegToRad(Mathf.Clamp(fovDegrees, 4f, 120f) * 0.5f));
+        zoom = zoom <= 1.15f ? 1f : Mathf.Min(16f, Mathf.Pow(2f, Mathf.Ceil(Mathf.Log(zoom) / Mathf.Log(2f))));
+        if (zoom == _lensZoom) return;
+        _lensZoom = zoom;
+        SmallParts.RemoveAll(x => !GodotObject.IsInstanceValid(x));
+        foreach (var g in SmallParts) g.VisibilityRangeEnd = SmallPartsRange * zoom;
     }
 
     /// <summary>A soft occlusion blob on the ground under the body and tyres (grounds the car in any light).</summary>

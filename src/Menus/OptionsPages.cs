@@ -20,7 +20,7 @@ public partial class OptionsPage : MenuPage
         Add("CAMERA", "The view you start in, the field of view, camera shake and the slow motion on wrecks.", OptionRows.Camera);
         Add("SOUND", "The volumes, how often the announcer talks and how often the drivers taunt you.", OptionRows.Sound);
         Add("CONTROLS", "The key layout, your own keys, the steering assists and the keyboard test.", OptionRows.Controls);
-        Add("GAMEPLAY", "Difficulty, and unlocking every layout and light without the championship.", OptionRows.Gameplay);
+        Add("GAMEPLAY", "Difficulty, the Purist preset (every assist off), the back-marker catch-up, and unlocking every layout and light.", OptionRows.Gameplay);
     }
 
     private void Add(string name, string hint, Action<MenuView, FrontEnd> rows) =>
@@ -98,7 +98,8 @@ public static class OptionRows
             Hint = () => "A cap saves power and heat; NONE runs as fast as the card can.",
         });
         m.Add(Slider("RESOLUTION SCALE", 50, 100, 5, s => s.RenderScale, (s, v) => s.RenderScale = v,
-            v => v >= 100 ? "100%  (NATIVE)" : $"{v}%  (FSR UPSCALING)", "The 3D picture below 100% is upscaled with AMD FSR 1: faster, a little softer. The HUD stays sharp."));
+            v => v >= 100 ? "100%  (NATIVE)" : GameSettings.Current.AntiAliasing == 5 ? $"{v}%  (FSR 2 UPSCALING)" : $"{v}%  (FSR UPSCALING)",
+            "The 3D picture below 100% is upscaled with AMD FSR 1 (FSR 2 with that anti-aliasing): faster, a little softer. The HUD stays sharp."));
     }
 
     public static void Graphics(MenuView m, FrontEnd host)
@@ -115,20 +116,24 @@ public static class OptionRows
         });
         m.Add(Choice("SHADOWS", new[] { "LOW", "MEDIUM", "HIGH", "ULTRA" }, s => s.Shadows, (s, v) => s.Shadows = v,
             "The size of the shadow maps and how soft their edges are.", graphics: true));
-        m.Add(Choice("ANTI-ALIASING", new[] { "OFF", "FXAA", "MSAA ×2", "MSAA ×4" }, s => s.AntiAliasing, (s, v) => s.AntiAliasing = v,
-            "Smooths jagged edges. MSAA is sharper, FXAA cheaper.", graphics: true));
+        m.Add(Choice("ANTI-ALIASING", new[] { "OFF", "FXAA", "MSAA ×2", "MSAA ×4 + SMAA", "TAA", "AMD FSR 2" }, s => s.AntiAliasing, (s, v) => s.AntiAliasing = v,
+            "Smooths jagged edges. MSAA is the sharpest, FXAA the cheapest; TAA and FSR 2 also smooth fences and wires but can smear a little in motion. FSR 2 is also the upscaler below 100% resolution.", graphics: true));
         m.Add(Choice("AMBIENT OCCLUSION", new[] { "OFF", "SSAO", "SSAO + BOUNCE LIGHT" }, s => s.AmbientOcclusion, (s, v) => s.AmbientOcclusion = v,
             "Contact shadows under and between things; the bounce light adds colour bleeding.", graphics: true));
         m.Add(Toggle("GLOW", s => s.Glow, (s, v) => s.Glow = v, "The bloom on lights, sparks and fire.", graphics: true));
         m.Add(Toggle("NIGHT HAZE", s => s.VolumetricFog, (s, v) => s.VolumetricFog = v, "The floodlights' beams in the haze at night (volumetric fog).", graphics: true));
         m.Add(Choice("DETAIL", new[] { "LOW", "MEDIUM", "HIGH" }, s => s.Detail, (s, v) => s.Detail = v,
             "How early distant models switch to their simpler versions.", graphics: true));
+        m.Add(Toggle("FILM LOOK", s => s.FilmLook, (s, v) => s.FilmLook = v,
+            "The colour grade of each light, a fine film grain and a soft vignette. Off: the plain picture."));
+        m.Add(Slider("MOTION BLUR", 0, 100, 10, s => s.MotionBlur, (s, v) => s.MotionBlur = v, Percent,
+            "Blur on fast camera movement, as a film camera's shutter would give it."));
     }
 
     public static void Camera(MenuView m, FrontEnd host)
     {
-        m.Add(Choice("START VIEW", new[] { "CHASE (DD2)", "FAR CHASE (DD1)", "BUMPER", "IN THE CAR" }, s => s.DefaultView, (s, v) => s.DefaultView = v,
-            "The view an event starts in; C (or your camera key) still cycles all four."));
+        m.Add(Choice("START VIEW", new[] { "CHASE (DD2)", "FAR CHASE (DD1)", "BUMPER", "IN THE CAR", "HIGH (ARENA)" }, s => s.DefaultView, (s, v) => s.DefaultView = v,
+            "The view an event starts in; your camera key still cycles all five. HIGH looks down over the arena around you."));
         m.Add(Slider("FIELD OF VIEW", -10, 15, 1, s => s.FovOffset, (s, v) => s.FovOffset = v, v => v == 0 ? "STANDARD" : $"{v:+0;-0}°",
             "Added to every view: wider shows more of the field, narrower feels faster."));
         m.Add(Slider("CAMERA SHAKE", 0, 100, 10, s => s.Shake, (s, v) => s.Shake = v, Percent, "How much the camera shakes on big hits."));
@@ -178,6 +183,14 @@ public static class OptionRows
     {
         m.Add(Choice("DIFFICULTY", new[] { "EASY", "NORMAL", "HARD" }, s => s.Difficulty, (s, v) => s.Difficulty = v,
             "Shifts every division: the racing AI's pace and how many derby cars may hunt you at once. NORMAL is the tuned one."));
+        m.Add(new MenuItem("PURIST")
+        {
+            Value = () => Settings.IsPurist(GameSettings.Current) ? "ON" : "OFF",
+            Change = d => Change(s => Settings.SetPurist(s, !Settings.IsPurist(s))),
+            Hint = () => "DD as it was: no counter-steer, no traction control, no catch-up for the cars at the back and no slow motion. Switching any of them back on ends PURIST.",
+        });
+        m.Add(Toggle("BACK-MARKER CATCH-UP", s => s.CatchUp, (s, v) => s.CatchUp = v,
+            "In races, cars far behind the leader drive up to 6% faster, so the field stays together. Never the leaders. OFF is the purist's choice."));
         m.Add(Toggle("UNLOCK EVERYTHING", s => s.UnlockAll, (s, v) => s.UnlockAll = v,
             "Every layout, direction and light (and the face-off start and the champion colours) in Single Event, Practice and Time Trial, without the championship."));
     }

@@ -46,8 +46,12 @@ public partial class SpeedwayLook : Node3D
     public override void _Ready()
     {
         var data = SpeedwayData.Load();
-        GetViewport().Msaa3D = Viewport.Msaa.Msaa4X;
-        GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAEnum.Smaa;
+        GameSettings.ApplyAntiAliasing(GetViewport());
+        if (GetNodeOrNull<WorldEnvironment>("WorldEnvironment") is { Environment: { } env } world)
+        {
+            Fx.Grading.Apply(env, Fx.Grading.FromScene(SceneFilePath));
+            Fx.MotionBlur.Attach(this, world);
+        }
         if (DevTools.Instance?.Arg("nolightmap") != null && GetNodeOrNull<LightmapGI>("LightmapGI") is { } lm) lm.LightData = null;
         BuildFencePosts(data);
         BuildTrees(data);

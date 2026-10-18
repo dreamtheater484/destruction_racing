@@ -84,8 +84,8 @@ public partial class RaceCommentary : Node
     private void OnCountdown(int n)
     {
         if (n != 3) return;
-        // One intro: the speedway, the layout or the event, whichever the dice pick.
-        string pick = _rng.Next(3) switch
+        // One intro: the season finale, the championship, the speedway, the layout or the event.
+        string pick = Session.IsFinale ? "champ_finale" : Session.InChampionship && _rng.Next(3) == 0 ? "champ_round" : _rng.Next(3) switch
         {
             0 => "race_intro",
             1 => Mode.IsStockCar ? "race_intro_stock" : Mode.LayoutId == SpeedwayLayout.Oval ? "race_intro_oval" : "race_intro_fig8",

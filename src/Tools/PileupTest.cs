@@ -11,7 +11,8 @@ namespace DestructionRacing.Tools;
 /// <summary>
 /// The 20-car pileup stress scene (plan §16, run at every milestone). Twenty model cars start in a ring and
 /// drive flat out into the middle, keep shoving for a while, a 21st car is dropped onto the pile, then
-/// everyone lets go and the pile must settle. Checks Jolt stability: nothing launched or fallen through the
+/// everyone lets go (and holds the car still) and the pile must settle; a car that misses the pile is held still
+/// at once. Checks Jolt stability: nothing launched or fallen through the
 /// floor, no explosive speeds, no jitter once settled, no cars left inside each other; reports the cost per
 /// physics tick. Headless by default; --visual runs it in the baked Bowl with all damage effects and debris
 /// (use with --perf for the frame-time capture); it then shows the verdict on screen and waits (R again, Esc quit)
@@ -23,9 +24,27 @@ public partial class PileupTest : Node3D
     private sealed class Push : ICarInput
     {
         public float Throttle = 1f;
-        public CarControls GetControls(Car car, float delta) => new() { Throttle = Throttle };
+        public bool Missed;
+
+        /// <summary>
+        /// Flat out at the middle until the release, then the car is held still. A car that misses the pile (with
+        /// a seed's jitter one can) is held still at once, once it is past the middle and heading away, so the speed
+        /// checks see the crash, not a car at top speed, and the settle check sees jitter, not a car coasting off.
+        /// </summary>
+        public CarControls GetControls(Car car, float delta)
+        {
+            var p = car.GlobalPosition;
+            if (!Missed && Throttle > 0f && new Vector2(p.X, p.Z).Length() > 14f && new Vector2(p.X, p.Z).Dot(new Vector2(car.LinearVelocity.X, car.LinearVelocity.Z)) > 0f)
+                Missed = true;
+            if (!Missed && Throttle > 0f) return new CarControls { Throttle = Throttle };
+            // Held still: brake while rolling forward, a touch of throttle while rolling back (brake at a standstill
+            // or rolling back is reverse in DD's controls).
+            float f = car.ForwardSpeed;
+            return f > 0.3f ? new CarControls { Brake = 1f } : f < -0.3f ? new CarControls { Throttle = 0.4f } : new CarControls();
+        }
     }
 
+    private double _lastFastLog = -1;
     private const double DriveUntil = 7.0, DropAt = 4.0, ReleaseAt = 7.0, End = 14.0;
     private readonly List<Car> _cars = new();
     private readonly List<Push> _drivers = new();
@@ -106,6 +125,9 @@ public partial class PileupTest : Node3D
     {
         ulong now = Time.GetTicksUsec();
         if (_time > 0.5) { _tickUsec += now - _lastTick; _ticks++; }
+        // A hitch: the gap between two ticks (the frame in between, in the visual run) over 30 ms.
+        if (_time > 0.5 && now - _lastTick > 30_000)
+            GD.Print($"[Pileup]    slow tick: {(now - _lastTick) / 1000.0:0} ms at {_time:0.00} s (GC {GC.CollectionCount(0)}/{GC.CollectionCount(1)}/{GC.CollectionCount(2)}, paused {GC.GetTotalPauseDuration().TotalMilliseconds:0} ms in all)");
         _lastTick = now;
         _time += delta;
 
@@ -121,11 +143,22 @@ public partial class PileupTest : Node3D
         {
             Vector3 p = c.GlobalPosition;
             if (!float.IsFinite(p.X) || !float.IsFinite(p.Y)) { _maxSpeed = float.PositiveInfinity; continue; }
+            if (c.LinearVelocity.Length() > 30f && c.LinearVelocity.Length() > _maxSpeed && _time - _lastFastLog > 0.25)
+            {
+                _lastFastLog = _time;
+                GD.Print($"[Pileup]    fast: #{c.Id} {c.LinearVelocity.Length():0.0} m/s at {_time:0.00} s, pos {p.X:0.0},{p.Y:0.00},{p.Z:0.0} v {c.LinearVelocity.X:0},{c.LinearVelocity.Y:0},{c.LinearVelocity.Z:0} " +
+                         $"spin {c.AngularVelocity.Length():0.0} up {c.GlobalBasis.Y.Y:0.00} wheels {c.WheelsGrounded} wrecked {c.IsWrecked}");
+            }
             _maxSpeed = MathF.Max(_maxSpeed, c.LinearVelocity.Length());
+            if (c.AngularVelocity.Length() > 14.5f && c.AngularVelocity.Length() > _maxSpin)
+                GD.Print($"[Pileup]    spin: #{c.Id} {c.AngularVelocity.Length():0.0} rad/s at {_time:0.00} s, w {c.AngularVelocity.X:0.0},{c.AngularVelocity.Y:0.0},{c.AngularVelocity.Z:0.0} pos {p.X:0.0},{p.Y:0.00},{p.Z:0.0} up {c.GlobalBasis.Y.Y:0.00} wheels {c.WheelsGrounded} v {c.LinearVelocity.Length():0.0}");
             _maxSpin = MathF.Max(_maxSpin, c.AngularVelocity.Length());
             if (_time > DropAt + 2.0) _maxHeight = MathF.Max(_maxHeight, p.Y);
             _minHeight = MathF.Min(_minHeight, p.Y);
             if (_time > End - 2.0) _settleSpeeds.Add(c.LinearVelocity.Length());
+            if (_time > End - 2.0 && _time < End - 1.99 && c.LinearVelocity.Length() > 1f)
+                GD.Print($"[Pileup]    moving at the end: #{c.Id} {c.LinearVelocity.Length():0.00} m/s pos {p.X:0.0},{p.Y:0.00},{p.Z:0.0} up {c.GlobalBasis.Y.Y:0.00} wheels {c.WheelsGrounded} " +
+                         $"missed {(_drivers.Count > _cars.IndexOf(c) && _cars.IndexOf(c) >= 0 ? _drivers[_cars.IndexOf(c)].Missed : false)} fwd {c.ForwardSpeed:0.00}");
         }
         if (_time >= End) Report();
     }
@@ -163,7 +196,19 @@ public partial class PileupTest : Node3D
         int overlaps = 0;
         for (int i = 0; i < _cars.Count; i++)
             for (int j = i + 1; j < _cars.Count; j++)
-                if (_cars[i].GlobalPosition.DistanceTo(_cars[j].GlobalPosition) < 1.1f) overlaps++;
+            {
+                // Inside each other: side by side closer than 1.1 m at the same level, or under 0.8 m apart at all
+                // (the dropped car can rest on another's hood, its centre 0.9 m up and half a metre aside).
+                var d = _cars[i].GlobalPosition - _cars[j].GlobalPosition;
+                if ((new Vector2(d.X, d.Z).Length() < 1.1f && MathF.Abs(d.Y) < 0.7f) || d.Length() < 0.8f)
+                {
+                    overlaps++;
+                    var (a, b) = (_cars[i], _cars[j]);
+                    GD.Print($"[Pileup]    inside: #{a.Id} at {a.GlobalPosition.X:0.00},{a.GlobalPosition.Y:0.00},{a.GlobalPosition.Z:0.00} up {a.GlobalBasis.Y.Y:0.00}  " +
+                             $"#{b.Id} at {b.GlobalPosition.X:0.00},{b.GlobalPosition.Y:0.00},{b.GlobalPosition.Z:0.00} up {b.GlobalBasis.Y.Y:0.00}  " +
+                             $"{a.GlobalPosition.DistanceTo(b.GlobalPosition):0.00} m apart");
+                }
+            }
         double msPerTick = _ticks > 0 ? _tickUsec / _ticks / 1000.0 : 0;
         bool ok = true;
         var lines = new List<string>();
@@ -181,6 +226,7 @@ public partial class PileupTest : Node3D
         Check(overlaps == 0, $"cars inside each other at the end: {overlaps}");
         GD.Print($"[Pileup]    hits measured {_hits}, wrecked {_cars.Count(c => c.IsWrecked)}, {(_visual ? "see [Perf] for frame times" : $"cost {msPerTick:0.00} ms per physics tick (headless, all scripts)")}");
         GD.Print($"[Pileup] {(ok ? "PASS" : "FAIL")}");
+        AllocProbe.Instance?.Report();
         lines.Add(ok ? "PASS" : "FAIL");
         _verdict = string.Join(KeyGuide.NewLine, lines);
         if (_status != null) return;

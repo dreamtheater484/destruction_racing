@@ -27,6 +27,8 @@ public partial class TimeTrialHud : CanvasLayer
 
     public override void _Ready()
     {
+        // Above the screen effects (ScreenFx, layer 5), so the grain, the flash and the blur leave the HUD alone.
+        Layer = 7;
         ProcessMode = ProcessModeEnum.Always;
         _root = new Control { Theme = HudStyle.Theme, MouseFilter = Control.MouseFilterEnum.Ignore };
         _root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
@@ -126,6 +128,11 @@ public partial class TimeTrialHud : CanvasLayer
         else if (place > 0) Popup($"LAP {TimeTrialTargets.Format(lap)}   ·   #{place} ON THE BOARD", HudStyle.White);
         else Popup($"LAP {TimeTrialTargets.Format(lap)}", HudStyle.White);
         if (medal > 0 && place == 1) Popup($"{TimeTrialTargets.MedalName(medal)} MEDAL", TimeTrialTargets.MedalColor(medal), big: true);
+        if (Mode.MedalColourOpened is { } colour)
+        {
+            Popup($"NEW COLOUR: {colour}", TimeTrialTargets.MedalColor(medal));
+            Mode.MedalColourOpened = null;
+        }
     }
 
     public void Popup(string text, Color color, bool big = false)

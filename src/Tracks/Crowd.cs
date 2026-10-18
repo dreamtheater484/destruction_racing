@@ -11,6 +11,7 @@ namespace DestructionRacing.Tracks;
 /// </summary>
 public partial class Crowd : Node3D
 {
+    private static readonly StringName ExcitementParam = "excitement", ActionPointParam = "action_point";   // set every frame: made once
     /// <summary>
     /// A grandstand in its own frame: the stand faces -Z, the first bench row is at the origin and rows step up
     /// (<paramref name="RowRise"/>) and back (+Z, <paramref name="RowDepth"/>); <paramref name="Columns"/> roof columns
@@ -141,9 +142,9 @@ public partial class Crowd : Node3D
         float target = BaseExcitement;
         Excitement = Excitement > target ? Mathf.Max(target, Excitement - dt * 0.12f) : Mathf.Min(target, Excitement + dt * 0.5f);
         _look = _look.Lerp(ActionPoint, 1f - Mathf.Exp(-dt * 2.5f));
-        _material.SetShaderParameter("excitement", Excitement);
-        _material.SetShaderParameter("action_point", _look);
-        _flashMaterial?.SetShaderParameter("excitement", Excitement);
+        _material.SetShaderParameter(ExcitementParam, Excitement);
+        _material.SetShaderParameter(ActionPointParam, _look);
+        _flashMaterial?.SetShaderParameter(ExcitementParam, Excitement);
     }
 
     // ------------------------------------------------------------------ the spectator mesh

@@ -513,6 +513,7 @@ public partial class SeasonEndPage : Page
             box.AddChild(HudStyle.Label($"DOWN:   {down}", 24, HudStyle.Grey, "SemiBold", outline: 0));
         }
         Host.Play(outcome.PlayerPromoted || outcome.PlayerWonChampionship ? "crowd_cheer" : "tally_done", -6f);
+        Host.Announce(outcome.PlayerWonChampionship ? "champ_title" : outcome.PlayerPromoted ? "champ_promoted" : "champ_missed");
     }
 
     private static string Ordinal(int n) => n + (n % 100 is 11 or 12 or 13 ? "TH" : (n % 10) switch { 1 => "ST", 2 => "ND", 3 => "RD", _ => "TH" });

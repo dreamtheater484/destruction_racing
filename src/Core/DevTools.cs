@@ -11,6 +11,7 @@ namespace DestructionRacing.Core;
 ///   --capture-frame=N         frame at which to capture (default 120)
 ///   --quit-after=N            quit after N frames (for smoke tests)
 ///   --perf[=S]                print frame time (mean, 1% low), draw calls, triangles and VRAM every S s
+///   --ab=F1,F2,...            with --perf: every other window turns one feature off (Tools.PerfAb)
 ///   --shot-every=S --shot-dir=out/x   save a screenshot every S seconds (stress scenes)
 ///   --keys=Enter,Down,w2,Escape   press keys one by one from 1.5 s on, across scene changes (wN waits N × 0.5 s;
 ///                             --menukeys is the same)
@@ -63,15 +64,26 @@ public partial class DevTools : Node
     public override void _Ready()
     {
         if ((Arg("keys") ?? Arg("menukeys")) is { } keys) FeedKeys(keys);
+        if (Arg("lodreport") != null) CallDeferred(MethodName.LodReport);
+        if (Arg("allocprobe") != null) Tools.AllocProbe.Start();
         var version = Engine.GetVersionInfo();
         GD.Print($"[DevTools] Godot {version["string"]} | renderer {RenderingServer.GetCurrentRenderingDriverName()} " +
                  $"| GPU {RenderingServer.GetVideoAdapterName()} | physics {ProjectSettings.GetSetting("physics/3d/physics_engine")} " +
                  $"@ {Engine.PhysicsTicksPerSecond} Hz");
     }
 
+    private void LodReport() => Tools.LodReport.Run(GetTree());
+
+    private double _allocReportAt = 20.0;
+
     public override void _Process(double delta)
     {
         _frame++;
+        if (Tools.AllocProbe.Instance is { } probe && Time.GetTicksMsec() / 1000.0 > _allocReportAt)
+        {
+            _allocReportAt += 20.0;
+            probe.Report();
+        }
         if (_perfEvery > 0f) Perf(delta);
         if (_shotEvery > 0f && (_shotClock += (float)delta) >= _shotEvery)
         {
@@ -114,10 +126,53 @@ public partial class DevTools : Node
         }
     }
 
+    private double _physSum, _physMax, _gpuSum;
+    private string? _abLabel;
+    private int _abWindow;
+    private ulong _aiFrames;
+    private long _aiTicks;
+
+    private ulong _deformFrames;
+    private long _deformTicks;
+
+    /// <summary>Dents and volume uploads per rendered frame since the last report (CarDamageVisual.Ticks).</summary>
+    private double DeformMsPerFrame()
+    {
+        ulong frames = Engine.GetProcessFrames() - _deformFrames;
+        long ticks = Vehicles.CarDamageVisual.Ticks - _deformTicks;
+        _deformFrames = Engine.GetProcessFrames();
+        _deformTicks = Vehicles.CarDamageVisual.Ticks;
+        return frames == 0 ? 0 : ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / frames;
+    }
+
+    /// <summary>The particles of every emitting system now (the budget is 40k, plan §16).</summary>
+    private static int Particles(Node n)
+    {
+        int sum = n is GpuParticles3D { Emitting: true } p ? p.Amount : n is CpuParticles3D { Emitting: true } c ? c.Amount : 0;
+        foreach (Node child in n.GetChildren()) sum += Particles(child);
+        return sum;
+    }
+
+    /// <summary>The cars' drivers per physics tick since the last report (Car.DriverTicks).</summary>
+    private double AiMsPerTick()
+    {
+        ulong frames = Engine.GetPhysicsFrames() - _aiFrames;
+        long ticks = Vehicles.Car.DriverTicks - _aiTicks;
+        _aiFrames = Engine.GetPhysicsFrames();
+        _aiTicks = Vehicles.Car.DriverTicks;
+        return frames == 0 ? 0 : ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / frames;
+    }
+
     private void Perf(double delta)
     {
         if (_frame < 30) return;                      // skip loading hitches
+        var vp = GetViewport().GetViewportRid();
+        if (_frame == 30) RenderingServer.ViewportSetMeasureRenderTime(vp, true);
+        else _gpuSum += RenderingServer.ViewportGetMeasuredRenderTimeGpu(vp);
         _frameTimes.Add(delta * 1000.0);
+        double phys = Performance.GetMonitor(Performance.Monitor.TimePhysicsProcess) * 1000.0;
+        _physSum += phys;
+        _physMax = System.Math.Max(_physMax, phys);
         _perfClock += (float)delta;
         if (_perfClock < _perfEvery) return;
         _frameTimes.Sort();
@@ -125,11 +180,16 @@ public partial class DevTools : Node
         foreach (double t in _frameTimes) mean += t;
         mean /= _frameTimes.Count;
         double p99 = _frameTimes[(int)(_frameTimes.Count * 0.99)];
-        GD.Print($"[Perf] {_frameTimes.Count} frames: mean {mean:0.00} ms ({1000.0 / mean:0} fps), 1% low {1000.0 / p99:0} fps, " +
+        GD.Print($"[Perf] {(_abLabel != null ? $"({_abLabel}) " : "")}{_frameTimes.Count} frames: mean {mean:0.00} ms ({1000.0 / mean:0} fps), 1% low {1000.0 / p99:0} fps, " +
                  $"draw calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0}, " +
                  $"triangles {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame) / 1e6:0.00} M, " +
-                 $"VRAM {Performance.GetMonitor(Performance.Monitor.RenderVideoMemUsed) / 1048576.0:0} MB");
+                 $"VRAM {Performance.GetMonitor(Performance.Monitor.RenderVideoMemUsed) / 1048576.0:0} MB, " +
+                 $"GPU {_gpuSum / _frameTimes.Count:0.00} ms, physics {_physSum / _frameTimes.Count:0.00} ms a frame (max {_physMax:0.0}), " +
+                 $"drivers (AI) {AiMsPerTick():0.00} ms a tick, deformation {DeformMsPerFrame():0.00} ms a frame, " +
+                 $"particles {Particles(GetTree().Root)}");
+        _physSum = _physMax = _gpuSum = 0;
         _frameTimes.Clear();
+        if (Arg("ab") is { } ab) _abLabel = Tools.PerfAb.Step(GetTree(), ab.Split(','), ++_abWindow);
         _perfClock = 0f;
     }
 

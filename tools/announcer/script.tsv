@@ -1,9 +1,9 @@
 id	category	text
 
 intro_01	intro	Ladies and gentlemen, welcome to the Bowl!
-intro_02	intro	Twenty cars! One survivor! Let's make some noise!
+intro_full_01	intro_full	Twenty cars! One survivor! Let's make some noise!
 intro_03	intro	Welcome, derby fans! Only the toughest car drives home!
-intro_04	intro	Twenty cars in the Bowl, and none of them leave pretty!
+intro_full_02	intro_full	Twenty cars in the Bowl, and none of them leave pretty!
 intro_05	intro	Good evening, and welcome to the derby! Hold on to your hats!
 intro_06	intro	Simple rules, folks! Hit hard, spin them, stay alive!
 
@@ -261,6 +261,86 @@ race_close_03	race_close	Three wide! Somebody's got to give!
 
 race_results_01	race_results	What a race! Let's look at the results!
 race_results_02	race_results	That's the race done! Here are the results!
+
+duel_intro_01	duel_intro	A duel in the Bowl! Two cars, and only one drives home!
+duel_intro_02	duel_intro	One on one tonight! There's no place to hide in here!
+duel_intro_03	duel_intro	It's a grudge match! Two cars, one winner!
+duel_intro_04	duel_intro	Just two cars in the Bowl! This one is personal!
+
+duel_lull_01	duel_lull	Come on, you two! Somebody make a move!
+duel_lull_02	duel_lull	Circling like boxers! Who throws the first punch?
+duel_lull_03	duel_lull	The crowd wants a knockout!
+
+duel_player_wins_01	duel_player_wins	You win the duel! Number seven is the last car running!
+duel_player_wins_02	duel_player_wins	One on one, and you came out on top!
+duel_player_wins_03	duel_player_wins	That settles it! Number seven wins the duel!
+
+duel_player_loses_01	duel_player_loses	Beaten in the duel! Your rival takes it!
+duel_player_loses_02	duel_player_loses	That's the duel over, and it's not your night, seven!
+duel_player_loses_03	duel_player_loses	Out-hit in the duel! Better luck next time!
+
+td_intro_01	td_intro	Total Destruction! Every car in the Bowl is coming for you!
+td_intro_02	td_intro	It's you against the whole field! How long can you survive?
+td_intro_03	td_intro	Total Destruction! Everyone is gunning for number seven!
+
+td_one_minute_01	td_one_minute	One minute, and number seven is still running!
+td_one_minute_02	td_one_minute	A whole minute survived! Keep it moving!
+
+td_two_minutes_01	td_two_minutes	Two minutes! They just can't finish you off!
+td_two_minutes_02	td_two_minutes	Two minutes in, and seven is still alive!
+
+td_three_minutes_01	td_three_minutes	Three minutes! This is a legendary stand!
+td_three_minutes_02	td_three_minutes	Three minutes and counting! The crowd can't believe it!
+
+td_still_alive_01	td_still_alive	Still alive! Keep moving, seven!
+td_still_alive_02	td_still_alive	Another minute survived! The crowd loves it!
+td_still_alive_03	td_still_alive	They're queuing up to hit you, and you're still going!
+
+td_end_01	td_end	They finally got you! What a stand!
+td_end_02	td_end	That's the end of the line for number seven! What a run!
+td_end_03	td_end	Total Destruction is over! Let's see how long you lasted!
+
+td_record_01	td_record	A new Total Destruction record!
+td_record_02	td_record	That's your best run ever! A new record!
+
+champ_round_01	champ_round	Championship points are on the line tonight!
+champ_round_02	champ_round	Every point counts in the championship!
+champ_round_03	champ_round	Another round of the championship! Let's go!
+
+champ_finale_01	champ_finale	It's the final round! The division is decided tonight!
+champ_finale_02	champ_finale	Last round of the season! Everything is on the line!
+champ_finale_03	champ_finale	This is it, the season finale! Winner takes all!
+
+champ_promoted_01	champ_promoted	Promoted! Number seven moves up a division!
+champ_promoted_02	champ_promoted	Top of the division! You're going up!
+champ_promoted_03	champ_promoted	Promotion! The next division awaits!
+
+champ_title_01	champ_title	Division One champion! Number seven is the best in the land!
+champ_title_02	champ_title	Champions! Number seven takes the title!
+champ_title_03	champ_title	The title is yours! What a season!
+
+champ_missed_01	champ_missed	Not this time! The season starts again!
+champ_missed_02	champ_missed	So close! Try again next season!
+
+tt_intro_01	tt_intro	Time trial! Just you, the track and the clock!
+tt_intro_02	tt_intro	An empty track and a stopwatch! Show us a fast lap!
+tt_intro_03	tt_intro	Beat the clock, number seven!
+
+tt_best_01	tt_best	New best lap!
+tt_best_02	tt_best	That's your fastest lap yet!
+tt_best_03	tt_best	A personal best! Brilliant driving!
+
+tt_gold_01	tt_gold	That's gold medal pace! Sensational!
+tt_gold_02	tt_gold	Gold! You can't drive it much faster than that!
+
+tt_silver_01	tt_silver	Silver medal time! Gold is within reach!
+tt_silver_02	tt_silver	That's a silver! A few tenths more for gold!
+
+tt_bronze_01	tt_bronze	A bronze medal! Now find some more speed!
+tt_bronze_02	tt_bronze	Bronze! Keep pushing, there's more time out there!
+
+tt_invalid_01	tt_invalid	Off the track! That lap won't count!
+tt_invalid_02	tt_invalid	Ooh, that's cost you the lap!
 
 # ---- generated number lines: generate.py rewrites everything below from NUMBER_TEMPLATES, edit there ----
 

@@ -107,5 +107,6 @@ public partial class Showroom : Node3D
         var right = (centre - eye).Cross(Vector3.Up).Normalized();
         Camera.Fov = 30f;
         Camera.LookAtFromPosition(eye, centre - right * Offset + (Far ? new Vector3(0f, 2.1f, 0f) : Vector3.Zero), Vector3.Up);
+        Fx.Focus.On(Camera, centre, 0.05f, near: false);
     }
 }

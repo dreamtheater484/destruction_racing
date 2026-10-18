@@ -11,6 +11,7 @@ namespace DestructionRacing.Vehicles;
 /// </summary>
 public partial class HeadlightRig : Node3D
 {
+    private static readonly StringName StrengthParam = "strength";   // set every frame: made once
     public const int Slots = 6;
     private const float BeamLength = 16f;
 
@@ -97,7 +98,7 @@ public partial class HeadlightRig : Node3D
             // The cone's narrow top (+Y) at the lamp, its wide end BeamLength ahead.
             var coneBasis = new Basis(xf.Basis.X, -fwd, xf.Basis.X.Cross(-fwd)).Orthonormalized();
             _cones[i].GlobalTransform = new Transform3D(coneBasis, origin + fwd * (BeamLength * 0.5f));
-            _cones[i].SetInstanceShaderParameter("strength", strength);
+            _cones[i].SetInstanceShaderParameter(StrengthParam, strength);
         }
     }
 

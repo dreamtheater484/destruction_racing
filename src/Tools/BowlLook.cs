@@ -47,8 +47,12 @@ public partial class BowlLook : Node3D
     {
         _camera = new Camera3D { Current = !Empty, Near = 0.05f, Far = 4000f };
         AddChild(_camera);
-        GetViewport().Msaa3D = Viewport.Msaa.Msaa4X;
-        GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAEnum.Smaa;
+        GameSettings.ApplyAntiAliasing(GetViewport());
+        if (GetNodeOrNull<WorldEnvironment>("WorldEnvironment") is { Environment: { } env } world)
+        {
+            Fx.Grading.Apply(env, Fx.Grading.FromScene(SceneFilePath));
+            Fx.MotionBlur.Attach(this, world);
+        }
         BuildTyreBarrier();
         BuildFencePosts();
         if (!Empty) SpawnCars();

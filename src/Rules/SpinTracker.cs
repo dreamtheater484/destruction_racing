@@ -27,6 +27,7 @@ public sealed class SpinTracker
     private int _attacker;
     private double _openTime;
     private double _lastHitTime;
+    private float _lastHitEnergy;
     private double _lastRotatingTime;
     private float _accumulatedDeg;
     private SpinTier _reported;
@@ -53,22 +54,29 @@ public sealed class SpinTracker
             _attacker = attackerId;
             _openTime = time;
             _lastHitTime = time;
+            _lastHitEnergy = hitEnergy;
             _accumulatedDeg = 0f;
             _reported = SpinTier.None;
             return;
         }
 
-        if (!_rotating)
+        // Several hits in the same instant (a pileup): the strongest takes the credit, whatever order the physics
+        // reported them in.
+        bool sameInstant = time <= _lastHitTime;
+        if (sameInstant && hitEnergy <= _lastHitEnergy) return;
+        if (!_rotating || sameInstant)
         {
             // Not spinning yet: the most recent attacker gets the credit.
             _attacker = attackerId;
             _lastHitTime = time;
+            _lastHitEnergy = hitEnergy;
         }
         else if (hitEnergy >= _t.StealMinEnergy && attackerId != _attacker)
         {
             // A big new hit during a spin takes over attribution.
             _attacker = attackerId;
             _lastHitTime = time;
+            _lastHitEnergy = hitEnergy;
         }
     }
 

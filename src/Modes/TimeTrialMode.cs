@@ -69,6 +69,8 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
     public string Key => _key;
     public TimeTrialRecords Records => _records;
     public TimeTrialTargets.Medals Medals { get; private set; }
+    /// <summary>The medal colour the last lap opened (plan §4.4), for the HUD; null when none.</summary>
+    public string? MedalColourOpened { get; set; }
     public Ghost? BestGhost { get; private set; }
     public bool GhostVisible { get; set; } = true;
     public double? CurrentLapTime => _lapStart is double t0 ? _clock - t0 : null;
@@ -106,7 +108,7 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
 
     // ------------------------------------------------------------------ IRaceView (for the PlayerProxy)
 
-    public IReadOnlyList<Car> Cars => _carList;
+    public List<Car> Cars => _carList;
     public bool IsRunning(Car car) => car == _car;
     public TrackPath Track => _layout.Path;
     public double Time => _clock;
@@ -208,6 +210,15 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
         _rig = new CameraRig { Target = _car };
         AddChild(_rig);
         if (Enum.TryParse(DevTools.Instance?.Arg("view") ?? "", out CameraRig.View view)) _rig.Mode = view;
+        var fx = new ScreenFx();
+        AddChild(fx);
+        impacts.Impacted += i =>
+        {
+            if (_rig == null || i.A != _car) return;
+            _rig.AddShake(Mathf.Clamp(i.Energy / 150_000f, 0.05f, 0.8f));
+            if (i.Energy >= DerbyPresenter.BigHit) _rig.Punch(Mathf.Clamp(i.Energy / 140_000f, 0.25f, 1f));
+            if (i.Energy >= DerbyPresenter.HugeHit) fx.HugeHit(i.Point, i.Energy);
+        };
         _hud = new TimeTrialHud { Mode = this };
         AddChild(_hud);
         AddChild(new Audio.EventAudio { Mode = this });
@@ -328,6 +339,7 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
                 LapTimes.Add(lap);
                 LastLap = lap;
                 medal = Medals.Of(lap);
+                if (Persist && medal > 0 && Profile.NoteMedal(medal)) MedalColourOpened = PlayerColours.MedalNames[medal - 1];
                 var record = new TimeTrialRecords.Lap(lap, new[] { _splits[0], _splits[1] }, TimeTrialRecords.Today());
                 place = _records.Submit(_key, record);
                 if (BestLap == null || lap < BestLap)

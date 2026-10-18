@@ -26,6 +26,9 @@ public partial class GameSettings : Node
     };
     private static readonly float[] LodThreshold = { 4f, 2f, 1f };
 
+    /// <summary>The soft-shadow filter of the spot and omni lights at the current shadow quality.</summary>
+    public static RenderingServer.ShadowQuality PositionalSoftShadow => SoftShadow[Mathf.Clamp(Current.Shadows, 0, 3)];
+
     public override void _EnterTree()
     {
         _instance = this;
@@ -86,16 +89,12 @@ public partial class GameSettings : Node
         if (display) DisplayServer.WindowSetVsyncMode(s.VSync ? DisplayServer.VSyncMode.Enabled : DisplayServer.VSyncMode.Disabled);
         Engine.MaxFps = s.MaxFps;
         var root = GetTree().Root;
-        float scale = Mathf.Clamp(s.RenderScale, 50, 100) / 100f;
-        root.Scaling3DMode = scale < 0.999f ? Viewport.Scaling3DModeEnum.Fsr : Viewport.Scaling3DModeEnum.Bilinear;
-        root.Scaling3DScale = scale;
+        ApplyAntiAliasing(root);
         int shadows = Mathf.Clamp(s.Shadows, 0, 3);
         RenderingServer.DirectionalShadowAtlasSetSize(DirectionalShadow[shadows], true);
         RenderingServer.DirectionalSoftShadowFilterSetQuality(SoftShadow[shadows]);
         RenderingServer.PositionalSoftShadowFilterSetQuality(SoftShadow[shadows]);
         root.PositionalShadowAtlasSize = PositionalShadow[shadows];
-        root.Msaa3D = s.AntiAliasing switch { 2 => Viewport.Msaa.Msaa2X, 3 => Viewport.Msaa.Msaa4X, _ => Viewport.Msaa.Disabled };
-        root.ScreenSpaceAA = s.AntiAliasing == 1 ? Viewport.ScreenSpaceAAEnum.Fxaa : Viewport.ScreenSpaceAAEnum.Disabled;
         root.MeshLodThreshold = LodThreshold[Mathf.Clamp(s.Detail, 0, 2)];
         foreach (var env in FindAll<WorldEnvironment>(root)) ApplyEnvironment(env);
 
@@ -112,6 +111,25 @@ public partial class GameSettings : Node
             a => s.CustomKeys.TryGetValue(a, out var keys) ? keys.Select(k => (Key)k).ToArray() : Controls.PresetMap(ControlPreset.Arrows)[a]);
         Controls.Apply(Controls.Parse(s.ControlPreset));
         if (DevTools.Instance?.Arg("taunts") == null) AI.Taunts.Frequency = (AI.Taunts.Level)Mathf.Clamp(s.Taunts, 0, 2);
+    }
+
+    /// <summary>
+    /// The anti-aliasing and the 3D resolution of the window. The venues call this as they load; without the
+    /// player's settings (dev, test and capture runs) it is the look-dev setting, MSAA ×4 + SMAA at full resolution.
+    /// </summary>
+    public static void ApplyAntiAliasing(Viewport vp)
+    {
+        int aa = Active ? Mathf.Clamp(Current.AntiAliasing, 0, 5) : 3;
+        float scale = Active ? Mathf.Clamp(Current.RenderScale, 50, 100) / 100f : 1f;
+        // --scale3d=X (performance runs): the 3D resolution as a factor of the window, e.g. 1.5 renders 4K in 1440p.
+        if (float.TryParse(DevTools.Instance?.Arg("scale3d"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float s3)) scale = Mathf.Clamp(s3, 0.25f, 2f);
+        vp.Msaa3D = aa switch { 2 => Viewport.Msaa.Msaa2X, 3 => Viewport.Msaa.Msaa4X, _ => Viewport.Msaa.Disabled };
+        vp.ScreenSpaceAA = aa switch { 1 => Viewport.ScreenSpaceAAEnum.Fxaa, 3 => Viewport.ScreenSpaceAAEnum.Smaa, _ => Viewport.ScreenSpaceAAEnum.Disabled };
+        vp.UseTaa = aa == 4;
+        // FSR 2 is temporal anti-aliasing and the upscaler in one (at 100% it only anti-aliases).
+        vp.Scaling3DMode = aa == 5 ? Viewport.Scaling3DModeEnum.Fsr2
+            : scale < 0.999f ? Viewport.Scaling3DModeEnum.Fsr : Viewport.Scaling3DModeEnum.Bilinear;
+        vp.Scaling3DScale = scale;
     }
 
     private static void OnNodeAdded(Node node)
@@ -135,6 +153,7 @@ public partial class GameSettings : Node
         env.SsilEnabled = ssil && s.AmbientOcclusion >= 2;
         env.GlowEnabled = glow && s.Glow;
         env.VolumetricFogEnabled = fog && s.VolumetricFog;
+        if (env.HasMeta("dr_grade")) env.AdjustmentEnabled = s.FilmLook;
     }
 
     /// <summary>The player's assists on the player's own car (plan §14.3); the bots keep the defaults.</summary>
@@ -152,6 +171,12 @@ public partial class GameSettings : Node
     public static float ShakeScale => Active ? Current.Shake / 100f : 1f;
     public static float FovOffset => Active ? Current.FovOffset : 0f;
     public static bool SlowMotion => !Active || Current.SlowMotion;
+    public static bool CatchUp => !Active || Current.CatchUp;
+    /// <summary>The film look (dev runs: on; <c>--nofilm</c> for before/after captures).</summary>
+    public static bool FilmLook => Active ? Current.FilmLook : DevTools.Instance?.Arg("nofilm") == null;
+    /// <summary>Motion blur strength, 0..1 (dev runs: the default, or <c>--motionblur=PERCENT</c>).</summary>
+    public static float MotionBlur => (Active ? Current.MotionBlur
+        : int.TryParse(DevTools.Instance?.Arg("motionblur"), out int mb) ? mb : 40) / 100f;
 
     private static System.Collections.Generic.IEnumerable<T> FindAll<T>(Node root) where T : Node
     {

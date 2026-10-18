@@ -11,8 +11,13 @@ public static class AudioMix
 {
     public const string Music = "Music", Announcer = "Announcer", World = "World", Sfx = "Sfx", Engines = "Engines", Crowd = "Crowd";
 
-    /// <summary>Base levels (dB) of the mix.</summary>
-    public static float MusicDb = -9f, AnnouncerDb = -1f, SfxDb = 0f, EnginesDb = -5f, CrowdDb = -7f;
+    /// <summary>
+    /// Base levels (dB) of the mix. M8 final mix, measured with <c>--mixlog</c> in a derby and a race (integrated,
+    /// ~LUFS): the announcer about −17 on top, the engines −22 to −21, the crowd −26 to −25, the music −25 at the
+    /// start to −19 at the finale (7 dB down under the announcer), the master about −18 with only the derby's
+    /// biggest crashes reaching the limiter.
+    /// </summary>
+    public static float MusicDb = -1f, AnnouncerDb = -1f, SfxDb = -3f, EnginesDb = -9f, CrowdDb = -7f;
     /// <summary>The volume sliders of the options screen (0..1 on top of the mix).</summary>
     public static float MasterGain = 1f, MusicGain = 1f, EffectsGain = 1f, EnginesGain = 1f, CrowdGain = 1f, AnnouncerGain = 1f;
 
@@ -71,7 +76,7 @@ public static class AudioMix
         Set(Music, MusicDb + Db(MusicGain) - 7f * _duckAnnouncer - 5f * _duckCrash);
         Set(Announcer, AnnouncerDb + Db(AnnouncerGain));
         Set(Sfx, SfxDb + Db(EffectsGain));
-        Set(Engines, EnginesDb + Db(EnginesGain) - 3f * _duckAnnouncer);
+        Set(Engines, EnginesDb + Db(EnginesGain) - 4f * _duckAnnouncer);
         Set(Crowd, CrowdDb + Db(CrowdGain) - 4f * _duckAnnouncer);
         int world = AudioServer.GetBusIndex(World);
         if (world < 0 || _slowMoFilter == null) return;

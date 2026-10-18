@@ -8,18 +8,24 @@ namespace DestructionRacing.Audio;
 /// <summary>
 /// Music (plan §12): the game's own tracks (assets/audio/music, royalty-free, credited in CREDITS.md) plus the
 /// player's own OGG/MP3 files from a <c>Music</c> folder next to the game or in <c>user://music</c>; shuffled.
-/// <see cref="Intensity"/> (0..3) brings the music up as the derby escalates (5, 3, 2 cars left).
+/// <see cref="Intensity"/> (0..3) brings the music up as the derby escalates (5, 3, 2 cars left). The tracks are
+/// level-matched (M8 final mix): the game's own by their measured loudness (loudness.json, from
+/// tools/dev/music_loudness.py), the player's own by a typical modern master's (they are usually louder).
 /// </summary>
 public partial class MusicPlayer : Node
 {
     private const string Dir = "res://assets/audio/music/";
+    /// <summary>The level every track is matched to, and what the player's own files are assumed to be (dB, ~LUFS).</summary>
+    private const float Reference = -18f, UserTrackLoudness = -12f;
 
     public int Intensity { get; set; }
     /// <summary>Faded out (results, replays) or playing.</summary>
     public bool Muted { get; set; }
 
     private AudioStreamPlayer _player = null!;
-    private readonly List<Func<AudioStream?>> _tracks = new();
+    private readonly List<(Func<AudioStream?> Load, float Gain)> _tracks = new();
+    private readonly Dictionary<string, float> _loudness = new();
+    private float _trackGain;
     private readonly Random _rng = new((int)(Time.GetUnixTimeFromSystem() % 100000));
     private int _next;
     private float _level = -40f;
@@ -42,8 +48,15 @@ public partial class MusicPlayer : Node
         PlayNext();
     }
 
+    private static float Gain(float loudness) => Math.Clamp(Reference - loudness, -12f, 6f);
+
     private void Scan()
     {
+        if (FileAccess.FileExists(Dir + "loudness.json"))
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(FileAccess.GetFileAsString(Dir + "loudness.json"));
+            foreach (var p in doc.RootElement.EnumerateObject()) _loudness[p.Name] = p.Value.GetSingle();
+        }
         if (DirAccess.Open(Dir) is { } dir)
             foreach (string f in dir.GetFiles())
             {
@@ -53,7 +66,7 @@ public partial class MusicPlayer : Node
                 if (_tracks.Count < 64 && !_known.Contains(path))
                 {
                     _known.Add(path);
-                    _tracks.Add(() => ResourceLoader.Exists(path) ? GD.Load<AudioStream>(path) : null);
+                    _tracks.Add((() => ResourceLoader.Exists(path) ? GD.Load<AudioStream>(path) : null, Gain(_loudness.GetValueOrDefault(name, Reference))));
                 }
             }
         string exeDir = System.IO.Path.GetDirectoryName(OS.GetExecutablePath()) ?? "";
@@ -63,8 +76,8 @@ public partial class MusicPlayer : Node
             foreach (string file in System.IO.Directory.GetFiles(folder).OrderBy(f => f))
             {
                 string ext = System.IO.Path.GetExtension(file).ToLowerInvariant();
-                if (ext == ".ogg") _tracks.Add(() => AudioStreamOggVorbis.LoadFromFile(file));
-                else if (ext == ".mp3") _tracks.Add(() => new AudioStreamMP3 { Data = System.IO.File.ReadAllBytes(file) });
+                if (ext == ".ogg") _tracks.Add((() => AudioStreamOggVorbis.LoadFromFile(file), Gain(UserTrackLoudness)));
+                else if (ext == ".mp3") _tracks.Add((() => new AudioStreamMP3 { Data = System.IO.File.ReadAllBytes(file) }, Gain(UserTrackLoudness)));
             }
         }
     }
@@ -75,12 +88,14 @@ public partial class MusicPlayer : Node
     {
         for (int tries = 0; tries < _tracks.Count; tries++)
         {
-            var stream = _tracks[_next % _tracks.Count]();
+            var (load, gain) = _tracks[_next % _tracks.Count];
+            var stream = load();
             _next++;
             if (stream == null) continue;
             if (stream is AudioStreamOggVorbis ogg) ogg.Loop = false;
             if (stream is AudioStreamMP3 mp3) mp3.Loop = false;
             _player.Stream = stream;
+            _trackGain = gain;
             _player.Play();
             return;
         }
@@ -91,6 +106,6 @@ public partial class MusicPlayer : Node
         float rdt = (float)(delta / Math.Max(Engine.TimeScale, 0.01));
         float target = Muted || _tracks.Count == 0 ? -40f : -6f + 2f * Math.Clamp(Intensity, 0, 3);
         _level = Mathf.MoveToward(_level, target, rdt * (target > _level ? 10f : 20f));
-        _player.VolumeDb = _level;
+        _player.VolumeDb = _level + _trackGain;
     }
 }

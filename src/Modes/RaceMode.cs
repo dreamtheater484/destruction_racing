@@ -140,6 +140,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     private readonly Dictionary<int, float> _pitLine = new();
     private Car _player = null!;
     private CameraRig? _rig;
+    private ScreenFx? _fx;
     private EventHud? _hud;
     private Node3D? _beacon;
     private Random _rng = null!;
@@ -177,7 +178,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
 
     // ------------------------------------------------------------------ IRaceView
 
-    public IReadOnlyList<Car> Cars => _cars;
+    public List<Car> Cars => _cars;
     public bool IsRunning(Car car) => _phase != Phase.Over && !_referee.IsWrecked(car.Id);
     public TrackPath Track => _layout.Path;
     public double Time => _time;
@@ -258,6 +259,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             DriverDivisions = req.DriverDivisions;
             CarCount = 1 + Math.Clamp(req.Opponents, 0, 19);
             if (req.Laps > 0) Laps = req.Laps;
+            CatchUpEnabled = GameSettings.CatchUp;
         }
         if (GetParent() == GetTree().Root && DevTools.Instance is { } dev)
         {
@@ -332,6 +334,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         {
             _rig = new CameraRig { Target = _player };
             AddChild(_rig);
+            _fx = new ScreenFx();
+            AddChild(_fx);
             _hud = new EventHud { Mode = this, PlayerCar = _player, ViewName = () => _rig.Mode.ToString() };
             if (front)
             {
@@ -341,6 +345,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 _hud.DivisionTitle = Session.DivisionTitle;
             }
             _hud.Replay = () => { if (_replay == null) StartReplay(); };
+            _hud.Highlights = () => { if (_replay == null) StartReplay(highlights: true); };
             _hud.ReplayActive = () => _replay != null;
             AddChild(_hud);
             _recorder = new Replay.ReplayRecorder { Cars = _cars, Clock = () => _time };
@@ -820,6 +825,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             case RefereeEventKind.SpinScored when e.Car == _player.Id:
                 _hud?.Popup(e.Doubled ? $"LEADER ×2   SPIN {(int)e.Tier}   +{e.Points}" : $"SPIN {(int)e.Tier}   +{e.Points}",
                     e.Doubled ? new Color(1f, 0.8f, 0.2f) : Colors.White);
+                if (_hud != null && _byId.TryGetValue(e.Other, out var spun))
+                    WorldPopup.Show(this, spun, e.Doubled ? $"×2  +{e.Points}" : $"SPIN {(int)e.Tier}  +{e.Points}", e.Doubled ? new Color(1f, 0.8f, 0.2f) : Colors.White);
                 break;
             case RefereeEventKind.Damage when e.Car == _player.Id:
                 _hud?.PulseZone(e.Zone);
@@ -835,8 +842,11 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 string by = e.Other > 0 ? $" by #{_byId[e.Other].Number}" : "";
                 _hud?.Feed($"#{victim.Number} WRECKED{by}{(e.Points > 0 ? $"  +{e.Points}" : "")}");
                 if (e.Other == _player.Id)
+                {
                     _hud?.Popup(e.Doubled ? $"LEADER ×2   WRECKED #{victim.Number}   +{e.Points}" : $"WRECKED #{victim.Number}   +{e.Points}",
                         new Color(1f, 0.45f, 0.2f));
+                    if (_hud != null) WorldPopup.Show(this, victim, $"WRECKED  +{e.Points}", new Color(1f, 0.45f, 0.2f));
+                }
                 if (e.Car == _player.Id)
                 {
                     _playerWreckTime = _time;
@@ -882,7 +892,12 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         if (Headless) return;
         if (i.Energy > 6_000f && i.A.Visual == null) SpawnSparks(i.Point, i.Energy);
         if (_rig != null && (i.A == _rig.Target || i.B == _rig.Target))
+        {
+            // The derby's juice (DerbyPresenter): shake, a camera punch on big hits, the flash and the blur on huge ones of yours.
             _rig.AddShake(Mathf.Clamp(i.Energy / 150_000f, 0.05f, 0.8f));
+            if (i.Energy >= DerbyPresenter.BigHit) _rig.Punch(Mathf.Clamp(i.Energy / 140_000f, 0.25f, 1f));
+            if (i.Energy >= DerbyPresenter.HugeHit && (i.A == _player || i.B == _player) && !PlayerOut) _fx?.HugeHit(i.Point, i.Energy);
+        }
     }
 
     private void UpdateBeacon()
@@ -908,7 +923,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     }
 
     /// <summary>The replay (results screen, V): from just before the player's wreck, or the run to the flag.</summary>
-    private void StartReplay()
+    private void StartReplay(bool highlights = false)
     {
         if (_recorder == null || _recorder.Times.Count == 0) return;
         double start = _playerWreckTime >= 0 ? _playerWreckTime - 8.0
@@ -920,6 +935,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             StartFocus = _player,
             StartTime = Math.Max(0.0, start),
             Rig = _rig,
+            Highlights = highlights,
             TvPosts = _venue.TvPosts(),
         };
         if (Sound != null) _replay.ImpactPlayed += Sound.PlayReplayImpact;
@@ -974,6 +990,9 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         Engine.TimeScale = 1.0;
         _skipping = false;
         _hud?.ShowResults(IsStockCar ? "STOCK CAR RACING  –  RESULTS" : "WRECKIN' RACING  –  RESULTS", IsStockCar ? "Place" : "Finish", BuildResults());
+        // Tests (--autoreplay[=highlights]): open the replay a moment after the results.
+        if (!Headless && DevTools.Instance?.Arg("autoreplay") is { } auto)
+            GetTree().CreateTimer(1.5, true, false, true).Timeout += () => { if (_replay == null) StartReplay(auto == "highlights"); };
         Finished?.Invoke(this);
         Ended?.Invoke();
     }

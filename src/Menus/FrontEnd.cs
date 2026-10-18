@@ -246,6 +246,19 @@ public partial class FrontEnd : Node3D
 
     public void Play(string sound, float db = -12f, float pitch = 1f) => _sfx.Play2D(sound, db, pitch);
 
+    private Announcer? _announcer;
+
+    /// <summary>A line from the stadium announcer (the season review's verdict).</summary>
+    public void Announce(string category)
+    {
+        if (_announcer == null)
+        {
+            _announcer = new Announcer { Frequency = GameSettings.AnnouncerFrequency };
+            AddChild(_announcer);
+        }
+        _announcer.Say(category, Announcer.Priority.Critical, maxWait: 3.0);
+    }
+
     public override void _UnhandledInput(InputEvent e)
     {
         if (e.IsEcho() || e is not InputEventKey { Pressed: true } key || _loading.Visible || _stack.Count == 0) return;
@@ -283,6 +296,8 @@ public partial class FrontEnd : Node3D
             var right = (c - eye).Cross(Vector3.Up).Normalized();
             _camera.Fov = 40f;
             _camera.LookAtFromPosition(eye, c - right * 2.8f + new Vector3(0f, -0.3f, 0f), Vector3.Up);
+            // The venue soft behind your car, so the menus read over it.
+            Fx.Focus.On(_camera, c, 0.08f, near: false);
         }
     }
 
