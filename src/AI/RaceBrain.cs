@@ -167,7 +167,8 @@ public sealed class RaceBrain
         float lookahead = Mathf.Clamp(7f + 0.55f * speed, 8f, 30f);
         Vector3 aim = track.PositionAt(s + lookahead, _lane);
         // Stock Car is pack racing: skill counts for less pace (4 % from rookie to racer, against 6.5 %) ✱.
-        float skillFactor = StockCar ? 0.91f + 0.09f * _p.Skill : 0.86f + 0.14f * _p.Skill;
+        // Wreckin': 5.5 % from rookie to racer (6.5 % until the post-M8 handling; the playtest found the field slow) ✱.
+        float skillFactor = StockCar ? 0.91f + 0.09f * _p.Skill : 0.88f + 0.12f * _p.Skill;
         float targetSpeed = track.SpeedAt(s + 4f) * skillFactor * PaceScale * view.CatchUp(me);
         bool ram = false;
 
@@ -304,9 +305,17 @@ public sealed class RaceBrain
             float actual = view.IsRunning(c) ? MathF.Max(0f, c.LinearVelocity.Dot(view.Track.TangentAt(cs))) : 0f;
             // We see the car ahead change speed a moment late (DD Code T1: that is how a brake-check catches you).
             float theirs = actual;
+            float gaining = 0f;
             if (_seen.TryGetValue(c.Id, out var seen) && t - seen.Time < 0.25)
+            {
                 theirs = seen.Speed + (actual - seen.Speed) * (1f - MathF.Exp(-(float)(t - seen.Time) / lag));
+                // A car pulling away (the start, a corner exit) opens the gap as we close it: count 0.6 s of its
+                // acceleration. Without it a grid launched like a queue at a traffic light, each row waiting for the
+                // one ahead. Braking is not anticipated: a brake-check still catches a tailgater.
+                if (t > seen.Time) gaining = MathF.Max(0f, (theirs - seen.Speed) / (float)(t - seen.Time)) * 0.6f;
+            }
             _seen[c.Id] = (theirs, t);
+            theirs += MathF.Min(gaining, 8f);
             // Tailgating in the draft: right on their bumper (under 2 m at race speed).
             float buffer = tailgating && c == _tailgateTarget ? 0.8f + speed * 0.03f : 2f + speed * Headway;
             float room = ds - CarLength - buffer;

@@ -233,9 +233,10 @@ Every addition that DD1 and DD2 did not have. "On" means it stays on in the Puri
 | Slow motion when you wreck a car or are wrecked in the Bowl (at most every 10 s) | Gameplay-affecting assist | off |
 | Optional handbrake binding | Gameplay-affecting assist | not built |
 | SPIN_ASSIST (1.5) and post-hit grip loss (0.8 s): a tapped rear spins, as in DD | Calibration | on |
+| DD cornering at speed (✱ A33, post-M8): grip ×2.3 from 108 km/h and a yaw control that holds the turn the keys ask for and stops it when they come up; the brake loosens it (DD2's brake-dab powerslide) | Calibration | on |
 | Opening-crunch damage ramp (✱ A19): ×0.4 at GO to ×1 over 90 s since M4 | Calibration | on |
 | Race damage ×0.5 (✱ A21) | Calibration | on |
-| Division pace and aggression (✱ A22, A25): pace ×0.97 → ×1.015, aggression ×0.8 → ×1 | Calibration | on |
+| Division pace and aggression (✱ A22, A25): pace ×1.0 → ×1.045 (×0.97 → ×1.015 until post-M8), aggression ×0.8 → ×1 | Calibration | on |
 | The attacker's share of contact damage, 0.7 in one-sided rams (M4) | Calibration | on |
 | Stock Car AI pace ×1.03 against Wreckin' | Calibration | on |
 | DD2 Fast Steer loosens the rear at derby speeds (✱ A20) | Calibration | on |
@@ -259,7 +260,10 @@ Measured from DD1 and DD2 PC gameplay videos (`docs/reference_feel.md`); ours as
 | 0–160 km/h | ~4.6 s (DD2) | 4.74 s (M1) |
 | Speed after 14 s at full throttle | ~230–240 km/h (DD2) | 230 km/h (M1); 216–240 km/h across the nine cars (M5) |
 | Top speed on a long straight | ~240 km/h (242 KPH seen, DD2) | about 255 km/h from the drag setting (M1 tuning) |
-| Mid-corner speed | 150–200 km/h typical (DD2) | about 80 km/h in the figure-8 turns, 150 km/h at the end of the straights (M1c); not the same tracks |
+| Mid-corner speed | 150–200 km/h typical (DD2); 170–230 km/h in Chalk Canyon | the AI takes Crossroads' 70 m corners at 131 km/h, the car can hold about 143 km/h (post-M8; about 80 km/h in the M1c figure-8); not the same tracks |
+| Cornering at speed | 2.2–2.4 g, steady from 100 to 170 km/h (DD2) | 2.2–2.3 g at 130, 175 and 208 km/h (post-M8 step test); 0.8 g in M1–M8 |
+| Turn response | the turn follows the keys within about 0.1 s and stops when the car straightens (DD2) | the turn builds up within 0.2–0.3 s of the key going down (the keyboard filter ramps the lock) and stops 0.21–0.27 s after it comes up (post-M8); M1–M8 kept turning for 2.2 s at 130 km/h, or spun |
+| Wrecks in a race | DD2: 0, 5, 9 and 5 of 20 in four races (4.75 on average), mostly in the second half | Wreckin' 4.8 (oval) and 6.7 (figure-8) of 20 per race; the bot is wrecked before half distance in 3–9% of races (post-M8 sims) |
 | Launch | 1.3–1.4 g (DD2); ~1.1 g (DD1 Bowl) | not measured in g |
 | The Bowl: GO to the first centre pile-up | ~2.5 s (DD1) | first contact 1.7 s (derby sims, M1b–M6) |
 | Steady cornering at 60 km/h, full lock | not measurable from video | 0.84 g, ~32 m radius |

@@ -9,6 +9,53 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## Post-M8 handling: steering and race AI — ready for your playtest (2026‑10‑19)
+Your playtest of the championship: the cars were very hard to steer and went into the walls, and the opponents were slow off the line (some even reversed) and slow in general. DD2 is the reference here, DD1 the second one.
+- **Play it:** double-click **Play Destruction Racing.cmd**, as before. Your settings and championships carry over.
+- **What DD2 does** (measured from the DD2 PC video, details in `docs/reference_feel.md`):
+  - DD2's cars corner at a steady **2.2–2.4 g** from 100 to 170 km/h, and the turn follows the keys within about 0.1 s. Ours managed **0.8 g**, the grip of a road car. At 130 km/h they kept turning for 2.2 s after the key came up, and at 150 km/h they spun. That was the "into the walls".
+  - Your Chalk Canyon video: the car holds 170–230 km/h through the canyon corners (300–344 km/h on the straights). Its turn rate can't be measured reliably, because the canyon walls hide the sky, but it confirms that DD2's grip holds at very high speed.
+  - **Wrecks:** DD2's race HUD counts the cars still running. In the video's four races, 0, 5, 9 and 5 of 20 cars were wrecked (4.75 on average), mostly in the second half; only one race lost cars before half distance.
+- **The steering** (✱ A33): above 50 km/h the tyres grip more, up to ×2.3 from 108 km/h. Above 40 km/h a held key is a steady turn at the rate the lock asks for, and letting go straightens the car. A hit, a spin, Fast Steer and reverse still work as before, and so does everything below 40 km/h (the derby's shoving, turning round). It is calibration, so it's on in Purist too.
+
+  | Speed | Turn rate (key held) | Cornering | Stops turning after the key comes up |
+  |---|---|---|---|
+  | 80 km/h | 39°/s | 1.55 g | 0.27 s |
+  | 130 km/h | 36°/s | 2.27 g | 0.26 s (was 2.2 s, at 1.1 g) |
+  | 175 km/h | 26°/s | 2.27 g | – |
+  | 208 km/h | 22°/s | 2.27 g | – |
+
+  - **The brake-dab powerslide** (DD2's manual): braking in a turn loosens the car. A 0.4 s dab at 130 km/h raises the turn from 40 to 57°/s and the slide from 4° to 11°, then the car settles back into the turn without spinning.
+- **The opponents:**
+  - **The start:** the AI drivers were already thinking during the countdown, so their "stuck" check fired, and some reversed at GO. They now wait for the green. The rows behind also waited for the car in front to pull away, like a queue at a traffic light; now they see it accelerating. All 20 cars are on full throttle at GO and at about 100 km/h after 2 s (DD2: 0–100 km/h in 2.2 s).
+  - **Their pace:** the AI's speed plan now uses the same grip as the cars: 131 km/h through Crossroads' 70 m bends, where a car can hold about 143 km/h. The base pace is ×1.0 in Division 4 up to ×1.045 in Division 1 (was ×0.97 to ×1.015, ✱ A22, A25), and the rookies are a little closer to the racers.
+  - **Best laps on the oval:** the AI racers 21.1 s and the rookies 22.7 s in traffic, against the average bot's 23.9 s. Alone, the skilled bot laps in 20.2–21.2 s.
+- **Race sims** (32 races per configuration, the average bot; M6 → now):
+
+  | | Wreckin' oval | Wreckin' figure-8 | Stock Car oval | Stock Car figure-8 |
+  |---|---|---|---|---|
+  | Winner's time | 250 → 212 s | 247 → 200 s | 232 → 182 s | 224 → 191 s |
+  | Spins in the field per lap | 3.6 → 5.1 | 7.3 → 9.1 | – | – |
+  | Wrecks per race | 1.2 → 4.8 | 4.6 → 6.7 | 1.4 → 2.7 | 2.0 → 4.0 |
+  | Bot wrecked before half distance (≤ 10%) | 9% → 3% | 12% → 9% | 3% → 0% | 9% → 6% |
+  | Bot finished / mean place | 81% / 16.8 → 72% / 13.4 | 44% / 15.6 → 66% / 11.6 | 72% / 17.8 → 91% / 14.5 | 62% / 16.5 → 81% / 12.3 |
+  | Pit stops per race | 3.1 → 10.5 | 2.3 → 9.9 | 3.8 → 14.7 | 1.4 → 14.3 |
+
+  - All the Wreckin' targets are met. The wrecks are now in line with DD2's 4.75 a race, and early wrecks stay rare, as in DD2.
+  - **Stock Car:** the spread from 1st to 10th on lap 2 is wider, 9.0 s and 16.7 s (M6: 6.6 s and 8.9 s; the target ≤ 6 s was missed in M6 too). The close battles in the last two laps: 47% on the oval (target 50%) and 62% on the figure-8.
+  - **Racer against hunter bot** (equal skill, 32 seed pairs per layout): 5% apart over both layouts (target ±15%). On the oval the hunter is 16% ahead, on the figure-8 the racer is 22% ahead; two batches of the same layout differ by that much, so it's within the noise.
+- **The derby** (80 derbies against M6): every target still passes. The cars grip more above 50 km/h, so the bot survives longer (113 s instead of 90 s) and hits a little less (19 hits a minute instead of 24). One derby in 80 ran into the 10-minute limit: the last two cars circled each other slowly for 7 minutes. That's an old rare case (the M4 strategy runs had it too); the "rocking in place" rule only catches cars that stay within 1.5 m. I've flagged a separate fix.
+- **DD Code tactics:** T1–T5 succeed in 10, 9, 10, 10 and 10 of 10 trials.
+- **Time Trial medals,** measured again (6 seeds × 5 laps): gold is reachable by the skilled bot and not by the average bot for 35 of the 36 cars and layouts (the Brougham on the oval is flat out for both). The laps are about 28% faster: oval gold 20.1–21.3 s (was 27.6–29.1 s), figure-8 23.7–24.6 s (was 33.2–34.7 s). **Your earlier Time Trial records were set with the old handling and are slower than the new bronze,** so the medals start over.
+- **Not done (for you to decide):**
+  - **The DD slide:** DD2's cars are turned 15–40° into the corners; ours show about 10° (a 4.5° slide plus the camera's lag). The look could be added on top of the grip; say if you want it.
+  - **Race length:** the laps are shorter now (oval 21–24 s, figure-8 29–33 s), so the winner needs about 3.5 minutes. DD2's races take 5–8 minutes. Raising the laps from 8 to 10 (oval) and from 6 to 8 (figure-8) would bring the winner to about 4.5 minutes.
+- **For your playtest:**
+  1. Steering: does it feel like DD2 now? Hold a key through a fast corner, let go, try a brake dab.
+  2. The opponents: are they quick off the line now, and fast enough in Division 4? If you have a higher division unlocked, try that too.
+  3. The derby: does the Bowl still feel right with the extra grip above 50 km/h?
+  4. Race length: keep 8 and 6 laps, or go to 10 and 8?
+
 ## M8 Polish — ready for your review (2026‑10‑19)
 - **Play it:** double-click **Play Destruction Racing.cmd**, as in M7. Your settings and championships carry over. The new options are on Options → Graphics (FILM LOOK, MOTION BLUR, the longer anti-aliasing list).
 - **Replays and highlights** (plan §15.5):

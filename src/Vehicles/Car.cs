@@ -361,9 +361,10 @@ public partial class Car : RigidBody3D
         Vector3 v = LinearVelocity;
 
         long aiStart = System.Diagnostics.Stopwatch.GetTimestamp();
-        var c = Driver?.GetControls(this, dt) ?? CarControls.Parked;
+        // Held on the grid (the countdown) or after the event: the driver isn't asked at all. Asked, an AI saw
+        // itself flooring it at 0 km/h for the whole countdown, called itself stuck, and reversed at the green light.
+        var c = InputLocked ? CarControls.Parked : Driver?.GetControls(this, dt) ?? CarControls.Parked;
         DriverTicks += System.Diagnostics.Stopwatch.GetTimestamp() - aiStart;
-        if (InputLocked) c = CarControls.Parked;
         // A wrecked car's engine is dead: it coasts to a stop and stays as an obstacle.
         if (IsWrecked) c = new CarControls { Brake = 0.35f, Hold = true };
         LastControls = c;
@@ -440,6 +441,10 @@ public partial class Car : RigidBody3D
         // Pass 1: suspension raycasts.
         float rayLength = t.RestLength + _wheelRadius;
         int grounded = 0, drivenGrounded = 0;
+        // DD handling at speed: arcade cornering grip (none while turning round; a hit takes it away with the rest).
+        float speedGrip = TurningAround ? 1f : t.SpeedGrip(ForwardSpeed);
+        float gripSum = 0f;
+        int gripWheels = 0;
         foreach (var w in _wheels)
         {
             if (Damage != null && Damage.IsWheelLost(w.Index))
@@ -513,10 +518,14 @@ public partial class Car : RigidBody3D
             if (SurfaceGripAt != null) grip *= SurfaceGripAt(w.ContactPoint.X, w.ContactPoint.Z);
             if (!w.Front && TurningAround) grip *= t.TurnAroundRearGrip;
             if (!w.Front && fastPivot > 0f) grip *= Mathf.Lerp(1f, t.FastSteerRearGrip, fastPivot);
-            // Post-hit grip loss lets a hit car keep rotating (calibration, plan §3).
-            grip *= Mathf.Lerp(1f, w.Front ? t.PostHitFrontGrip : t.PostHitRearGrip, _gripLoss);
             // A damaged wheel wobbles and grips less.
             if (Damage != null) grip *= 0.6f + 0.4f * Damage.WheelHealth(w.Index) / DamageState.MaxHealth;
+            gripSum += grip;
+            gripWheels++;
+            // DD's cornering grip at speed; a hit takes it away first, so the hit car spins as calibrated (plan §3).
+            grip *= Mathf.Lerp(speedGrip, 1f, _gripLoss);
+            // Post-hit grip loss lets a hit car keep rotating (calibration, plan §3).
+            grip *= Mathf.Lerp(1f, w.Front ? t.PostHitFrontGrip : t.PostHitRearGrip, _gripLoss);
             float maxForce = grip * load;
             float maxLong = maxForce * t.LongitudinalGrip;
 
@@ -571,6 +580,28 @@ public partial class Car : RigidBody3D
 
         if (fastPivot > 0f && grounded >= 3)
             ApplyTorque(up * (-MathF.Sign(c.Steer) * fastPivot * t.FastSteerYawTorque));
+
+        // DD yaw control: a held key is a steady turn at the rate the lock asks for (capped by the grip), a released
+        // key stops the turn. Without it a keyboard car at race speed slid on for 2 s after the key came up, or spun.
+        float vAbs = MathF.Abs(ForwardSpeed);
+        float yawGain = t.YawControl
+            * Mathf.Clamp((vAbs - t.YawControlStartSpeed) / MathF.Max(t.YawControlFullSpeed - t.YawControlStartSpeed, 0.1f), 0f, 1f)
+            * (1f - _gripLoss)
+            * Mathf.Clamp((t.YawControlMaxSlip - MathF.Abs(BodySlipDeg)) / 10f, 0f, 1f)
+            // The DD2 manual's brake-dab powerslide: braking lets the tail come round; off the brake the control catches it.
+            * (1f - t.YawControlBrakeRelease * Mathf.Clamp(c.Brake, 0f, 1f));
+        if (yawGain > 0f && grounded >= 3 && gripWheels > 0 && !TurningAround && fastPivot <= 0f && !reversing && ForwardSpeed > 0f)
+        {
+            float wheelbase = MathF.Max(MathF.Abs(_wheels[2].Mount.Z - _wheels[0].Mount.Z), 1.5f);
+            float fullLock = Mathf.DegToRad(maxSteer);
+            float kinematic = vAbs * MathF.Tan(fullLock) / wheelbase;
+            float gripLimit = 9.81f * gripSum / gripWheels * speedGrip * t.YawControlGripUse / MathF.Max(vAbs, 1f);
+            // The driver's input (and the damage pull), not the counter-steer assist: + steer is right, + yaw is left.
+            float steerShare = Mathf.Clamp(c.Steer + _pullDeg / MathF.Max(maxSteer, 1f), -1f, 1f);
+            float targetYaw = -steerShare * MathF.Min(kinematic, gripLimit);
+            float yawNow = AngularVelocity.Dot(up);
+            ApplyTorque(up * ((targetYaw - yawNow) * Inertia.Y * yawGain));
+        }
 
         // DD1 turn-around: yaw the car round at low speed.
         if (TurningAround && grounded >= 3)

@@ -18,8 +18,9 @@ public sealed class TrackPath
     private readonly float[] _bank;
 
     /// <param name="bank">Banking per point (rad, the outside of the turn higher); null = flat.</param>
+    /// <param name="gripAtSpeed">The cornering grip multiplier at a speed (m/s), as the cars have it (DD's arcade grip); null = 1.</param>
     public TrackPath(IReadOnlyList<Vector3> points, float width, float lateralGrip = 7.6f, float braking = 8f,
-        IReadOnlyList<float>? bank = null)
+        IReadOnlyList<float>? bank = null, Func<float, float>? gripAtSpeed = null)
     {
         int n = points.Count;
         _p = new Vector3[n];
@@ -51,8 +52,16 @@ public sealed class TrackPath
         {
             float k = MathF.Abs(SmoothedCurvature(i, 6));
             float tb = MathF.Tan(_bank[i]);
-            float lateral = 9.81f * (mu + tb) / MathF.Max(1f - mu * tb, 0.2f);
-            _v[i] = k > 1e-4f ? MathF.Min(90f, MathF.Sqrt(lateral / k)) : 90f;
+            if (k <= 1e-4f) { _v[i] = 90f; continue; }
+            // The grip grows with speed: settle v = sqrt(a(v) / k) by a few fixed-point steps.
+            float v = 20f;
+            for (int it = 0; it < 8; it++)
+            {
+                float m = mu * (gripAtSpeed?.Invoke(v) ?? 1f);
+                float lateral = 9.81f * (m + tb) / MathF.Max(1f - m * tb, 0.2f);
+                v = MathF.Min(90f, MathF.Sqrt(lateral / k));
+            }
+            _v[i] = v;
         }
         for (int pass = 0; pass < 2; pass++)
             for (int i = n - 1; i >= 0; i--)

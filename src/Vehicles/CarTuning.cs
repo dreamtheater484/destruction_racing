@@ -11,8 +11,20 @@ namespace DestructionRacing.Vehicles;
 public sealed class CarTuning
 {
     /// <summary>Bumped when the defaults are retuned; saved files from an older version are ignored.</summary>
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
     public int Version = CurrentVersion;
+
+    public CarTuning()
+    {
+        // Dev A/B (--classichandling): the M1-M8 handling, without DD's grip at speed and the yaw control.
+        if (Core.DevTools.Instance?.Arg("classichandling") != null) { ArcadeGrip = 1f; YawControl = 0f; }
+        // Dev A/B (--tune=RearGrip=0.9,YawControl=6): any tunable by name.
+        if (Core.DevTools.Instance?.Arg("tune") is { } tune)
+            foreach (string pair in tune.Split(','))
+                if (pair.Split('=') is [var name, var value] && typeof(CarTuning).GetField(name) is { FieldType: var ft } field && ft == typeof(float)
+                    && float.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float f))
+                    field.SetValue(this, f);
+    }
 
     // Body
     public float Mass = 1400f;
@@ -87,6 +99,34 @@ public sealed class CarTuning
     public float MaxDamagePullDeg = 4f;         // steering pull with one side fully damaged
     public float BothSidesLockScale = 0.35f;    // steering lock left when both sides are destroyed
     public float RearDamagePowerLoss = 0.3f;    // acceleration and top-speed loss at 0 rear health
+
+    // DD handling at speed (docs/reference_feel.md, DD2 PC: corners at 2.2-2.4 g from 100 to 170 km/h, the turn rate
+    // follows the keys within 0.1 s, and the car stops turning when they are let go). Calibration, not an assist: on in
+    // Purist too. Below the start speeds the car is the M1 car (the derby's shoving and turning round keep their approved feel).
+    /// <summary>Cornering grip at speed relative to the tyres' own (×1 up to ArcadeGripStartSpeed, ×this from ArcadeGripFullSpeed).</summary>
+    public float ArcadeGrip = 2.3f;
+    public float ArcadeGripStartSpeed = 14f;    // m/s (50 km/h)
+    public float ArcadeGripFullSpeed = 30f;     // m/s (108 km/h)
+    /// <summary>
+    /// Yaw control (1/s): a torque holds the car to the turn rate the steering asks for (the kinematic rate of the
+    /// lock, capped by what the grip holds), so a held key is a steady turn and a released one straightens the car.
+    /// Off during a hit's grip loss, in a spin (body slip over YawControlMaxSlip), turning round and in a Fast Steer pivot.
+    /// </summary>
+    public float YawControl = 8f;
+    public float YawControlStartSpeed = 11f;    // m/s (40 km/h): off below
+    public float YawControlFullSpeed = 22f;     // m/s (80 km/h)
+    public float YawControlMaxSlip = 40f;       // degrees
+    /// <summary>The share of the grip's cornering limit the yaw control asks for at full lock.</summary>
+    public float YawControlGripUse = 0.92f;
+    /// <summary>How much the brake relaxes the yaw control (the DD2 brake-dab powerslide).</summary>
+    public float YawControlBrakeRelease = 0.7f;
+
+    /// <summary>The cornering grip multiplier at this speed (m/s): 1 below ArcadeGripStartSpeed, ArcadeGrip from ArcadeGripFullSpeed.</summary>
+    public float SpeedGrip(float speed) =>
+        1f + (ArcadeGrip - 1f) * Mathf.Clamp((MathF.Abs(speed) - ArcadeGripStartSpeed) / MathF.Max(ArcadeGripFullSpeed - ArcadeGripStartSpeed, 0.1f), 0f, 1f);
+
+    /// <summary>The default tuning (the AI's speed profiles are built for it).</summary>
+    public static readonly CarTuning Defaults = new();
 
     // Safety
     public float MaxAngularSpeed = 14f;         // rad/s

@@ -16,7 +16,7 @@ Work in progress, built milestone by milestone (`IMPLEMENTATION_PLAN.md` §18):
 | M5 Car roster (nine cars, liveries and sponsors, 19 named drivers with radio taunts, balance sims) | approved |
 | M6 Racing (Crossroads Speedway, racing AI with the DD Code, Wreckin', Stock Car, Time Trial, pits, replays) | approved |
 | M7 Championship and front end (divisions, seasons, menus, showroom, options, rebinding, save and load, Duel, Total Destruction) | approved |
-| M8 Polish (replay highlights, final audio mix, the full announcer set, VFX and post polish, performance, LODs, the Purist preset) | ready for your review |
+| M8 Polish (replay highlights, final audio mix, the full announcer set, VFX and post polish, performance, LODs, the Purist preset); after your playtest, DD2's steering and faster race AI | ready for your review |
 | M9 Release v1 (Windows export, zip, credits and licences, final QA) | |
 
 Progress notes and test results: [`docs/PROGRESS.md`](docs/PROGRESS.md).

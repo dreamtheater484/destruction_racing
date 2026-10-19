@@ -100,6 +100,8 @@ public partial class DriveTest : Node3D
     private float _maxRollDeg;
     private float _startYaw;
     private float _accumulatedYaw;
+    private float _stepSpeed, _stepHold, _stepPeak, _stepSettle = -1f, _stepAt = 4f;
+    private float _stepLastLog = -1f;
 
     private void RunScenario(string name)
     {
@@ -116,8 +118,30 @@ public partial class DriveTest : Node3D
             "slalom" => t => new CarControls { Throttle = 1f, Steer = t < 3f ? 0f : (((int)((t - 3f) / 1.2f)) % 2 == 0 ? 1f : -1f) },
             "turnaround" => t => t < 0.5f ? CarControls.Idle : new CarControls { Throttle = 1f, TurnAround = true, Steer = -1f },
             "keys" => _ => CarControls.Idle,
+            "step" => _ => CarControls.Idle,
             _ => throw new ArgumentException($"unknown scenario {name}"),
         };
+        if (name == "step")
+        {
+            // A steering step through the real keyboard path at a held speed (--speed=KMH, default 130): the steer key
+            // goes down at 4 s (--runup=S, for higher speeds) for 1.5 s (--hold=S), then up. The speed is held by a
+            // controller on the throttle.
+            var keyboard = new PlayerInput();
+            _stepSpeed = (float.TryParse(DevTools.Instance?.Arg("speed"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float kmh) ? kmh : 130f) / 3.6f;
+            _stepHold = float.TryParse(DevTools.Instance?.Arg("hold"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float hold) ? hold : 1.5f;
+            if (float.TryParse(DevTools.Instance?.Arg("runup"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float runup)) _stepAt = runup;
+            _pilot.Script = t =>
+            {
+                SetAction(Controls.SteerLeft, t >= _stepAt && t < _stepAt + _stepHold);
+                var c = keyboard.GetControls(_player, 1f / Engine.PhysicsTicksPerSecond);
+                float dv = _stepSpeed - _player.ForwardSpeed;
+                c.Throttle = t < _stepAt ? Mathf.Clamp(dv * 0.5f + 0.3f, 0f, 1f) : Mathf.Clamp(dv * 0.4f + 0.35f, 0f, 1f);
+                c.Brake = dv < -3f ? 0.5f : 0f;
+                // --dab: a 0.4 s full-brake dab 0.5 s into the turn (the DD2 brake-dab powerslide).
+                if (DevTools.Instance?.Arg("dab") != null && t >= _stepAt + 0.5f && t < _stepAt + 0.9f) { c.Brake = 1f; c.Throttle = 0f; }
+                return c;
+            };
+        }
         if (name == "keys")
         {
             // Drive through the real keyboard path: InputMap actions → PlayerInput filter → car.
@@ -186,6 +210,29 @@ public partial class DriveTest : Node3D
                 }
                 if (t >= 8f) Finish(("speed_at_8s_kmh", _player.SpeedKmh), ("gear", _player.Gear));
                 break;
+            case "step":
+            {
+                float yawDps = Mathf.RadToDeg(_player.AngularVelocity.Y);
+                float latG = Mathf.Abs(_player.AngularVelocity.Y * _player.LinearVelocity.Length()) / 9.81f;
+                if (t >= _stepAt - 0.1f && t - _stepLastLog >= 0.1f - 1e-4f)
+                {
+                    _stepLastLog = t;
+                    GD.Print($"[Step] t={t - _stepAt:0.00} v={speed * 3.6f:0} steer={_player.LastControls.Steer:0.00} yaw={yawDps:0.0} latG={latG:0.00} " +
+                             $"slip={_player.BodySlipDeg:0.0} slipF={_player.FrontSlipDeg:0.0} slipR={_player.RearSlipDeg:0.0}");
+                }
+                if (t >= _stepAt && t < _stepAt + _stepHold) _stepPeak = MathF.Max(_stepPeak, MathF.Abs(yawDps));
+                if (t >= _stepAt + _stepHold && _stepSettle < 0f && MathF.Abs(yawDps) < 2f) _stepSettle = t - _stepAt - _stepHold;
+                if (t >= _stepAt + _stepHold - 0.02f && !_metrics.ContainsKey("yaw_at_release_dps"))
+                {
+                    _metrics["yaw_at_release_dps"] = yawDps;
+                    _metrics["lat_g_at_release"] = latG;
+                    _metrics["speed_at_release_kmh"] = speed * 3.6f;
+                    _metrics["heading_turned_deg"] = Mathf.RadToDeg(_accumulatedYaw);
+                }
+                if (t >= _stepAt + _stepHold + 3f) Finish(("peak_yaw_dps", _stepPeak), ("settle_after_release_s", _stepSettle), ("speed_end_kmh", speed * 3.6f));
+                if (t < _stepAt) _accumulatedYaw = 0f;
+                break;
+            }
             case "turnaround":
                 if (t >= 0.5f && !_metrics.ContainsKey("yaw0")) { _metrics["yaw0"] = 1f; _accumulatedYaw = 0f; }
                 if (t >= 2.5f) Finish(("yaw_turned_deg", Mathf.RadToDeg(_accumulatedYaw)), ("speed_kmh", _player.SpeedKmh));

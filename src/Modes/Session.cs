@@ -59,8 +59,11 @@ public sealed record EventRequest
         _ => GameMode.DestructionDerby,
     };
 
-    /// <summary>The racing AI's pace: ×0.97 in Division 4 up to ×1.015 in Division 1 (✱ A22), ±0.02 for easy and hard.</summary>
-    public float AiPace => 0.97f + 0.015f * (4 - Division) + 0.02f * (Difficulty - 1);
+    /// <summary>
+    /// The racing AI's pace: ×1.0 in Division 4 up to ×1.045 in Division 1 (✱ A22), ±0.02 for easy and hard. Was ×0.97
+    /// to ×1.015 until the post-M8 handling, when the playtest found the AI slow ("generally quite slow").
+    /// </summary>
+    public float AiPace => 1.0f + 0.015f * (4 - Division) + 0.02f * (Difficulty - 1);
     /// <summary>
     /// The racing AI's aggression, how often it attacks (plan §10.5) ✱: ×0.8 in Division 4 up to ×1 (M6) in
     /// Division 1, and ∓0.2 for easy and hard. Wreckin' points come from spins, so the pace alone hardly changes them;

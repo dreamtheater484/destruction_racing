@@ -63,7 +63,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     /// AI pace for the player's division (plan §10.5) ✱: Div 4 is 0.97, so an average player who races cleanly can
     /// fight for the top three (at 1.0 the AI racers out-pace an average player and only hunting pays).
     /// </summary>
-    public float AiPaceScale { get; set; } = 0.97f;
+    public float AiPaceScale { get; set; } = 1.0f;
     /// <summary>The AI's division aggression (plan §10.5, <see cref="EventRequest.AiAggression"/>): how often it attacks.</summary>
     public float AiAttackScale { get; set; } = 1f;
     /// <summary>Back-marker catch-up (plan §4.2/§10.5; off in Purist).</summary>
@@ -504,6 +504,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     {
         _time += dt;
         TrackCars();
+        if (_startLog) StartLog();
+        if (_time <= dt && DevTools.Instance?.Arg("trackinfo") != null) TrackInfo();
         _referee.SetRaceLeader(_standings.Leader);
 
         _samples.Clear();
@@ -532,6 +534,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         SetIntensity(leaderLap >= Laps ? 3 : leaderLap >= Laps - 1 ? 2 : leaderLap > Laps / 2 ? 1 : 0);
 
         UpdatePlayerState();
+        TrackLaps();
         // --fliptest: 4 s after GO the player's car is put on its roof beside the track (the rollover and the righting).
         if (_flipTest && !_flipped && _time > 4.0)
         {
@@ -909,6 +912,57 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             _beacon.GlobalPosition = leader.GlobalPosition + Vector3.Up * (2.0f + 0.15f * Mathf.Sin((float)_time * 4f));
     }
 
+    // Dev (--startlog): every car's speed, behaviour and pedals in the first seconds after GO, by grid slot.
+    private readonly bool _startLog = DevTools.Instance?.Arg("startlog") != null;
+    private static readonly float[] StartLogTimes = { 0.5f, 1f, 1.5f, 2f, 3f, 4f, 5f, 6f, 8f, 10f };
+    private int _startLogNext;
+    private List<Car>? _gridOrder;
+
+    /// <summary>Dev (--trackinfo): the layout's corners (radius, length, the AI's speed profile through them).</summary>
+    private void TrackInfo()
+    {
+        var path = Track;
+        GD.Print($"[TrackInfo] {LayoutId}{(Reverse ? " reverse" : "")}: length {path.Length:0} m, width {path.Width:0.0} m");
+        bool inCorner = false;
+        float start = 0f, minR = float.MaxValue, minV = float.MaxValue, turned = 0f;
+        for (float s = 0f; s <= path.Length; s += 2f)
+        {
+            float k = MathF.Abs(path.CurvatureAt(s));
+            bool corner = k > 1f / 400f;
+            if (corner)
+            {
+                if (!inCorner) { inCorner = true; start = s; minR = float.MaxValue; minV = float.MaxValue; turned = 0f; }
+                minR = MathF.Min(minR, 1f / k);
+                minV = MathF.Min(minV, path.SpeedAt(s));
+                turned += k * 2f;
+            }
+            else if (inCorner)
+            {
+                inCorner = false;
+                GD.Print($"[TrackInfo]   corner at s={start:0}-{s:0}: min radius {minR:0} m, turns {Mathf.RadToDeg(turned):0} deg, profile min {minV * 3.6f:0} km/h");
+            }
+        }
+        float maxV = 0f;
+        for (float s = 0f; s < path.Length; s += 2f) maxV = MathF.Max(maxV, path.SpeedAt(s));
+        GD.Print($"[TrackInfo]   profile max {maxV * 3.6f:0} km/h");
+    }
+
+    private void StartLog()
+    {
+        _gridOrder ??= _cars.OrderByDescending(c => _progress[c.Id]).ToList();
+        if (_startLogNext >= StartLogTimes.Length || _time < StartLogTimes[_startLogNext]) return;
+        _startLogNext++;
+        var sb = new System.Text.StringBuilder($"[Start] t={_time:0.0}s ");
+        foreach (var c in _gridOrder)
+        {
+            var lc = c.LastControls;
+            string who = c == _player ? "YOU" : _brains.TryGetValue(c.Id, out var b) ? b.Current.ToString()[..3] : "?";
+            string pedal = lc.Reverse ? "R" : lc.Brake > 0.05f ? $"B{lc.Brake:0.0}" : $"T{lc.Throttle:0.0}";
+            sb.Append($"| {who} {c.ForwardSpeed * 3.6f:0} {pedal} ");
+        }
+        GD.Print(sb.ToString());
+    }
+
     public void DumpState()
     {
         GD.Print($"[Race] t={_time:0} leader progress {_leaderProgress:0} finished {_standings.FinishedCount}");
@@ -997,6 +1051,22 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         Ended?.Invoke();
     }
 
+    /// <summary>Each car's lap count from its progress, when that lap began and its best lap (the [CarResult] best=, for pace checks).</summary>
+    private readonly Dictionary<int, (int Lap, double Start, double Best)> _laps = new();
+
+    private void TrackLaps()
+    {
+        foreach (var c in _cars)
+        {
+            int lap = (int)MathF.Floor(_progress[c.Id] / Track.Length);
+            if (!_laps.TryGetValue(c.Id, out var l)) { _laps[c.Id] = (lap, -1, double.MaxValue); continue; }
+            if (lap <= l.Lap) continue;
+            // The lap from the grid (a standing start) has no start time, so it doesn't count.
+            double best = l.Start >= 0 && lap == l.Lap + 1 ? Math.Min(l.Best, _time - l.Start) : l.Best;
+            _laps[c.Id] = (lap, l.Lap >= 0 ? _time : -1, best);
+        }
+    }
+
     /// <summary>Balance sims: one line per car (model, driver, place, points, finish) for tools/dev/balance_report.py.</summary>
     /// <summary>Times each car was spun (its [CarResult] line: how the cars fare in traffic).</summary>
     private readonly Dictionary<int, int> _spunCount = new();
@@ -1015,7 +1085,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 $"retired={(_standings.IsRetired(c.Id) ? 1 : 0)} pits={_pits.StopsBy(c)} length={_time:0.0}" +
                 $" laps={_standings.LapOf(c.Id)} stuck={_stuckResets.GetValueOrDefault(c.Id)} longeststop={_longestStop.GetValueOrDefault(c.Id):0.0}" +
                 $" spun={_spunCount.GetValueOrDefault(c.Id)} who={(_drivers.TryGetValue(c.Id, out var di) ? Array.IndexOf(Drivers.All, di) : -1)}" +
-                $" wrecks={score.Wrecks}"));
+                $" wrecks={score.Wrecks} skill={(_drivers.TryGetValue(c.Id, out var ds) ? ds.Personality.Skill : -1f):0.00}" +
+                $" best={(_laps.TryGetValue(c.Id, out var bl) && bl.Best < 1e9 ? bl.Best : -1):0.00}"));
         }
     }
 

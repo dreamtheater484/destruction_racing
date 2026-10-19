@@ -51,7 +51,9 @@ public sealed class RaceLayout
             pts[i] = new Vector3(src.Points[k].X, 0f, src.Points[k].Y);
             bank[i] = src.Bank[k];
         }
-        Path = new TrackPath(pts, data.RoadWidth, bank: bank);
+        // The AI's speed profile: 8.2 m/s² of base grip (×2.3 at speed, DD's arcade grip), about 96 % of what the car
+        // holds (7.6 until the post-M8 handling: the field took the corners well below the limit).
+        Path = new TrackPath(pts, data.RoadWidth, lateralGrip: 8.2f, bank: bank, gripAtSpeed: Vehicles.CarTuning.Defaults.SpeedGrip);
         SectorEnds = new[] { Path.Length / 3f, Path.Length * 2f / 3f };
 
         if (src.Crossover is Vector2 c)

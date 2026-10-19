@@ -165,6 +165,61 @@ Probe measurements:
 - **Smaller mistakes at speed.** A mistake at speed is a twitch, not a held wrong turn: at 150 km/h a 0.3 s full-lock mistake crashed it every lap.
 - With these, it laps alone with almost no wall contact (4 of 4 clean runs).
 
+## Post-M8: DD2 cornering and steering (measured 19 Oct 2026)
+
+Measured from the same DD2 PC video (`J8sM4LYVueU`, the 8-lap race from 1033 s), watched without logging in. The video frames were read into a canvas in the browser, and nothing was downloaded.
+
+**How:**
+- **The turn rate:** DD2's camera follows the car's heading, so the sky, which is too far away to move with the car's travel, slides sideways only when the car turns. For each pair of frames 0.1 s apart, I took the sideways offset that best matched a band of sky just below the HUD (a block match, to a fraction of a pixel).
+- **The scale:** a lap is a closed loop, so the car turns through exactly 360°. Two laps (35.6 s each, found from the repeating pattern) gave 836–884 px a lap, so 2.39 px per degree at my sample width (±3%). That calibrates the sky directly, with no need to know the camera's field of view.
+- **The speed:** read from DD2's speedometer at the same moments.
+
+| Corner | Speed (HUD) | Turn rate | Radius | Lateral force |
+|---|---|---|---|---|
+| 1044–1045 s | 148–164 km/h | ~29°/s | ~85 m | ~2.2 g |
+| 1056.5–1058.5 s (tight) | 97–109 km/h | ~46°/s | ~36 m | ~2.3 g |
+| 1062.5–1063.5 s | 165–170 km/h | ~27°/s | ~99 m | ~2.2 g |
+| 1079.5–1080.5 s | 165–173 km/h | ~28°/s | ~96 m | ~2.35 g |
+| 1092.5–1094 s (tight) | 84–121 km/h | ~46°/s | ~37 m | ~2.4 g |
+
+**Findings:**
+- **Cornering grip:** DD2's cars corner at a steady 2.2–2.4 g at every speed from 100 to 170 km/h. Our M1–M8 cars managed about 0.8 g, the grip of a real road car.
+- **Response:** the turn rate follows the steering within about 0.1 s (for example from −6°/s to +22°/s between two samples 0.1 s apart), and it stops when the car straightens.
+- **The slide:** in the frames the car is turned 30–40° into the tight corners and about 15° into the fast ones. It is a steady, controlled slide, not a spin.
+- **Braking:** from 243 to 104 km/h in about 3.5 s, about 1.1 g including the lift-off.
+- **The lap:** 35.6 s on this circuit (the M0 sheet said ~37.5 s from the lap counter).
+
+**Our cars before the change** (DriveTest `--scenario=step`: the steer key held for 1.5 s at a set speed, then released):
+- **80 km/h:** 34°/s at most; the car straightens 0.5 s after the key comes up.
+- **130 km/h:** 34°/s for a moment, then it slides (body slip 16°, past the tyres' grip peak), at 1.1 g and losing speed. It keeps turning for 2.2 s after the key comes up.
+- **150 km/h:** after the key comes up, the turn rate *rises* and the car spins (body slip 28° and climbing).
+
+That is the "very hard to steer, into the walls" of the playtest. **The change and the result** are under "Post-M8 handling" in `docs/PROGRESS.md`.
+
+### DD2 race wrecks (the same PC video, four races)
+
+DD2's race HUD counts the cars **Still Running**, so the wrecks can be read off it. I read it every 8 s through the four races in the video, and every 2 s through the last two laps of the 8-lap race. All four races had 20 cars, and the player in the video was never wrecked.
+
+| Race (video time) | Laps | Wrecked by the flag | When |
+|---|---|---|---|
+| A (125–500 s) | 10 × ~37 s | 0 | – |
+| B (512–990 s) | 5 × ~95 s | 5 | 2 out by lap 2 (about 20% distance), 3 by half distance, the rest late |
+| C (1033–1332 s) | 8 × 35.6 s | 9 | the first at 61% distance (lap 6), 2 more in lap 7 and 6 in the last lap |
+| D (1360–1765 s) | 5 × ~80 s | 5 | the first at about 55% distance (lap 3) |
+
+- **On average 4.75 cars of 20 are wrecked in a DD2 race** (0 to 9), most of them in the second half as the damage builds up. Early wrecks happen, but rarely: 3 of 80 cars were out before half distance, in race B.
+- The count sometimes goes up again by one or two. A car that is stopped or on its roof seems to count as not running until it moves again.
+- DD2 races last 5–8 minutes (300–480 s).
+- DD1's race HUD (`xWVgPW6Uiyk`) shows only the position and the field ("05/16"), and its results screen shows the finish and the points, so DD1 gives no wreck count. DD2 is the main reference anyway.
+
+### DD2 Chalk Canyon (a world-record lap, `jbCdlNL2LIM`)
+
+A 46.31 s lap of Chalk Canyon (the video sent during the post-M8 playtest).
+- **The lap timer runs 1.2× faster than the video** (29.9 game seconds in 25 video seconds). That is 60/50: a PAL game run at 60 Hz. Game time is the timer's.
+- **Speeds** (the speedometer every 0.5 s): 300–344 km/h on the straights, 170–230 km/h through the canyon corners, 132 km/h at the slowest. The car holds its line through all of them, with only a slight slide.
+- **The turn rate could not be measured** reliably. The canyon walls fill the sky band in most corners, so the block match follows the rock flowing past instead of the turn. Where only sky shows, it is a smooth gradient with nothing to match. The PC race above stays the measurement: 2.2–2.4 g, steady from 100 to 170 km/h.
+- What it confirms: DD2's grip holds at very high speed. Ours now holds 2.27 g at 130, 175 and 208 km/h (the step test).
+
 ## Still to measure (M2 and later)
 
 - DD2 rollovers and flying parts.
