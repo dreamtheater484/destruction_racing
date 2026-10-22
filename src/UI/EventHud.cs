@@ -96,7 +96,7 @@ public partial class EventHud : CanvasLayer
     private VBoxContainer _popups = null!, _feed = null!, _radio = null!;
     private DamageDiagram _diagram = null!;
     private Control _pause = null!, _wrecked = null!, _standings = null!, _results = null!, _banner = null!;
-    private Label _bannerTitle = null!, _bannerSub = null!, _wreckedTitle = null!, _wreckedSub = null!;
+    private Label _bannerTitle = null!, _bannerSub = null!, _wreckedTitle = null!, _wreckedSub = null!, _wreckedHint = null!;
     private GridContainer _standingsGrid = null!;
     private Label _standingsText = null!;
     private float _spinTimer, _shownPoints, _pointsFlash, _countdownScale;
@@ -307,7 +307,8 @@ public partial class EventHud : CanvasLayer
         _wrecked.AddChild(_wreckedTitle);
         _wreckedSub = HudStyle.Label("YOU'RE OUT", 38, HudStyle.White, "Bold", HorizontalAlignment.Center, 8);
         _wrecked.AddChild(_wreckedSub);
-        _wrecked.AddChild(HudStyle.Label("←/→  watch another car    ·    T  TV / chase camera    ·    SPACE  ×2 speed    ·    ENTER  skip to the results", 24, HudStyle.Yellow, "SemiBold", HorizontalAlignment.Center, 6));
+        _wreckedHint = HudStyle.Label(SpectateHint, 24, HudStyle.Yellow, "SemiBold", HorizontalAlignment.Center, 6);
+        _wrecked.AddChild(_wreckedHint);
         _wrecked.Visible = false;
         _root.AddChild(_wrecked);
 
@@ -462,6 +463,12 @@ public partial class EventHud : CanvasLayer
     public void PulseZone(DamageZone zone) => _diagram.Pulse(zone);
 
     /// <summary>The banner when the player is out: "TITLE – SUBTITLE" (the derby's default, a race's "WRECKED – DNF").</summary>
+    /// <summary>The keys while watching the event after the player is out (the derby's default).</summary>
+    public const string SpectateHint = "←/→  watch another car    ·    T  TV / chase camera    ·    SPACE  ×2 speed    ·    ENTER  straight to the results";
+
+    /// <summary>The line under WRECKED: the keys, a countdown or the progress of the fast finish.</summary>
+    public void SetWreckedHint(string text) => _wreckedHint.Text = text;
+
     public void ShowWrecked(string headline = "WRECKED  –  YOU'RE OUT")
     {
         _wrecked.Visible = true;
@@ -568,6 +575,7 @@ public partial class EventHud : CanvasLayer
     {
         var tree = GetTree();
         tree.Paused = false;
+        Modes.FastFinish.End(GetViewport());
         Engine.TimeScale = 1.0;
         DevTools.MarkSceneRequest();
         tree.ReloadCurrentScene();
@@ -577,6 +585,7 @@ public partial class EventHud : CanvasLayer
     {
         var tree = GetTree();
         tree.Paused = false;
+        Modes.FastFinish.End(GetViewport());
         Engine.TimeScale = 1.0;
         DevTools.MarkSceneRequest();
         tree.ChangeSceneToFile(scene);

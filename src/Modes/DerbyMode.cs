@@ -705,6 +705,7 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
                 c == _player ? DestructionRacing.Rules.Career.PlayerKey : _drivers.TryGetValue(c.Id, out var d) ? d.Name : "?",
                 _referee.Score(c.Id).Total, _referee.Score(c.Id).Wrecks, _standings.PlaceOf(c.Id) ?? 0)).ToList());
         foreach (var c in _cars) c.InputLocked = true;
+        FastFinish.End(GetViewport());
         Engine.TimeScale = 1.0;
         _skipping = false;
         if (_recorder != null) _recorder.Recording = false;
@@ -798,16 +799,16 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
     public void ToggleDoubleSpeed()
     {
         if (_phase == Phase.Over || _skipping) return;
-        Engine.TimeScale = Engine.TimeScale > 1.5 ? 1.0 : 2.0;
+        FastFinish.SetSpeed(Engine.TimeScale > 1.5 ? 1 : 2);
     }
 
     /// <summary>Fast-simulates the rest of the derby to the final standings.</summary>
+    /// <summary>ENTER once the player is out: the rest of the derby at full speed, then the results.</summary>
     public void SkipToResults()
     {
-        if (_phase == Phase.Over) return;
+        if (_phase == Phase.Over || _skipping) return;
         _skipping = true;
-        Engine.MaxPhysicsStepsPerFrame = 16;
-        Engine.TimeScale = 8.0;
+        FastFinish.Begin(GetViewport(), _cars.Select(c => (Node3D?)c.Visual));
     }
 
     private bool _loadPrinted;
@@ -825,10 +826,13 @@ public partial class DerbyMode : Node3D, IArenaView, IHudMode, Audio.IEventSound
         // Keep following a running car while spectating.
         if (_rig != null && PlayerOut && _phase != Phase.Over && _rig.Target is Car t && !IsRunning(t)) SpectateNext(0);
         if (_tvLive != null && _rig != null && _replay == null) _tvLive.Focus = _rig.Target;
+        if (_skipping && _hud != null && _phase != Phase.Over && PlayerOut)
+            _hud.SetWreckedHint($"FINISHING THE DERBY  ·  {_cars.Count(IsRunning)} CARS LEFT");
     }
 
     public override void _ExitTree()
     {
+        FastFinish.End(GetViewport());
         Engine.TimeScale = 1.0;
     }
 

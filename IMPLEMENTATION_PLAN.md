@@ -141,7 +141,7 @@ v1 ships **one ruleset, "Standard"**, which follows **DD2 PC**. Our physics and 
 - **Scoring:** **spins and wrecks score** (the PC manuals). Event points (spins + wrecks + survivor bonus) feed the championship.
 - **Out:** a car is out when wrecked (§6.0). Wrecked cars **stay as obstacles**, smoking or burning, and can still be pushed.
 - **No time limit** by default (none is documented). An optional limit exists in Single Event; when it runs out, ranking is by points, then remaining health.
-- **When you are wrecked:** "WRECKED – Race Over". Choose **Spectate** (TV cameras, ×2 speed) or **Skip**, which fast‑simulates the rest to the final standings.
+- **When you are wrecked:** "WRECKED – Race Over". Choose **Spectate** (TV cameras, ×2 speed) or **Skip**, which fast‑simulates the rest to the final standings. In a race Skip is the default (post-M8 playtest): a TV shot of your wreck, then after 5 s the rest of the race is simulated straight to the results; SPACE spectates instead.
 - **The ×2 leader:** in the Bowl this is the event points leader ✱, marked with a gold beacon.
 
 **Engagement design** (the Bowl was the "high point" of DD1 for reviewers)

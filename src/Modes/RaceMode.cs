@@ -16,7 +16,8 @@ namespace DestructionRacing.Modes;
 /// A race at Crossroads Speedway (plan §4.2, §4.3), on the oval or the figure-8, forward or reverse: 20 cars on a
 /// 3-wide grid, a 3-2-1 countdown, a fixed number of laps; wrecks are DNFs and stay on track. Pit stops repair damage
 /// (<see cref="PitStops"/>); a flipped car is put back on the track after 3 s. The race ends when the player finishes;
-/// when the player is wrecked they can watch, speed up or skip to the results. Also runs headless with the
+/// when the player is wrecked a TV camera shows their wreck, and the rest of the race is simulated straight to the
+/// results (after 5 s, or ENTER), unless they choose to watch it on the TV cameras. Also runs headless with the
 /// PlayerProxy for sims.
 /// <list type="bullet">
 /// <item><b>Wreckin' Racing:</b> spins and wrecks score, ×2 for hitting the car in 1st place (the leader beacon),
@@ -545,6 +546,17 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             _player.LinearVelocity = Vector3.Zero;
             _player.AngularVelocity = Vector3.Zero;
         }
+        // --wreckplayer=S (tests): the player's car is wrecked S seconds after GO; --autoskip then presses ENTER (skip
+        // to the results) a second later. While out, [Spectate] lines say every 2 s what the camera shows.
+        if (_wreckPlayerAt > 0)
+        {
+            if (_time >= _wreckPlayerAt && !PlayerOut) _referee.ForceWreck(_time, _player.Id);
+            if (PlayerOut && !Headless && DevTools.Instance?.Arg("autoskip") != null && !_skipping && _time >= _playerWreckTime + 1.0) SkipToResults();
+            if (PlayerOut && (int)(_time / 2.0) != (int)((_time - dt) / 2.0))
+                GD.Print($"[Spectate] t={_time:0} real={Godot.Time.GetTicksMsec() / 1000.0:0.0} s scale={Engine.TimeScale:0} camera={(_rig?.Target is Car tc ? $"#{tc.Number}{(tc == _player ? " (player)" : "")}" : "-")} " +
+                         $"current={GetViewport()?.GetCamera3D()?.GetType().Name} player v={_player.SpeedKmh:0} km/h at s={_s[_player.Id]:0}");
+        }
+        if (PlayerOut && !Headless && !_watching && !_skipping && _playerWreckTime >= 0 && _time >= _playerWreckTime + ResultsAfterWreck) SkipToResults();
         StepPits();
         CheckStuck();
         if (Endurance) TrackStops();
@@ -850,12 +862,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                         new Color(1f, 0.45f, 0.2f));
                     if (_hud != null) WorldPopup.Show(this, victim, $"WRECKED  +{e.Points}", new Color(1f, 0.45f, 0.2f));
                 }
-                if (e.Car == _player.Id)
-                {
-                    _playerWreckTime = _time;
-                    _hud?.ShowWrecked("WRECKED  –  DNF");
-                    SpectateNext(0);
-                }
+                if (e.Car == _player.Id) OnPlayerWrecked();
                 break;
             }
         }
@@ -1041,8 +1048,17 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
                 id == _player.Id ? DestructionRacing.Rules.Career.PlayerKey : _drivers.TryGetValue(id, out var d) ? d.Name : "?",
                 _referee.Score(id).Total, _referee.Score(id).Wrecks, i + 1)).ToList());
         foreach (var c in _cars) c.InputLocked = true;
+        FastFinish.End(GetViewport());
         Engine.TimeScale = 1.0;
         _skipping = false;
+        // Behind the results: the player's own car (their wreck on the TV camera).
+        if (_rig != null) _rig.Target = _player;
+        if (_tvLive != null && PlayerOut)
+        {
+            _tvLive.Focus = _player;
+            _tvLive.Current = true;
+            _tvLive.Snap();
+        }
         _hud?.ShowResults(IsStockCar ? "STOCK CAR RACING  –  RESULTS" : "WRECKIN' RACING  –  RESULTS", IsStockCar ? "Place" : "Finish", BuildResults());
         // Tests (--autoreplay[=highlights]): open the replay a moment after the results.
         if (!Headless && DevTools.Instance?.Arg("autoreplay") is { } auto)
@@ -1112,11 +1128,92 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         return $"{(int)span.TotalMinutes}:{span.Seconds:00}.{span.Milliseconds / 100}";
     }
 
-    // ------------------------------------------------------------------ player out: spectate / skip
+    // ------------------------------------------------------------------ player out: straight to the results, or watch
+
+    /// <summary>Seconds on the player's wreck before the race goes straight to the results (unless they chose to watch).</summary>
+    private const double ResultsAfterWreck = 5.0;
+    private bool _watching;
+    private TvDirector? _tvLive;
+    private bool _spectateTv = true;
+
+    /// <summary>
+    /// The player is out: a TV camera shows their wreck, and after a few seconds (or ENTER) the rest of the race is
+    /// simulated straight to the results. SPACE or ←/→ watches the race instead, on the TV cameras and with the car
+    /// named. The chase view behind the nearest car looked like your own car racing on (post-M8 playtest).
+    /// </summary>
+    private void OnPlayerWrecked()
+    {
+        _playerWreckTime = _time;
+        _hud?.ShowWrecked("WRECKED  –  DNF");
+        if (_rig == null) return;
+        _rig.Target = _player;
+        if (_tvLive == null)
+        {
+            _tvLive = new TvDirector { Posts = _venue.TvPosts() };
+            AddChild(_tvLive);
+        }
+        _tvLive.Focus = _player;
+        _tvLive.Current = true;
+        _tvLive.Snap();
+        UpdateWreckedHint();
+        // --watch (tests): watch the race at once, as SPACE does.
+        if (DevTools.Instance?.Arg("watch") != null) StartWatching();
+    }
+
+    private void StartWatching()
+    {
+        if (_watching || _phase == Phase.Over || _skipping) return;
+        _watching = true;
+        SpectateNext(0);
+        SetSpectateCamera(_spectateTv);
+    }
+
+    private void SetSpectateCamera(bool tv)
+    {
+        _spectateTv = tv;
+        if (_tvLive == null || _rig == null) return;
+        if (tv)
+        {
+            _tvLive.Focus = _rig.Target;
+            _tvLive.Current = true;
+            _tvLive.Snap();
+        }
+        else _rig.Current = true;
+        UpdateWreckedHint();
+    }
+
+    public void ToggleSpectateCamera()
+    {
+        if (_watching) SetSpectateCamera(!_spectateTv);
+    }
+
+    /// <summary>The line under WRECKED: the countdown to the results, who is being watched, or the fast finish's progress.</summary>
+    private void UpdateWreckedHint()
+    {
+        if (_hud == null || !PlayerOut || _phase == Phase.Over) return;
+        if (_skipping)
+        {
+            int lap = _standings.Leader is int lid ? _standings.LapOf(lid) : 1;
+            _hud.SetWreckedHint($"FINISHING THE RACE  ·  THE LEADER IS ON LAP {lap}/{Laps}");
+        }
+        else if (_watching)
+        {
+            string who = _rig?.Target is Car t
+                ? $"WATCHING #{t.Number}{(_drivers.TryGetValue(t.Id, out var d) ? "  " + d.Short.ToUpperInvariant() : "")}"
+                : "WATCHING";
+            _hud.SetWreckedHint($"{who}    ·    ←/→  another car    ·    T  TV / chase    ·    SPACE  {(Engine.TimeScale > 1.5 ? "normal speed" : "×2 speed")}    ·    ENTER  straight to the results");
+        }
+        else
+        {
+            int left = Math.Max(0, (int)Math.Ceiling(ResultsAfterWreck - (_time - _playerWreckTime)));
+            _hud.SetWreckedHint($"RESULTS IN {left}    ·    ENTER  straight to the results    ·    SPACE  watch the race");
+        }
+    }
 
     public void SpectateNext(int direction)
     {
         if (_rig == null) return;
+        if (PlayerOut && !_watching) { StartWatching(); return; }
         var running = _cars.Where(IsRunning).ToList();
         if (running.Count == 0) return;
         if (direction == 0)
@@ -1129,24 +1226,31 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             _spectateIndex = ((_spectateIndex + direction) % running.Count + running.Count) % running.Count;
         }
         _rig.Target = running[_spectateIndex];
+        if (_tvLive != null && _spectateTv) _tvLive.Focus = _rig.Target;
+        UpdateWreckedHint();
     }
 
     public void ToggleDoubleSpeed()
     {
         if (_phase == Phase.Over || _skipping) return;
-        Engine.TimeScale = Engine.TimeScale > 1.5 ? 1.0 : 2.0;
+        if (PlayerOut && !_watching) { StartWatching(); return; }
+        FastFinish.SetSpeed(Engine.TimeScale > 1.5 ? 1 : 2);
+        UpdateWreckedHint();
     }
 
+    /// <summary>ENTER (or the countdown) once the player is out: the rest of the race at full speed, then the results.</summary>
     public void SkipToResults()
     {
-        if (_phase == Phase.Over) return;
+        if (_phase == Phase.Over || _skipping) return;
         _skipping = true;
-        Engine.MaxPhysicsStepsPerFrame = 16;
-        Engine.TimeScale = 8.0;
+        FastFinish.Begin(GetViewport(), _cars.Select(c => (Node3D?)c.Visual));
+        UpdateWreckedHint();
     }
 
     private bool _loadPrinted;
     private readonly bool _flipTest = DevTools.Instance?.Arg("fliptest") != null;
+    private readonly double _wreckPlayerAt = double.TryParse(DevTools.Instance?.Arg("wreckplayer"), System.Globalization.NumberStyles.Float,
+        System.Globalization.CultureInfo.InvariantCulture, out double wreckAt) ? wreckAt : -1;
     private bool _flipped;
 
     /// <summary>
@@ -1170,7 +1274,8 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
     {
         if (!_loadPrinted) { _loadPrinted = true; ReportLoad("race on screen"); }
         if (_rig == null) return;
-        if (PlayerOut && _phase != Phase.Over && _rig.Target is Car t && !IsRunning(t)) SpectateNext(0);
+        if (PlayerOut && _watching && _phase != Phase.Over && _rig.Target is Car t && !IsRunning(t)) SpectateNext(0);
+        UpdateWreckedHint();
         // The crowd watches the car the camera follows.
         if (_venue.Look?.Crowd is { } crowd && _rig.Target is Car focus) crowd.ActionPoint = focus.GlobalPosition;
         // The pit stop camera orbits the car to the zone being repaired.
@@ -1179,6 +1284,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
 
     public override void _ExitTree()
     {
+        FastFinish.End(GetViewport());
         Engine.TimeScale = 1.0;
     }
 

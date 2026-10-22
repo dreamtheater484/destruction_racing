@@ -9,6 +9,23 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## Post-M8: when you're wrecked in a race — ready for your playtest (2026‑10‑22)
+Your report: wrecked in a race, you pressed skip, and your wrecked car seemed to race on, pit and finish, sped up.
+- **What it was:** the car on screen wasn't yours. After a wreck the race put the chase camera behind the nearest car (often the one that wrecked you, damaged and heading for the pits), so it looked exactly like driving. The skip ran the race "×8", which on your PC was slower than real time (4 fps). It also made every physics step 8 times longer (15 Hz instead of 120 Hz), so the rest of the race was simulated sloppily.
+- **Now, in a race:**
+  - A TV camera shows your wreck: **WRECKED – DNF** and "RESULTS IN 5 · ENTER straight to the results · SPACE watch the race".
+  - After 5 s (or ENTER) the rest of the race is simulated at full speed, with the 3D view and the sound off: "FINISHING THE RACE · THE LEADER IS ON LAP 5/8". Then the results, with your wreck behind them.
+  - It runs at about 7× real time on your PC: wrecked halfway, about 15 s; wrecked on lap 1, under 30 s. It is the same simulation as when you watch, so the results and the championship points are real.
+  - **SPACE** (or ←/→) watches the race instead, on the TV cameras, with the car named: "WATCHING #24 PRICE · ←/→ another car · T TV / chase · SPACE ×2 speed · ENTER straight to the results".
+- **The derby:** ENTER uses the same fast finish ("FINISHING THE DERBY · 6 CARS LEFT"). Watching on the TV cameras stays the derby's default, as you approved it in M4.
+- **×2 speed** (watching) made every physics step twice as long too. Every speed-up now keeps the 1/120 s step: the game runs more steps instead.
+- **Black squares in the TV cameras,** found while testing this. Godot's depth of field breaks up into black squares on a multisampled (MSAA) frame, around distant cars and their lamps. That affected the TV cameras, the replays and the highlights on the Medium, High and Ultra presets. While a camera with depth of field is on screen, MSAA now gives way to SMAA, and your MSAA comes back with the chase camera. Before, 25 of 57 TV frames had black squares; after, none.
+- **Checks:**
+  - The replay self-test after a fast finish: 20 of 20 cars rebuilt bit for bit, in a race and in a derby.
+  - Unit tests: 102 of 102 pass. The pileup test passes.
+  - The sims are unchanged, because none of this runs headless.
+- **Found on the way, flagged as separate fixes:** the headless sims no longer give the same race twice for the same seed (already so before this change; the statistics are unaffected); and the derby stalemate (two cars circling each other), which is in progress.
+
 ## Post-M8 handling: steering and race AI — ready for your playtest (2026‑10‑19)
 Your playtest of the championship: the cars were very hard to steer and went into the walls, and the opponents were slow off the line (some even reversed) and slow in general. DD2 is the reference here, DD1 the second one.
 - **Play it:** double-click **Play Destruction Racing.cmd**, as before. Your settings and championships carry over.

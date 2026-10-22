@@ -40,7 +40,33 @@ public partial class GameSettings : Node
 
     public override void _Ready()
     {
+        ProcessMode = ProcessModeEnum.Always;
         if (Active) ApplyAll();
+    }
+
+    // Godot's depth of field breaks up into black squares on a multisampled frame (distant cars and their lamps,
+    // through the TV cameras' long lens; found post-M8, with MSAA off there were none). While the camera on screen
+    // has depth of field, MSAA gives way to SMAA; the player's MSAA comes back with the next camera without it.
+    private static Viewport.Msaa? _msaaHeld;
+    private static Viewport.ScreenSpaceAAEnum _screenAaHeld;
+
+    public override void _Process(double delta)
+    {
+        var vp = GetViewport();
+        bool dof = vp.GetCamera3D()?.Attributes is CameraAttributesPractical a && (a.DofBlurFarEnabled || a.DofBlurNearEnabled);
+        if (dof && _msaaHeld == null && vp.Msaa3D != Viewport.Msaa.Disabled)
+        {
+            _msaaHeld = vp.Msaa3D;
+            _screenAaHeld = vp.ScreenSpaceAA;
+            vp.Msaa3D = Viewport.Msaa.Disabled;
+            vp.ScreenSpaceAA = Viewport.ScreenSpaceAAEnum.Smaa;
+        }
+        else if (!dof && _msaaHeld is { } msaa)
+        {
+            vp.Msaa3D = msaa;
+            vp.ScreenSpaceAA = _screenAaHeld;
+            _msaaHeld = null;
+        }
     }
 
     /// <summary>Saves and applies a changed copy of the settings (the options screen).</summary>
@@ -119,6 +145,7 @@ public partial class GameSettings : Node
     /// </summary>
     public static void ApplyAntiAliasing(Viewport vp)
     {
+        _msaaHeld = null;   // a new setting replaces the one held during depth of field (see _Process)
         int aa = Active ? Mathf.Clamp(Current.AntiAliasing, 0, 5) : 3;
         float scale = Active ? Mathf.Clamp(Current.RenderScale, 50, 100) / 100f : 1f;
         // --scale3d=X (performance runs): the 3D resolution as a factor of the window, e.g. 1.5 renders 4K in 1440p.

@@ -96,7 +96,7 @@
 - `--maxcontacts=N`: contacts each car reports to the impact system (default 48; for experiments).
 - `--pinned=S` (derby): how long a car may rock in place before it counts as immobilised (default 20 s; for experiments).
 - `--preset=afternoon|golden|night` (derby, race, Time Trial): the venue's light; `--division=1..4`; `--car=<id>` (one of the nine).
-- `--autoskip` (derby, windowed): fast-simulate to the results; `--autoreplay`: open the replay at the results (replay checks), `--autoreplay=highlights` the highlights reel instead.
+- `--autoskip` (derby, windowed): fast-simulate to the results (the 3D view and the sound are off while it runs, as when the player skips); `--autoreplay`: open the replay at the results (replay checks), `--autoreplay=highlights` the highlights reel instead.
 - `--replaycheck` (with `--autoreplay`, derby or race): the replay self-test. It rebuilds every car's damage from its journal and compares it bit for bit with the car as the event left it (`[Replay] self-test: 20/20 cars match`).
 - `--audiolog` (derby): print what the audio loaded and every announcer line as it is said.
 - `--marks-debug` (derby): show the raw ground-marks texture on the floor; `--marks-dump=out/x.png`: save it when the derby closes.
@@ -104,6 +104,7 @@
 - `--loadtime` (race): prints the time to the first frame and to the green light, after launch or after an R restart; `--loadtime=restart` presses R itself once and quits after the reloaded race starts. The front end and the derby print their first frame too (after launch, or after the menu's START, R or leaving an event).
 - `--fliptest` (race): puts the player's car on its roof 4 s after GO (the rollover and the righting).
 - `--startlog` (race): every car's behaviour, speed and pedal at 0.5, 1, 1.5, 2, 3, 4, 5, 6, 8 and 10 s after GO, in grid order (the launch check: nobody reverses or waits).
+- `--wreckplayer=S` (race): the player's car is wrecked S seconds after GO (the wrecked flow); `--autoskip` then presses ENTER a second later, `--watch` presses SPACE at once (watch the race). While the player is out it prints a `[Spectate]` line every 2 s of race time: the real time, the time scale, what the camera follows and where the wreck is (the fast finish's speed is the race time over the real time).
 - `--trackinfo` (race): the layout's length and width, then each corner: where it is, its smallest radius, how far it turns and the AI's slowest profile speed through it; and the profile's top speed.
 - **The front end** (M7): the game starts at `res://scenes/menu/FrontEnd.tscn` (Boot's default). The player's settings (`settings.json`), championships (`career/slot1..3.json`) and progress (`profile.json`: the best division reached, the champion flag, the Total Destruction best) live in `user://`; Time Trial records stay in `user://timetrial/`.
   - Settings only apply when the game runs without `--scene` (or with `--usersettings`), so dev, test and sim runs keep the defaults.
