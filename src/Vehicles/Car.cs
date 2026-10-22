@@ -79,6 +79,7 @@ public partial class Car : RigidBody3D
     public bool IsReplaying { get; private set; }
     public bool ReplayWrecked { get; set; }
     public float ReplaySteer { get; set; }
+    public float ReplayDrift { get; set; }
     public readonly float[] ReplaySpin = new float[4];
     public readonly float[] ReplayHealth = { 1f, 1f, 1f, 1f };
     public float ReplaySpeed { get; set; }
@@ -104,6 +105,18 @@ public partial class Car : RigidBody3D
     public float SpeedKmh => LinearVelocity.Length() * 3.6f;
     public float SteerAngleDeg { get; private set; }
     public float BodySlipDeg { get; private set; }
+    /// <summary>
+    /// DD2's slide (CarTuning.DriftAngle): how far the car's visible body is turned past its physics body (rad,
+    /// + = nose to the left, as the yaw). Only the look: the physics, the collisions and the AI never see it.
+    /// </summary>
+    public float DriftAngle => IsReplaying ? ReplayDrift : _drift;
+    /// <summary>
+    /// Room (m) beside the car's tail on its right and its left, set every step by a race on screen: the slide's
+    /// tail swings out by about the half-length times the sine of its angle, and it stays off the wall and the car
+    /// alongside. Unlimited elsewhere (the Bowl, headless sims).
+    /// </summary>
+    public float SlideRoomRight { get; set; } = float.MaxValue;
+    public float SlideRoomLeft { get; set; } = float.MaxValue;
     public int Gear { get; private set; } = 1;
     public float Rpm { get; private set; } = 900f;
     public int WheelsGrounded { get; private set; }
@@ -132,6 +145,7 @@ public partial class Car : RigidBody3D
     private CpuParticles3D? _fire;
     private float _wheelRadius = 0.33f;
     private float _steerRad;
+    private float _drift;
     private CollisionShape3D? _nose, _tail;
     private float _noseLength, _tailLength, _noseZ, _tailZ;
 
@@ -268,6 +282,12 @@ public partial class Car : RigidBody3D
     {
         var w = _wheels[i];
         point = w.ContactPoint;
+        // Under the visible wheel, which DD2's slide turns about the centre of mass.
+        if (_drift != 0f)
+        {
+            Vector3 com = GlobalTransform * CenterOfMass;
+            point = com + (point - com).Rotated(Vector3.Up, _drift);
+        }
         skid = w.Mark;
         return w.Grounded;
     }
@@ -275,7 +295,7 @@ public partial class Car : RigidBody3D
     public Vector3 WheelCentre(int i) => _wheels[i].Mount + Vector3.Down * (Tuning.RestLength - _wheels[i].Compression);
     public float WheelSteer(int i) => _wheels[i].Front ? -(IsReplaying ? ReplaySteer : _steerRad) : 0f;
     public float WheelSpin(int i) => IsReplaying ? ReplaySpin[i] : _wheels[i].Spin;
-    /// <summary>The front wheels' steering angle (rad), as recorded for replays.</summary>
+    /// <summary>The front wheels' angle to the body (rad, + = right; with the slide's opposite lock), as recorded for replays.</summary>
     public float SteerAngle => _steerRad;
 
     public void ApplyTuning(CarTuning t)
@@ -403,7 +423,8 @@ public partial class Car : RigidBody3D
         steerDeg = Mathf.Clamp(steerDeg, -maxSteer * 1.25f, maxSteer * 1.25f);
         SteerAngleDeg = steerDeg;
         float steerRad = Mathf.DegToRad(steerDeg);
-        _steerRad = steerRad;
+        // To the visible body, turned past the car by DD2's slide, the front wheels show opposite lock.
+        _steerRad = steerRad + _drift;
 
         // Drive, brake, reverse (DD2: holding brake at a standstill reverses; DD1 PS: dedicated reverse).
         float brake = c.Brake;
@@ -599,8 +620,27 @@ public partial class Car : RigidBody3D
             // The driver's input (and the damage pull), not the counter-steer assist: + steer is right, + yaw is left.
             float steerShare = Mathf.Clamp(c.Steer + _pullDeg / MathF.Max(maxSteer, 1f), -1f, 1f);
             float targetYaw = -steerShare * MathF.Min(kinematic, gripLimit);
+            // DD2's slide (the look only): the visible body turns past the car by an angle that grows with the turn
+            // the keys ask for.
+            float driftTarget = 0f;
+            if (t.DriftAngle > 0f)
+            {
+                float share = MathF.Pow(MathF.Abs(targetYaw) / Mathf.DegToRad(MathF.Max(t.DriftYawRate, 1f)), t.DriftExponent);
+                driftTarget = MathF.Sign(targetYaw) * Mathf.DegToRad(MathF.Min(t.DriftAngle * share, t.DriftMaxAngle))
+                    * Mathf.Clamp((vAbs - t.DriftStartSpeed) / MathF.Max(t.DriftFullSpeed - t.DriftStartSpeed, 0.1f), 0f, 1f);
+            }
+            // Nose left (+) swings the tail right.
+            float room = driftTarget >= 0f ? SlideRoomRight : SlideRoomLeft;
+            if (room < 1e6f) driftTarget = MathF.Sign(driftTarget) * MathF.Min(MathF.Abs(driftTarget),
+                MathF.Asin(Mathf.Clamp(room / MathF.Max(HalfExtents.Z, 1f), 0f, 1f)));
+            _drift = Mathf.MoveToward(_drift, driftTarget, Mathf.DegToRad(t.DriftRate) * dt);
             float yawNow = AngularVelocity.Dot(up);
             ApplyTorque(up * ((targetYaw - yawNow) * Inertia.Y * yawGain));
+        }
+        else
+        {
+            // No yaw control (a hit, a spin, Fast Steer, reverse, slow): the body comes back in line.
+            _drift = Mathf.MoveToward(_drift, 0f, Mathf.DegToRad(t.DriftRate) * dt);
         }
 
         // DD1 turn-around: yaw the car round at low speed.
@@ -616,7 +656,7 @@ public partial class Car : RigidBody3D
         UpdateGearbox(reversing);
         UpdateUpsideDown(up, v, dt);
         UpdateRidingOff(grounded, up, c, dt);
-        if (Spec == null) UpdateWheelVisuals(steerRad);
+        if (Spec == null) UpdateWheelVisuals(_steerRad);
     }
 
     private bool IsDriven(Wheel w) => Tuning.RearWheelDrive ? !w.Front : w.Front;

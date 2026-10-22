@@ -356,7 +356,7 @@ def main():
                 "length": round(oval_len, 2),
                 "start_forward": oval_start,
                 "start_reverse": oval_start,
-                "laps": 8,
+                "laps": 14,  # DD2 races take 5-8 min (docs/reference_feel.md): the winner ~6 min
                 "crossover": None,
                 "pit": {"points": [[round(x, 3), round(z, 3)] for x, z in pit_o], "boxes": [list(b) for b in boxes_o]},
             },
@@ -366,7 +366,7 @@ def main():
                 "length": round(fig8_len, 2),
                 "start_forward": 0.0,
                 "start_reverse": round(fig8_rev_start, 2),
-                "laps": 6,
+                "laps": 10,  # the winner ~5.5 min
                 "crossover": {"point": [0.0, 0.0], "radius": round(W * 1.1, 2)},
                 "pit": {"points": [[round(x, 3), round(z, 3)] for x, z in pit_f], "boxes": [list(map(float, b)) for b in boxes_f]},
             },

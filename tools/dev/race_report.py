@@ -14,7 +14,8 @@ import sys
 
 
 def median(values):
-    v = [x for x in values if x is not None and not (isinstance(x, float) and math.isnan(x))]
+    # .NET writes a race without a winner (all wrecked) as the string "NaN".
+    v = [x for x in values if isinstance(x, (int, float)) and not math.isnan(x)]
     return statistics.median(v) if v else float("nan")
 
 

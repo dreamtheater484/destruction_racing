@@ -100,9 +100,12 @@ public sealed record RulesConfig
     /// <summary>
     /// Calibration ✱ (M1c): all damage in a race is scaled by this. Race contact is constant and mostly incidental
     /// (packs, crossover traffic, wrecks on the line), where the derby calibration assumes deliberate rams; at full
-    /// damage most of the field and the player were wrecked before half distance (target: player ≤ 10%).
+    /// damage most of the field and the player were wrecked before half distance (target: player ≤ 10%). Post-M8
+    /// (✱ A34) the races are DD2's length, 14 and 10 laps instead of 8 and 6: at ×0.5 half the field was wrecked
+    /// and the bot finished one race in six, so a hit now does about 8/14 of the damage. A race wrecks about as
+    /// many cars as DD2's 4.75.
     /// </summary>
-    public float RaceDamageScale { get; init; } = 0.5f;
+    public float RaceDamageScale { get; init; } = 0.32f;
     /// <summary>
     /// Scraping (DD Code T4): sustained contact sliding faster than ScrapeMinSpeed (m/s) grinds the touching zone
     /// at ScrapeRate health per second per m/s above it.

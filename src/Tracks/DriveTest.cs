@@ -218,7 +218,8 @@ public partial class DriveTest : Node3D
                 {
                     _stepLastLog = t;
                     GD.Print($"[Step] t={t - _stepAt:0.00} v={speed * 3.6f:0} steer={_player.LastControls.Steer:0.00} yaw={yawDps:0.0} latG={latG:0.00} " +
-                             $"slip={_player.BodySlipDeg:0.0} slipF={_player.FrontSlipDeg:0.0} slipR={_player.RearSlipDeg:0.0}");
+                             $"slip={_player.BodySlipDeg:0.0} slipF={_player.FrontSlipDeg:0.0} slipR={_player.RearSlipDeg:0.0} drift={Mathf.RadToDeg(_player.DriftAngle):0.0} " +
+                             $"path={Mathf.RadToDeg(Mathf.Atan2(-_player.LinearVelocity.X, -_player.LinearVelocity.Z)):0.0}");
                 }
                 if (t >= _stepAt && t < _stepAt + _stepHold) _stepPeak = MathF.Max(_stepPeak, MathF.Abs(yawDps));
                 if (t >= _stepAt + _stepHold && _stepSettle < 0f && MathF.Abs(yawDps) < 2f) _stepSettle = t - _stepAt - _stepHold;

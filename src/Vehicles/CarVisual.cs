@@ -443,7 +443,7 @@ public partial class CarVisual : Node3D
         mesh.SurfaceSetMaterial(0, block);
         mesh.SurfaceSetMaterial(1, dark);
         mesh.SurfaceSetMaterial(2, lid);
-        Model.Root.AddChild(new MeshInstance3D { Name = "EngineBay", Mesh = mesh });
+        Model.Root.AddChild(new MeshInstance3D { Name = "EngineBay", Mesh = mesh, Layers = CarModel.RenderLayer });
     }
 
     // Godot's front faces are clockwise; u × v points out of the face.
@@ -524,8 +524,11 @@ public partial class CarVisual : Node3D
 
     // ------------------------------------------------------------------ space helpers
 
-    private Vector3 ToModel(Vector3 world) => Model.Root.ToLocal(world);
-    private Vector3 ToModelDir(Vector3 world) => Model.Root.GlobalBasis.Inverse() * world;
+    // Hits and scrapes come from the physics body, which DD2's slide doesn't turn (Car.DriftAngle): they map onto the
+    // model as if it weren't turned, so a dent lands on the panel that was hit.
+    private Transform3D ModelFrame => Car.GlobalTransform * Model.Root.Transform;
+    private Vector3 ToModel(Vector3 world) => ModelFrame.AffineInverse() * world;
+    private Vector3 ToModelDir(Vector3 world) => ModelFrame.Basis.Inverse() * world;
     private Vector3 ToWorld(Vector3 model) => Model.Root.ToGlobal(model);
 
     private static float Distance(Aabb box, Vector3 p)
@@ -774,10 +777,24 @@ public partial class CarVisual : Node3D
 
     private Vector3 ToWorldDir(Vector3 model) => Model.Root.GlobalBasis * model;
 
-    /// <summary>Loose panels swing on their hinges, shaken by the car's accelerations and the wind.</summary>
+    private Vector3 _aerialAccel;
+    private Vector2 _aerialSwing, _aerialSwingRate;
+
+    /// <summary>Loose panels swing on their hinges, shaken by the car's accelerations and the wind; so does the aerial.</summary>
     private void SwingParts(float dt, Vector3 accelModel)
     {
         float speed = Car.LinearVelocity.Length();
+        // The aerial whips forward under braking, leans back under power and in the wind, and out of the turns: a
+        // springy rod on the frame-to-frame acceleration smoothed over a tenth of a second (frames see 0-2 physics steps).
+        if (Model.Aerial is { } aerial)
+        {
+            float step = Mathf.Min(dt, 0.05f);
+            _aerialAccel = _aerialAccel.Lerp(accelModel, 1f - Mathf.Exp(-dt / 0.1f));
+            var target = new Vector2(-_aerialAccel.Z * 0.008f + speed * 0.0018f, _aerialAccel.X * 0.008f);
+            _aerialSwingRate += (160f * (target - _aerialSwing) - 6f * _aerialSwingRate) * step;
+            _aerialSwing = (_aerialSwing + _aerialSwingRate * step).Clamp(new Vector2(-0.5f, -0.5f), new Vector2(0.5f, 0.5f));
+            aerial.Basis = new Basis(Vector3.Right, 0.14f + _aerialSwing.X) * new Basis(Vector3.Back, _aerialSwing.Y);
+        }
         foreach (var part in _parts)
         {
             if (part.State != PartState.Loose || part.Pivot == null) continue;
@@ -807,7 +824,9 @@ public partial class CarVisual : Node3D
         _time += dt;
         _frozenThisFrame = null;
         if (GetViewport().GetCamera3D() is { } camera) CarModel.SetLens(camera.Fov);
+        UpdateSlide();
         UpdateWheels();
+        UpdateDust(dt);
         UpdateCrush(dt);
         Vector3 accel = (Car.LinearVelocity - _lastVelocity) / dt;
         _lastVelocity = Car.LinearVelocity;
@@ -822,6 +841,46 @@ public partial class CarVisual : Node3D
         Model.Flush(budgeted: true);
     }
 
+    // The dust an event leaves (post-M8 look), per second at 20 m/s: the Bowl's dirt floor, asphalt, off the road.
+    private const float DustBowl = 0.0075f, DustRoad = 0.0006f, DustOffRoad = 0.02f, DustMax = 0.85f;
+    private float _dust, _dustShown = -1f, _dustPush;
+
+    /// <summary>
+    /// Builds up the event's dust: slowly on asphalt, fast off the road and on the Bowl's dirt, faster in a slide
+    /// or wheelspin; sent to the materials a few times a second (CarModel.SetDust). A replay shows the last of it.
+    /// </summary>
+    private void UpdateDust(float dt)
+    {
+        var grip = global::DestructionRacing.Vehicles.Car.SurfaceGripAt;
+        if (!Car.IsReplaying && Car.WheelsGrounded > 0)
+        {
+            float rate = grip == null ? DustBowl : DustRoad;
+            float scuffing = 0f;
+            for (int i = 0; i < 4; i++)
+            {
+                if (!Car.WheelMark(i, out var p, out float skid)) continue;
+                scuffing = Mathf.Max(scuffing, skid);
+                if (grip != null && grip(p.X, p.Z) < 0.9f) rate = DustOffRoad;
+            }
+            float speed = Mathf.Min(Car.LinearVelocity.Length() / 20f, 1.5f);
+            _dust = Mathf.Min(DustMax, _dust + dt * rate * speed * (1f + 1.5f * scuffing));
+        }
+        if ((_dustPush -= dt) > 0f || Mathf.Abs(_dust - _dustShown) < 0.004f) return;
+        _dustPush = 0.25f;
+        _dustShown = _dust;
+        Model.SetDust(_dust, grip == null ? CarModel.BowlDust : CarModel.RoadDust);
+    }
+
+    /// <summary>DD2's slide: the visible car turns past the physics body about its centre of mass, tail out.</summary>
+    private void UpdateSlide()
+    {
+        float d = Car.DriftAngle;
+        if (d == 0f && Transform == Transform3D.Identity) return;
+        var turn = new Basis(Vector3.Up, d);
+        Vector3 com = Car.CenterOfMass;
+        Transform = new Transform3D(turn, com - turn * com);
+    }
+
     private void UpdateWheels()
     {
         Vector3 down = new(0f, Car.GroundY, 0f);
@@ -830,7 +889,9 @@ public partial class CarVisual : Node3D
             var node = _wheelNodes[i];
             if (node == null || node.GetParent() is DebrisPiece) continue;
             node.Position = Car.WheelCentre(i) - down;
-            node.Basis = new Basis(Vector3.Up, Car.WheelSteer(i)) * new Basis(Vector3.Right, -Car.WheelSpin(i));
+            float spin = Car.WheelSpin(i);
+            node.Basis = new Basis(Vector3.Up, Car.WheelSteer(i)) * new Basis(Vector3.Right, -spin);
+            Model.SetBrakeSpin(i, spin);
         }
     }
 

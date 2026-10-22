@@ -121,6 +121,21 @@ public sealed class CarTuning
     /// <summary>How much the brake relaxes the yaw control (the DD2 brake-dab powerslide).</summary>
     public float YawControlBrakeRelease = 0.7f;
 
+    // DD2's slide (post-M8 playtest: "a bit of a tail-out slide is cool"). DD2's cars are turned 30-40° into its
+    // tight corners and ~15° into the fast ones (docs/reference_feel.md). At speed the visible body turns further
+    // into the corner than the car, tail out, and the front wheels show opposite lock (CarVisual). Only the look:
+    // a physically turned body put its tail into the walls (the bot alone needed a pit stop, the field's wrecks
+    // rose by a quarter), so the grip, the line, the collisions and the lap times stay those of A33.
+    /// <summary>Extra body angle (degrees) at the yaw rate DriftYawRate; 0 = off.</summary>
+    public float DriftAngle = 18f;
+    public float DriftYawRate = 45f;            // °/s asked for by the keys (DD2's tight corners turn at ~46°/s)
+    /// <summary>The fast corners' gentler turn shows less of it: angle ∝ (yaw rate)^this.</summary>
+    public float DriftExponent = 2f;
+    public float DriftMaxAngle = 24f;           // degrees
+    public float DriftStartSpeed = 16f;         // m/s (58 km/h): off below, so the derby's shoving is untouched
+    public float DriftFullSpeed = 26f;          // m/s (94 km/h)
+    public float DriftRate = 45f;               // °/s: how fast the slide builds and settles
+
     /// <summary>The cornering grip multiplier at this speed (m/s): 1 below ArcadeGripStartSpeed, ArcadeGrip from ArcadeGripFullSpeed.</summary>
     public float SpeedGrip(float speed) =>
         1f + (ArcadeGrip - 1f) * Mathf.Clamp((MathF.Abs(speed) - ArcadeGripStartSpeed) / MathF.Max(ArcadeGripFullSpeed - ArcadeGripStartSpeed, 0.1f), 0f, 1f);

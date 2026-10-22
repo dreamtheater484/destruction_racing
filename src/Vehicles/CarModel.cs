@@ -5,7 +5,7 @@ using Godot;
 namespace DestructionRacing.Vehicles;
 
 /// <summary>
-/// Paint scheme of one car (plan §9.4; see assets/shaders/car_paint.gdshader): base colour, a second colour by
+/// Paint scheme of one car (plan Â§9.4; see assets/shaders/car_paint.gdshader): base colour, a second colour by
 /// <see cref="Mode"/> (0 solid, 1 twin stripes, 2 lower two-tone, 3 side band, 4 cabin two-tone, 5 side flash),
 /// the race number, a fictional sponsor (assets/textures/sponsors.png cell, -1 none), wear and dirt, a panel
 /// in primer (a node name such as "Door_FL", or null) and the division roof colour.
@@ -27,7 +27,7 @@ public sealed record Livery(
     public static readonly string[] ModeNames = { "SOLID", "TWIN STRIPES", "TWO-TONE", "SIDE BAND", "CABIN TWO-TONE", "SIDE FLASH" };
     public const int Sponsors = 8;
 
-    /// <summary>DD division roof colour (plan §4.5); a vinyl roof is painted over when it is set.</summary>
+    /// <summary>DD division roof colour (plan Â§4.5); a vinyl roof is painted over when it is set.</summary>
     public bool HasRoofColour => Roof != null;
 
     public static readonly Livery KitsuneRed = new(new Color(0.62f, 0.05f, 0.035f), new Color(0.93f, 0.93f, 0.9f), 0, Number: 12);
@@ -65,12 +65,26 @@ public readonly record struct NumberPlacement(float DoorZ, float DoorY, float Do
 public sealed class CarModel
 {
     private static readonly StringName CrushParam = "crush";   // set every frame while a crunch lands: made once
+    /// <summary>
+    /// The render layer every car mesh is on (layer 2, not 1): the venues' reflection probes capture the venue
+    /// without the cars parked in it when they load (Fx.VenueReflections).
+    /// </summary>
+    public const uint RenderLayer = 1u << 1;
     public Node3D Root { get; }
     public ShaderMaterial Paint { get; }
     /// <summary>Simulated wood (the Homestead's sides): the paint shader with grain, so decals and damage match.</summary>
     public ShaderMaterial Wood { get; }
     public ShaderMaterial Glass { get; }
     public ShaderMaterial TailLens { get; }
+    /// <summary>The tyres' rubber, lettering and dust (car_tyre.gdshader).</summary>
+    public ShaderMaterial Tyre { get; }
+    public StandardMaterial3D Rim { get; }
+    public StandardMaterial3D Hubcap { get; }
+    /// <summary>The brakes behind the spokes (car_brake.gdshader); none behind full wheel covers.</summary>
+    public ShaderMaterial Brakes { get; }
+    private readonly Node3D?[] _brakes = new Node3D?[4];
+    /// <summary>The aerial's base (CarVisual sways it), or null.</summary>
+    public Node3D? Aerial { get; private set; }
     public CarDamageVisual Damage { get; }
     /// <summary>Zone crush shapes (front, rear, left, right; 0..1), see <see cref="SetCrush"/>.</summary>
     public Vector4 Crush { get; private set; }
@@ -82,11 +96,14 @@ public sealed class CarModel
     private float _crushSeed;
     private int _attachedVersion = -1;
     private bool _attachedDirty;
+    // The aerial's base as built; it follows the dents until its wing comes off.
+    private Vector3 _aerialRest;
+    private bool _aerialOff;
     private MeshInstance3D? _primed;
     private static int _cars;
 
     private static readonly Dictionary<string, Texture2D> TextureCache = new();
-    private static Shader? _paintShader, _glassShader, _surfaceShader, _contactShader;
+    private static Shader? _paintShader, _glassShader, _surfaceShader, _contactShader, _tyreShader, _brakeShader;
 
     private CarModel(Node3D root, Livery livery, string carId)
     {
@@ -113,6 +130,13 @@ public sealed class CarModel
         Wood.SetShaderParameter("wood_grain", 1f);
         Glass = Deforming(new ShaderMaterial { Shader = _glassShader });
         TailLens = Lens(new Color(0.55f, 0.015f, 0.01f), 2);
+        _tyreShader ??= GD.Load<Shader>("res://assets/shaders/car_tyre.gdshader");
+        _brakeShader ??= GD.Load<Shader>("res://assets/shaders/car_brake.gdshader");
+        Tyre = new ShaderMaterial { Shader = _tyreShader };
+        Tyre.SetShaderParameter("lettering", GD.Load<Texture2D>("res://assets/textures/tyre_lettering.png"));
+        Rim = Std(RimColour, 0.32f, 1f);
+        Hubcap = Std(HubcapColour, 0.22f, 1f);
+        Brakes = new ShaderMaterial { Shader = _brakeShader };
 
         // Wheels live in their own node space and do not dent: plain materials.
         var shared = new Dictionary<string, Material>
@@ -134,9 +158,9 @@ public sealed class CarModel
             ["vinyl"] = livery.HasRoofColour ? Paint : Surface(new Color(0.045f, 0.03f, 0.026f), 0.55f, clearcoat: 0.15f),
             ["chrome"] = Surface(new Color(0.9f, 0.9f, 0.92f), 0.05f, 1f),
             ["exhaust"] = Surface(new Color(0.16f, 0.15f, 0.14f), 0.5f, 0.85f, scuff: 0.3f),
-            ["tyre"] = Std(new Color(0.028f, 0.028f, 0.03f), 0.88f),
-            ["rim"] = Std(new Color(0.72f, 0.73f, 0.74f), 0.32f, 1f),
-            ["hubcap"] = Std(new Color(0.62f, 0.63f, 0.65f), 0.22f, 1f),
+            ["tyre"] = Tyre,
+            ["rim"] = Rim,
+            ["hubcap"] = Hubcap,
         };
         _materials = shared;
         foreach (var mi in Descendants<MeshInstance3D>(root))
@@ -151,6 +175,8 @@ public sealed class CarModel
             ApplyDrawHints(mi);
         }
         foreach (var n in Descendants<Node3D>(root)) _nodes.TryAdd(n.Name, n);
+        FitWheels(carId);
+        AddSmallParts(carId);
 
         var bounds = (Node("Body") as MeshInstance3D)?.GetAabb() ?? new Aabb(new Vector3(-1f, 0f, -2.5f), new Vector3(2f, 1.5f, 5f));
         Damage = new CarDamageVisual(bounds.Grow(0.12f));
@@ -175,6 +201,115 @@ public sealed class CarModel
         }
         ApplyPrimer(livery.Primer);
         AddContactShadow();
+        foreach (var g in Descendants<GeometryInstance3D>(root)) g.Layers = RenderLayer;
+    }
+
+    private static readonly string[] WheelNames = { "Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR" };
+
+    /// <summary>
+    /// The maker's emblem on the back and the front with the model script beside the back one, and a whip aerial on
+    /// the front wing, where TrimParts found room for them on this model.
+    /// </summary>
+    private void AddSmallParts(string carId)
+    {
+        if (Material("chrome") is not { } chrome || Material("trim_black") is not { } dark) return;
+        var spots = TrimParts.For(carId, Root);
+        void Badge(TrimParts.Spot? spot, Vector2 size, bool script, string name)
+        {
+            if (spot is not { } at || Node(at.Panel) is not MeshInstance3D panel) return;
+            var mi = new MeshInstance3D { Name = name, Mesh = TrimParts.Badge(at.At, at.Normal, size, script, chrome, dark),
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+            HideBeyond(mi);
+            panel.AddChild(mi);
+        }
+        Badge(spots.Emblem, TrimParts.EmblemSize, false, "Badge_R");
+        Badge(spots.Script, TrimParts.ScriptSize, true, "Badge_Script");
+        Badge(spots.Front, TrimParts.FrontSize, false, "Badge_F");
+        if (spots.Aerial is { } mount && Node(mount.Panel) is Node3D wing)
+        {
+            _aerialRest = mount.At;
+            Aerial = new Node3D { Name = "Aerial", Position = mount.At };
+            var rod = new MeshInstance3D { Mesh = TrimParts.Aerial(0.72f, Std(new Color(0.8f, 0.8f, 0.82f), 0.18f, 1f)),
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+            HideBeyond(rod);
+            Aerial.AddChild(rod);
+            wing.AddChild(Aerial);
+        }
+    }
+
+    // The 1980s sports cars have discs at the back too; the rest have drums there.
+    private static readonly HashSet<string> RearDiscs = new() { "interceptor", "hikari", "ryujin", "volant" };
+
+    /// <summary>
+    /// Sizes the tyre lettering to this car's tyres and rims, and puts the brakes behind the spokes (not behind a
+    /// full wheel cover, which hides them).
+    /// </summary>
+    private void FitWheels(string carId)
+    {
+        if (Node("Wheel_FL_Tyre") is not MeshInstance3D tyre || Node("Wheel_FL_Rim") is not MeshInstance3D rim) return;
+        float R = tyre.GetAabb().Size.Y * 0.5f, rimR = rim.GetAabb().Size.Y * 0.5f;
+        Tyre.SetShaderParameter("band_inner", rimR + 0.034f);
+        Tyre.SetShaderParameter("band_outer", R - 0.042f);
+        Tyre.SetShaderParameter("tread_radius", R - 0.022f);
+        bool covered = Node("Wheel_FL_Hubcap") is MeshInstance3D cap && cap.GetAabb().Size.Y * 0.5f > 0.6f * rimR;
+        if (covered) return;
+        for (int i = 0; i < 4; i++)
+        {
+            if (Node(WheelNames[i]) is not { } wheel) continue;
+            bool front = i < 2, right = i % 2 == 1;
+            var brake = new MeshInstance3D
+            {
+                Name = WheelNames[i] + "_Brake",
+                Mesh = BrakeMesh.Build(rimR, right ? 1f : -1f, drum: !front && !RearDiscs.Contains(carId), front),
+                MaterialOverride = Brakes,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            };
+            HideBeyond(brake);
+            wheel.AddChild(brake);
+            _brakes[i] = brake;
+        }
+    }
+
+    private static readonly string[] DustedSurfaces = { "bumper", "trim_black", "plate", "chrome", "lens_red", "lens_amber", "lens_clear", "exhaust", "rubber" };
+    /// <summary>The dust's colour: the Bowl's dirt floor, and the road grime of the speedway.</summary>
+    public static readonly Color BowlDust = new(0.45f, 0.36f, 0.26f), RoadDust = new(0.37f, 0.34f, 0.3f);
+    private static readonly Color RimColour = new(0.72f, 0.73f, 0.74f), HubcapColour = new(0.62f, 0.63f, 0.65f);
+
+    /// <summary>
+    /// The dust an event has left on the car, 0..1 (CarVisual builds it up): a pale film on the paint and the trim,
+    /// on the tyres, and brake dust on the rims and the brakes.
+    /// </summary>
+    public void SetDust(float amount, Color tint)
+    {
+        foreach (var m in new[] { Paint, Wood })
+        {
+            m.SetShaderParameter("dust", amount);
+            m.SetShaderParameter("dust_color", tint);
+        }
+        foreach (string name in DustedSurfaces)
+            if (Material(name) is ShaderMaterial s && s != Paint)
+            {
+                s.SetShaderParameter("dust", amount);
+                s.SetShaderParameter("dust_color", tint);
+            }
+        Tyre.SetShaderParameter("dust", amount);
+        Tyre.SetShaderParameter("dust_color", tint * 0.85f);
+        float brakeDust = Mathf.Min(1f, amount * 1.5f);
+        Brakes.SetShaderParameter("dust", brakeDust);
+        var grime = new Color(0.16f, 0.13f, 0.1f);
+        Rim.AlbedoColor = RimColour.Lerp(grime, brakeDust * 0.45f);
+        Rim.Roughness = Mathf.Lerp(0.32f, 0.62f, brakeDust);
+        Hubcap.AlbedoColor = HubcapColour.Lerp(grime, brakeDust * 0.4f);
+        Hubcap.Roughness = Mathf.Lerp(0.22f, 0.55f, brakeDust);
+    }
+
+    /// <summary>
+    /// Takes the wheel's spin back out of its brake (the wheel node turns with the steering and the spin; the
+    /// caliper and the drum only steer). <paramref name="spin"/> is the wheel's spin angle, as CarVisual sets it.
+    /// </summary>
+    public void SetBrakeSpin(int wheel, float spin)
+    {
+        if (_brakes[wheel] is { } b) b.Basis = new Basis(Vector3.Right, spin);
     }
 
     /// <summary>
@@ -206,11 +341,15 @@ public sealed class CarModel
         return map;
     }
 
-    /// <summary>Stops tracking attachments (plate text) under a node that left the car.</summary>
-    public void Forget(Node subtree) => _attached.RemoveAll(a => !GodotObject.IsInstanceValid(a.Label) || subtree.IsAncestorOf(a.Label));
+    /// <summary>Stops tracking attachments (plate text, the aerial) under a node that left the car.</summary>
+    public void Forget(Node subtree)
+    {
+        _attached.RemoveAll(a => !GodotObject.IsInstanceValid(a.Label) || subtree.IsAncestorOf(a.Label));
+        if (Aerial != null && subtree.IsAncestorOf(Aerial)) _aerialOff = true;
+    }
 
     /// <summary>
-    /// Uploads damage changes and keeps attachments the shader cannot move (the plate text) on the metal.
+    /// Uploads damage changes and keeps attachments the shader cannot move (the plate text, the aerial) on the metal.
     /// Call once per frame; <paramref name="budgeted"/> shares the per-frame upload budget between cars.
     /// </summary>
     public void Flush(bool budgeted = false)
@@ -230,6 +369,7 @@ public sealed class CarModel
             var outward = new Vector3(0f, 0f, p.Z < 0f ? -1f : 1f) * (0.03f * crush);
             label.Position = rest + t.Basis.Inverse() * (Damage.SampleDent(p) + CrushAt(p) + outward);
         }
+        if (Aerial != null && !_aerialOff) Aerial.Position = _aerialRest + Damage.SampleDent(_aerialRest) + CrushAt(_aerialRest);
     }
 
     /// <summary>The bulk of the shader's crush field (without its noise and buckles) at a car-local point.</summary>
@@ -288,6 +428,7 @@ public sealed class CarModel
                 Shaded = true,
                 DoubleSided = false,
                 CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+                Layers = RenderLayer,
             };
             HideBeyond(label);
             plate.AddChild(label);
@@ -329,8 +470,8 @@ public sealed class CarModel
     /// <summary>
     /// A visibility range is a distance, blind to the lens: through the TV cameras' long lenses a car 90 m away
     /// fills the frame, and its plate and handles would vanish. Called every frame with the current camera's
-    /// vertical field of view, this scales the small parts' range with the zoom against a 70° chase view, in steps
-    /// (×1, 2, 4, 8, 16), so a zooming camera touches the ranges only when it crosses one.
+    /// vertical field of view, this scales the small parts' range with the zoom against a 70Â° chase view, in steps
+    /// (Ã—1, 2, 4, 8, 16), so a zooming camera touches the ranges only when it crosses one.
     /// </summary>
     public static void SetLens(float fovDegrees)
     {

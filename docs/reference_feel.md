@@ -155,7 +155,7 @@ Probe measurements:
 **Strategy balance** (plan §17.4): over 10 seeds, a racer bot and a hunter bot of equal skill (0.55) scored **44 vs 39 points** on average, 11% apart (target ±15%). The hunter is wrecked more often (in 15% of its races before half distance); the racer collects the finishing bonus.
 
 **Calibrations ✱** (plan §20.2):
-- **A21, race damage ×0.5.** At full damage, the player was wrecked before half distance in 83–100% of races, with 12 of 20 cars wrecked per race.
+- **A21, race damage ×0.5** (×0.32 since A34, for DD2's race length). At full damage, the player was wrecked before half distance in 83–100% of races, with 12 of 20 cars wrecked per race.
 - **A22, AI pace ×0.97 in Division 4.** At ×1 the AI racers out-pace an average player, and hunting paid 40% more than racing.
 - **A23, crossover walls.** The walls open where the legs cross. Where a wall resumes it is flared (about 8°), and the four corners are closed. Blunt wall ends had wrecked cars that drifted into the gap.
 
@@ -209,7 +209,8 @@ DD2's race HUD counts the cars **Still Running**, so the wrecks can be read off 
 
 - **On average 4.75 cars of 20 are wrecked in a DD2 race** (0 to 9), most of them in the second half as the damage builds up. Early wrecks happen, but rarely: 3 of 80 cars were out before half distance, in race B.
 - The count sometimes goes up again by one or two. A car that is stopped or on its roof seems to count as not running until it moves again.
-- DD2 races last 5–8 minutes (300–480 s).
+- DD2 races last 5–8 minutes (300–480 s). Ours did 3–3.5 min (8 and 6 laps); since post-M8 the oval has 14 laps and the figure-8 10, and the winner needs about 6 min (✱ A34). The race damage went from ×0.5 to ×0.32 with it: at ×0.5 half the field was wrecked. Now a Wreckin' race wrecks 3.6 cars on the oval and 4.7 on the figure-8, against DD2's 4.75.
+- **The slide:** in the same races the cars run visibly turned into the corners, tail out: about 15° in the fast bends and 30–40° in the tight ones. Ours (✱ A35) turns the car on screen past the physics body by up to 24°, with opposite lock on the front wheels, and only the look: a physical slide put the tails into the walls and wrecked the bot early in 25% of races instead of 4%.
 - DD1's race HUD (`xWVgPW6Uiyk`) shows only the position and the field ("05/16"), and its results screen shows the finish and the points, so DD1 gives no wreck count. DD2 is the main reference anyway.
 
 ### DD2 Chalk Canyon (a world-record lap, `jbCdlNL2LIM`)

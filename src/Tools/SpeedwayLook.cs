@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using DestructionRacing.Core;
 using DestructionRacing.Tracks;
+using DestructionRacing.Vehicles;
 using Godot;
 
 namespace DestructionRacing.Tools;
@@ -10,7 +12,8 @@ namespace DestructionRacing.Tools;
 /// plus what is added at runtime: the catch-fence posts, the crowd in the two grandstands, a tree line round the
 /// venue, the chosen layout's barriers (red and white blocks closing off the other layout's roads) and the start
 /// lights. As the main scene it is a look-dev viewer: V next view, P photo (out/speedway), --shots=DIR saves every
-/// view and quits.
+/// view and quits. With --cars it stages four cars on the start straight and shows them close up instead (the car
+/// look in the venue's light: reflections, grounding, tyres, dust).
 /// </summary>
 public partial class SpeedwayLook : Node3D
 {
@@ -26,6 +29,10 @@ public partial class SpeedwayLook : Node3D
         new("fig8pits", new Vector3(-150f, 4f, -40f), new Vector3(-100f, 1f, -50f), 50f),
         new("overview", new Vector3(0f, 170f, 250f), new Vector3(0f, 0f, 0f), 55f),
     };
+
+    private View[] _views = Views;
+    private readonly List<CarModel> _staged = new();
+    private float _spin, _spinAngle;
 
     public const float WallHeight = 1.2f;
     public Crowd? Crowd { get; private set; }
@@ -55,6 +62,10 @@ public partial class SpeedwayLook : Node3D
         if (DevTools.Instance?.Arg("nolightmap") != null && GetNodeOrNull<LightmapGI>("LightmapGI") is { } lm) lm.LightData = null;
         BuildFencePosts(data);
         BuildTrees(data);
+        // Reflections along both layouts, captured at car-roof height (Fx.VenueReflections).
+        var lines = new[] { SpeedwayLayout.Oval, SpeedwayLayout.Figure8 }.Select(l =>
+            (IReadOnlyList<Vector3>)data.Get(l).Points.Select(q => new Vector3(q.X, data.HeightAt(q.X, q.Y) + 1.3f, q.Y)).ToList());
+        Fx.VenueReflections.Add(this, Fx.VenueReflections.AlongLines(lines, 60f), new Vector3(110f, 60f, 110f), 20f);
         Crowd = new Crowd
         {
             Night = IsNight,
@@ -197,9 +208,54 @@ public partial class SpeedwayLook : Node3D
         _camera = new Camera3D { Current = true, Near = 0.05f, Far = 4000f };
         AddChild(_camera);
         BuildBarriers(SpeedwayData.Load(), SpeedwayLayout.Figure8);
-        ApplyView(Views[0]);
+        if (DevTools.Instance?.Arg("cars") != null) StageCars();
+        ApplyView(_views[0]);
         if (DevTools.Instance?.Arg("shots") is { } dir) RunShots(dir);
         else KeyGuide.Add(this, "Crossroads Speedway (baked lighting)\nV next view   P photo (out/speedway)   Esc quit");
+    }
+
+    /// <summary>
+    /// Four cars on the oval's start straight (racing towards +x), the Kitsune in front of the main grandstand; the
+    /// close views look at it from the stand's side, so its flanks reflect the stand.
+    /// </summary>
+    private void StageCars()
+    {
+        var data = SpeedwayData.Load();
+        Vector3 On(float x, float z) => new(x, data.HeightAt(x, z), z);
+        var hero = On(2f, 68f);
+        (string Car, Vector3 At, float Yaw, float Dirt)[] staged =
+        {
+            ("kitsune", hero, 0f, 0.15f),
+            ("brougham", On(-7.5f, 72.6f), 2f, 0.3f),
+            ("nordvik", On(-14.5f, 67.2f), -3f, 0.25f),
+            ("ryujin", On(10.5f, 72.8f), 1f, 0.2f),
+        };
+        foreach (var (id, at, yaw, dirt) in staged)
+        {
+            var driver = AI.Drivers.All.First(d => d.Car == id);
+            var car = CarModel.Load(id, driver.Livery with { Number = driver.Number, Dirt = dirt });
+            car.SetPlate($"DD {driver.Number:00}");
+            // --dust=X: the dust of an event (0..1), as CarVisual builds it up.
+            if (float.TryParse(DevTools.Instance?.Arg("dust"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float dust))
+                car.SetDust(dust, CarModel.RoadDust);
+            AddChild(car.Root);
+            _staged.Add(car);
+            // Model forward is -Z: face +x, turned a little.
+            car.Root.GlobalTransform = new Transform3D(new Basis(Vector3.Up, Mathf.DegToRad(-90f + yaw)), at);
+        }
+        // --spin=KMH: the wheels turn as at that speed (the motion blur on spinning wheels).
+        if (float.TryParse(DevTools.Instance?.Arg("spin"), out float kmh)) _spin = kmh / 3.6f / 0.3f;
+        Vector3 H(float x, float y, float z) => hero + new Vector3(x, y, z);
+        _views = new View[]
+        {
+            new("car_q34f", H(5.2f, 1.0f, 3.6f), H(0.1f, 0.55f, 0f), 40f),
+            new("car_side", H(0.3f, 0.9f, 6.6f), H(0f, 0.6f, 0f), 40f),
+            new("car_q34r", H(-5.0f, 1.1f, 3.8f), H(0.1f, 0.55f, 0f), 40f),
+            new("car_wheel", H(2.7f, 0.45f, 2.3f), H(1.3f, 0.32f, 0.78f), 30f),
+            new("car_rim", H(1.75f, 0.42f, 1.5f), H(1.21f, 0.3f, 0.72f), 32f),
+            new("car_pack", H(15f, 0.9f, 1.8f), H(-6f, 0.7f, 2.2f), 42f),
+            new("car_high", H(4.2f, 3.9f, 5.0f), H(0f, 0.5f, 0f), 45f),
+        };
     }
 
     private void ApplyView(View v)
@@ -214,7 +270,9 @@ public partial class SpeedwayLook : Node3D
         string abs = ProjectSettings.GlobalizePath(dir.StartsWith("res://") ? dir : "res://" + dir);
         DirAccess.MakeDirRecursiveAbsolute(abs);
         string tag = SceneFilePath.Contains("Golden") ? "golden" : SceneFilePath.Contains("Night") ? "night" : "afternoon";
-        foreach (var v in Views)
+        // The reflection probes are captured one after another over the first frames (Fx.VenueReflections).
+        for (int f = 0; f < 240; f++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        foreach (var v in _views)
         {
             ApplyView(v);
             for (int f = 0; f < 30; f++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -224,10 +282,22 @@ public partial class SpeedwayLook : Node3D
         DevTools.QuitClean(GetTree(), 0);
     }
 
+    public override void _Process(double delta)
+    {
+        if (_spin == 0f) return;
+        _spinAngle += _spin * (float)delta;
+        foreach (var car in _staged)
+            for (int i = 0; i < 4; i++)
+            {
+                if (car.Node(new[] { "Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR" }[i]) is { } n) n.Basis = new Basis(Vector3.Right, -_spinAngle);
+                car.SetBrakeSpin(i, _spinAngle);
+            }
+    }
+
     public override void _UnhandledInput(InputEvent e)
     {
         if (_camera == null || e.IsEcho() || e is not InputEventKey { Pressed: true } key) return;
-        if (key.PhysicalKeycode == Key.V) ApplyView(Views[_view = (_view + 1) % Views.Length]);
+        if (key.PhysicalKeycode == Key.V) ApplyView(_views[_view = (_view + 1) % _views.Length]);
         else if (key.PhysicalKeycode == Key.P)
         {
             string abs = ProjectSettings.GlobalizePath("res://out/speedway");

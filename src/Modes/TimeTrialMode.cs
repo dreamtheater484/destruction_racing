@@ -284,6 +284,10 @@ public partial class TimeTrialMode : Node3D, IRaceView, Audio.IEventSound
         else if (_lapStart != null) _invalid = true;
         _s = ns;
         _lat = nl;
+        // DD2's slide only turns the visible body: it keeps the visible tail off the wall (as RaceMode).
+        float edge = path.Width * 0.5f + 0.25f;
+        _car.SlideRoomRight = edge - nl - _car.HalfExtents.X;
+        _car.SlideRoomLeft = edge + nl - _car.HalfExtents.X;
 
         // The line: a lap runs from one crossing of line k to the first crossing of line k + 1.
         float L = path.Length;

@@ -12,6 +12,9 @@ uniform float clearcoat_roughness : hint_range(0.0, 1.0) = 0.05;
 uniform vec3 emission : source_color = vec3(0.0);
 uniform float emission_energy = 0.0;
 uniform float scuff : hint_range(0.0, 1.0) = 0.0;     // plastic greys out where it crumples
+// The dust this event has left (post-M8, CarVisual), as on the paint: low parts most.
+uniform float dust : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 dust_color : source_color = vec3(0.36, 0.33, 0.29);
 uniform int lens_pattern = 0;                         // 0 none, 1 fluted headlamp glass, 2 prismatic lamp lens
 uniform float lens_pitch = 0.007;
 // Per lamp (SetInstanceShaderParameter): a smashed lamp goes dark and its lens crazes. The car shaders' instance
@@ -65,6 +68,15 @@ void fragment() {
 		float craze = step(0.86, fract(sin(dot(floor(q.xy + q.z), vec2(12.9898, 78.233))) * 43758.5453));
 		ALBEDO = mix(ALBEDO, ALBEDO * 0.25 + vec3(0.12), lamp_broken * (0.6 + 0.4 * craze));
 		ROUGHNESS = mix(ROUGHNESS, 0.7, lamp_broken);
+	}
+	if (dust > 0.0) {
+		vec3 q = rest_position * 9.0;
+		float n1 = fract(sin(dot(floor(q), vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+		float film = clamp(dust * (0.25 + 0.9 * (1.0 - smoothstep(0.12, 0.85, rest_position.y))) * (0.7 + 0.5 * n1) - 0.04, 0.0, 0.7);
+		ALBEDO = mix(ALBEDO, dust_color, film);
+		ROUGHNESS = mix(ROUGHNESS, 0.8, min(film * 1.6, 1.0));
+		CLEARCOAT *= 1.0 - min(film * 2.0, 1.0);
+		METALLIC *= 1.0 - film;
 	}
 	EMISSION = emission * emission_energy * (1.0 - crumple_amount) * (1.0 - lamp_broken) * lamp_lit;
 }

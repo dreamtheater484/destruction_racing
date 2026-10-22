@@ -88,8 +88,9 @@ public partial class HeadlightRig : Node3D
             _spots[i].Visible = on;
             _cones[i].Visible = on;
             if (!on) continue;
-            var xf = car!.GlobalTransform;
-            var origin = xf * car.Visual!.HeadlightOrigin;
+            // The visible body: in DD2's slide the beams follow the nose.
+            var xf = car!.Visual!.GlobalTransform;
+            var origin = xf * car.Visual.HeadlightOrigin;
             // Aimed along the car, dipped a little.
             var fwd = (-xf.Basis.Z - xf.Basis.Y * 0.07f).Normalized();
             var up = xf.Basis.Y;

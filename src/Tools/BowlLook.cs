@@ -55,6 +55,10 @@ public partial class BowlLook : Node3D
         }
         BuildTyreBarrier();
         BuildFencePosts();
+        // One probe over the arena, parallax-corrected against a box from the floor to the stands' height, captured
+        // at car-roof height in the middle (Fx.VenueReflections).
+        Fx.VenueReflections.Add(this, new[] { new Vector3(0f, 16f, 0f) }, new Vector3(2f * A + 6f, 32f, 2f * B + 6f), 2f,
+            boxProjection: true, captureOffset: new Vector3(0f, -14.7f, 0f));
         if (!Empty) SpawnCars();
         ApplyView(Views[0]);
         var dev = DevTools.Instance;
@@ -134,7 +138,7 @@ public partial class BowlLook : Node3D
             float t = Mathf.Tau * i / count + 0.2f;
             var pos = new Vector3(55f * 0.74f * Mathf.Cos(t), 0f, 38f * 0.74f * Mathf.Sin(t));
             var driver = drivers[i];
-            var car = CarModel.Load(driver.Car, driver.LiveryFor(Modes.DerbyMode.RoofColor(4 - i % 4)));
+            var car = Dusty(CarModel.Load(driver.Car, driver.LiveryFor(Modes.DerbyMode.RoofColor(4 - i % 4))));
             car.SetPlate($"DD {driver.Number:00}");
             AddChild(car.Root);
             car.Root.Position = pos;
@@ -183,9 +187,17 @@ public partial class BowlLook : Node3D
         foreach (var c in new[] { victim, kitsune, nordvik, limper, incoming }) c.Flush();
     }
 
+    /// <summary>--dust=X (look-dev): the dust of a derby (0..1), as CarVisual builds it up.</summary>
+    private static CarModel Dusty(CarModel car)
+    {
+        if (float.TryParse(DevTools.Instance?.Arg("dust"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float dust))
+            car.SetDust(dust, CarModel.BowlDust);
+        return car;
+    }
+
     private CarModel Stage(string id, Livery livery, string plate, float right, float fwd, float headRight, float headFwd)
     {
-        var car = CarModel.Load(id, livery);
+        var car = Dusty(CarModel.Load(id, livery));
         car.SetPlate(plate);
         AddChild(car.Root);
         var heading = (PileRight * headRight + PileFwd * headFwd).Normalized();

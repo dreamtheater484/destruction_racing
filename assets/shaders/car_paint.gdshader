@@ -1,6 +1,6 @@
 // Car body paint: livery by rest position (no UVs needed), solid or metallic base under a clear coat,
 // damage layers (scuffed clear coat -> primer -> bare metal -> rust, plus soot) from a 3D damage volume,
-// and road dirt. Back faces render as a dark interior so open gaps and glass never show the void.
+// road dirt and the dust an event leaves. Back faces render as a dark interior so open gaps and glass never show the void.
 // debug_mode 1 = zebra (reflection stripes), 2 = clay. Object space: X right, Y up, -Z forward.
 shader_type spatial;
 render_mode cull_disabled, depth_draw_opaque;
@@ -57,6 +57,9 @@ uniform vec3 volume_min = vec3(-1.0, 0.0, -2.5);
 uniform vec3 volume_size = vec3(2.0, 1.5, 5.0);
 uniform float wear : hint_range(0.0, 1.0) = 0.0;          // global age: chips, faded clear coat
 uniform float dirt : hint_range(0.0, 1.0) = 0.0;
+// The dust this event has left (post-M8, CarVisual: slow on asphalt, fast off the road and in the Bowl).
+uniform float dust : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 dust_color : source_color = vec3(0.36, 0.33, 0.29);
 uniform sampler2D rust_albedo : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D dirt_albedo : source_color, filter_linear_mipmap, repeat_enable;
 
@@ -331,6 +334,18 @@ void fragment() {
 		base = mix(base, mud, d * 0.9);
 		rough = mix(rough, 0.92, d);
 		coat *= 1.0 - d;
+
+		// The event's dust: a dry, pale film, heaviest on the sills and the lower panels, lighter on the flat tops,
+		// in soft patches; it dulls the clear coat first.
+		if (dust > 0.0) {
+			float low_d = 1.0 - smoothstep(0.12, 0.85, p.y);
+			float top = smoothstep(0.55, 0.95, n.y);
+			float blot = fbm(p * 2.2 + 31.0);
+			float film = clamp(dust * (0.2 + 0.9 * low_d + 0.35 * top) * (0.55 + 0.9 * blot) - 0.04, 0.0, 0.8);
+			base = mix(base, dust_color * (0.82 + 0.36 * fbm(p * 13.0 + 3.0)), film);
+			rough = mix(rough, 0.78, min(film * 1.6, 1.0));
+			coat *= 1.0 - min(film * 2.0, 1.0);
+		}
 
 		float occ = gap_occlusion;
 		ALBEDO = base * mix(0.06, 1.0, occ);

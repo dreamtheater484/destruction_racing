@@ -9,6 +9,45 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## Post-M8: DD2's race length, the slide and the cars' details — ready for your playtest (2026‑10‑22)
+Your requests: races as long as DD2's, a bit of a tail-out slide, and items 1, 2, 5 and 6 of the car-looks list, kept only where they look real.
+- **Play it:** double-click **Play Destruction Racing.cmd**, as before. Your settings and championships carry over.
+- **Race length** (✱ A34): DD2's races last 5–8 minutes, ours 3–3.5. The oval now has 14 laps (was 8) and the figure-8 10 (was 6), so the winner needs about 6 minutes. With the same damage, half the field was wrecked and the bot finished one race in six, so a hit in a race now does ×0.32 of the derby's damage instead of ×0.5 (about 8/14 of what it did). A race now wrecks about as many cars as DD2's 4.75.
+- **Race sims** (32 races per configuration, the average bot; 8/6 laps → 14/10 laps):
+
+  | | Wreckin' oval | Wreckin' figure-8 | Stock Car oval | Stock Car figure-8 |
+  |---|---|---|---|---|
+  | Winner's time | 212 → 368 s | 200 → 343 s | 182 → 328 s | 191 → 331 s |
+  | Wrecks per race (DD2: 4.75) | 4.8 → 3.6 | 6.7 → 4.7 | 2.7 → 1.5 | 4.0 → 2.2 |
+  | Bot wrecked before half distance (≤ 10%) | 3% → 6% | 9% → 0% | 0% → 6% | 6% → 0% |
+  | Bot finished / mean place | 72% / 13.4 → 72% / 15.1 | 66% / 11.6 → 72% / 12.1 | 91% / 14.5 → 88% / 16.7 | 81% / 12.3 → 100% / 13.0 |
+  | Pit stops per race | 10.5 → 13.3 | 9.9 → 15.4 | 14.7 → 21.6 | 14.3 → 21.0 |
+  | Close battle with the bot in the last 2 laps (≥ 50%) | – | – | 47% → **31%** ❌ | 62% → 62% |
+  | Spread 1st–10th on lap 2 (≤ 6 s) | – | – | 9.0 → 7.3 s ❌ | 16.7 → 14.7 s ❌ |
+
+  - **For you to judge:** on the Stock Car oval the bot is in a close battle at the end in fewer races (31%, target 50%), and it finishes further back (16.7th). Over 14 laps the pack has more time to string out, and the stops (1.7 per race for the bot) break the battles up. The lap-2 spread was over target before and is a little better now.
+- **The slide** (✱ A35): in DD2 the cars run visibly turned into the corners, tail out: about 15° in the fast bends and 30–40° in the tight ones (the DD2 race video).
+  - Now the car on screen turns into a fast corner past where it is heading, tail out, by up to 24°. It turns more in a tighter turn and at more speed, and the front wheels show opposite lock.
+  - A real slide of the physics body was tried first. The tails hit the walls, and the bot was wrecked before half distance in 25% of races instead of 4%. So the slide is only the look: the physics, the collisions and the AI are as you playtested them on 19 Oct, and it can't change a race.
+  - Near a wall or a car alongside the slide narrows, so the tail doesn't sink into them. Replays show it too.
+- **The cars' looks:**
+  1. **Reflections:** the paint, chrome and glass now reflect the track, the walls, the stands and the floodlights, not only the sky picture. Reflection probes over the venues are captured as the event loads, without the cars. Subtle in daylight; clearest on dark paint.
+  2. **Grounding:** the tyres have moulded sidewall lettering (DUSTBOWL · STEEL BELTED RADIAL · 185/70 R13 86S · TUBELESS), with the rims fitted to the bead. Brake discs with calipers sit behind the spokes, with drums at the back on the older cars. The contact shadow under the car was already right, so it stays.
+  5. **Wear during an event:** dust builds up on the lower panels, the sills, the tyres and the wheels. It builds slowly on asphalt, fast off the road and on the Bowl's dirt, and faster in slides; brake dust darkens the rims. By the end a race leaves a light film and a derby a dull, dusty car. Wheel blur at speed was already there: the motion blur blurs the spokes.
+  6. **Small parts:** a chrome maker's emblem on the back and the grille (or the nose), the model script on the boot lid, and a whip aerial on the left front wing that sways under braking, power and in the turns. They are placed on each car's own panels, clear of the lamps, the plate and the glass, and they dent and come off with their panel. Wipers, door handles, mirrors, exhausts and window rubbers were already there.
+  - Before and now: `out/look/final/looks_before_now.jpg`, the dust `out/look/final/dust.jpg`, the slide `out/drift/sheet3.png`.
+- **Fixed on the way: the motion blur without MSAA.** Without MSAA, Godot's frame can't be copied into, so the blur failed. That covers the Low preset and, since the black-squares fix, every TV, replay and highlights camera. Nothing was blurred, and every frame logged an error, a few MB a minute in the log file. The blur now writes the frame in a second pass there.
+- **Checks:**
+  - Unit tests: 102 of 102 pass. The pileup test passes (0.70 ms per physics tick).
+  - The replay self-test (the replays now record the slide): 20 of 20 cars rebuilt bit for bit, in a race and in a derby.
+  - Load times (plan §17.4: load ≤ 5 s, restart ≤ 3 s): a race is on screen 4.9 s after launch and 1.5 s after R, as in M8. The probes are captured during the countdown.
+  - Performance at 4K Ultra (rendered 3840×2160, RTX 5090):
+    - figure-8 afternoon: 231–306 fps, 1% lows 170–240 (M8: 262–311 and 189–280);
+    - oval at night: 132–225 fps, 1% lows 80–171 (M8: 146–227 and 110–168). The lowest window is the first 10 s, while the probes are captured and the shaders compile.
+    - VRAM 2.5–2.6 GB (M8: 2.0 GB); the reflection probes take about 0.4 GB of it. The budget is 6 GB.
+  - The badges and the aerial are placed in 30–50 ms per model, once per session.
+- M8 is still waiting for your approval; M9 has not started.
+
 ## Post-M8: when you're wrecked in a race — ready for your playtest (2026‑10‑22)
 Your report: wrecked in a race, you pressed skip, and your wrecked car seemed to race on, pit and finish, sped up.
 - **What it was:** the car on screen wasn't yours. After a wreck the race put the chase camera behind the nearest car (often the one that wrecked you, damaged and heading for the pits), so it looked exactly like driving. The skip ran the race "×8", which on your PC was slower than real time (4 fps). It also made every physics step 8 times longer (15 Hz instead of 120 Hz), so the rest of the race was simulated sloppily.

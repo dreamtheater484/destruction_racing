@@ -292,7 +292,10 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         Car.DebugHits = DevTools.Instance?.Arg("hits") != null;
 
         SpawnField();
-        _referee = new Referee(Rules, Kind, _cars.Select(c => (c.Id, c.RefereeToughness))) { DamageScale = Endurance ? 0f : Rules.RaceDamageScale };
+        // --racedamage=X (sims): another race damage scale, for calibration.
+        float damage = float.TryParse(DevTools.Instance?.Arg("racedamage"), System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out float rd) ? rd : Rules.RaceDamageScale;
+        _referee = new Referee(Rules, Kind, _cars.Select(c => (c.Id, c.RefereeToughness))) { DamageScale = Endurance ? 0f : damage };
         foreach (var c in _cars)
         {
             c.Damage = _referee.Damage(c.Id);
@@ -561,6 +564,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         CheckStuck();
         if (Endurance) TrackStops();
         UpdateDraft();
+        if (!Headless) UpdateSlideRoom();
         _metrics.Step(_time, dt, _standings, _s, _progress, IsRunning);
         UpdateBeacon();
 
@@ -572,6 +576,29 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         if (_standings.HasFinished(_player.Id)) EndRace(timedOut: false);
         else if (PlayerOut && (_standings.FinishedCount >= 1 || racing == 0)) EndRace(timedOut: false);
         else if (_time >= MaxDuration) EndRace(timedOut: true);
+    }
+
+    /// <summary>
+    /// DD2's slide only turns the visible body (Car.DriftAngle): the room beside each car's tail, to the wall at the
+    /// road's edge and to a car alongside, keeps the visible tail out of them.
+    /// </summary>
+    private void UpdateSlideRoom()
+    {
+        float edge = Track.Width * 0.5f + 0.25f;
+        foreach (var c in _cars)
+        {
+            float lat = _lateral[c.Id], half = c.HalfExtents.X;
+            float right = edge - lat - half, left = edge + lat - half;      // lateral: + = right of the racing line
+            foreach (var o in _cars)
+            {
+                if (o == c || MathF.Abs(Track.Delta(_s[c.Id], _s[o.Id])) > c.HalfExtents.Z + o.HalfExtents.Z) continue;
+                float dl = _lateral[o.Id] - lat, gap = MathF.Abs(dl) - half - o.HalfExtents.X;
+                if (dl > 0f) right = MathF.Min(right, gap);
+                else left = MathF.Min(left, gap);
+            }
+            c.SlideRoomRight = right;
+            c.SlideRoomLeft = left;
+        }
     }
 
     /// <summary>

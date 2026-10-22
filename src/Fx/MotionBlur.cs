@@ -71,10 +71,13 @@ public partial class MotionBlurEffect : CompositorEffect
     /// <summary>The longest blur, in screen UV.</summary>
     public float MaxLength { get; set; } = 0.05f;
 
-    private static readonly StringName Context = "dr_motion_blur", OutName = "out";
+    private static readonly StringName Context = "dr_motion_blur", ScratchName = "scratch";
     private RenderingDevice? _rd;
-    private Rid _shader, _pipeline, _linear, _nearest, _set;
-    private (Rid Color, Rid Velocity, Rid Output) _setFor;
+    private Rid _shader, _pipeline, _linear, _nearest, _set, _setBack;
+    private (Rid Color, Rid Velocity, Rid Scratch) _setFor;
+    private Rid _formatFor;
+    private RenderingDevice.DataFormat _format;
+    private bool _copyBack, _usable;
     private readonly float[] _params = new float[4];
     private readonly byte[] _push = new byte[16];
 
@@ -120,39 +123,63 @@ public partial class MotionBlurEffect : CompositorEffect
         Rid color = buffers.GetColorLayer(0, false);
         Rid velocity = buffers.GetVelocityLayer(0, false);
         if (!color.IsValid || !velocity.IsValid) return;
-        // The pass reads the frame and writes its own texture, which is then copied over the frame (the frame can
-        // be copied into, not out of). The buffers drop the texture when the size changes.
-        if (!buffers.HasTexture(Context, OutName))
+        // The pass reads the frame and writes a scratch texture, which then goes over the frame. With MSAA the
+        // resolved frame can be copied into; without it (the Low preset, and SMAA under a depth-of-field camera) it
+        // can't be copied at all but is a storage image, so a second pass with no shutter copies the scratch over it.
+        // The frame's usage is read once per frame texture (the format wrapper is garbage).
+        if (_formatFor != color)
         {
             using var format = _rd.TextureGetFormat(color);
-            buffers.CreateTexture(Context, OutName, format.Format,
-                (uint)(RenderingDevice.TextureUsageBits.StorageBit | RenderingDevice.TextureUsageBits.CanCopyFromBit),
+            _format = format.Format;
+            _copyBack = (format.UsageBits & RenderingDevice.TextureUsageBits.CanCopyToBit) != 0;
+            _usable = _copyBack || (format.UsageBits & RenderingDevice.TextureUsageBits.StorageBit) != 0;
+            _formatFor = color;
+        }
+        if (!_usable) return;
+        // The buffers drop the scratch texture when the size changes.
+        if (!buffers.HasTexture(Context, ScratchName))
+            buffers.CreateTexture(Context, ScratchName, _format,
+                (uint)(RenderingDevice.TextureUsageBits.StorageBit | RenderingDevice.TextureUsageBits.SamplingBit
+                       | RenderingDevice.TextureUsageBits.CanCopyFromBit),
                 RenderingDevice.TextureSamples.Samples1, size, 1, 1, true, false);
-        }
-        Rid output = buffers.GetTexture(Context, OutName);
+        Rid scratch = buffers.GetTexture(Context, ScratchName);
 
-        // The uniform set only changes with the buffers (a resize, a new view).
-        if (_setFor != (color, velocity, output) || !_rd.UniformSetIsValid(_set))
+        // The uniform sets only change with the buffers (a resize, a new view, MSAA on or off).
+        if (_setFor != (color, velocity, scratch) || !_rd.UniformSetIsValid(_set) || (!_copyBack && !_rd.UniformSetIsValid(_setBack)))
         {
-            var uniforms = new Godot.Collections.Array<RDUniform>
-            {
-                Uniform(RenderingDevice.UniformType.SamplerWithTexture, 0, _linear, color),
-                Uniform(RenderingDevice.UniformType.SamplerWithTexture, 1, _nearest, velocity),
-                Uniform(RenderingDevice.UniformType.Image, 2, output),
-            };
-            _set = UniformSetCacheRD.GetCache(_shader, 0, uniforms);
-            foreach (var u in uniforms) u.Dispose();
-            _setFor = (color, velocity, output);
+            _set = UniformSet(color, velocity, scratch);
+            _setBack = _copyBack ? default : UniformSet(scratch, velocity, color);
+            _setFor = (color, velocity, scratch);
         }
-        (_params[0], _params[1], _params[2], _params[3]) = (size.X, size.Y, Scale, MaxLength);
+        Dispatch(_set, size, Scale);
+        if (_copyBack) _rd.TextureCopy(scratch, color, Vector3.Zero, Vector3.Zero, new Vector3(size.X, size.Y, 1), 0, 0, 0, 0);
+        else Dispatch(_setBack, size, 0f);
+    }
+
+    private Rid UniformSet(Rid input, Rid velocity, Rid output)
+    {
+        var uniforms = new Godot.Collections.Array<RDUniform>
+        {
+            Uniform(RenderingDevice.UniformType.SamplerWithTexture, 0, _linear, input),
+            Uniform(RenderingDevice.UniformType.SamplerWithTexture, 1, _nearest, velocity),
+            Uniform(RenderingDevice.UniformType.Image, 2, output),
+        };
+        var set = UniformSetCacheRD.GetCache(_shader, 0, uniforms);
+        foreach (var u in uniforms) u.Dispose();
+        return set;
+    }
+
+    // One pass of the shader; with no shutter it copies its input unchanged.
+    private void Dispatch(Rid set, Vector2I size, float scale)
+    {
+        (_params[0], _params[1], _params[2], _params[3]) = (size.X, size.Y, scale, MaxLength);
         Buffer.BlockCopy(_params, 0, _push, 0, 16);
-        long list = _rd.ComputeListBegin();
+        long list = _rd!.ComputeListBegin();
         _rd.ComputeListBindComputePipeline(list, _pipeline);
-        _rd.ComputeListBindUniformSet(list, _set, 0);
+        _rd.ComputeListBindUniformSet(list, set, 0);
         _rd.ComputeListSetPushConstant(list, _push, (uint)_push.Length);
         _rd.ComputeListDispatch(list, (uint)((size.X + 7) / 8), (uint)((size.Y + 7) / 8), 1);
         _rd.ComputeListEnd();
-        _rd.TextureCopy(output, color, Vector3.Zero, Vector3.Zero, new Vector3(size.X, size.Y, 1), 0, 0, 0, 0);
     }
 
     private static RDUniform Uniform(RenderingDevice.UniformType type, int binding, params Rid[] ids)

@@ -59,7 +59,7 @@ This list shows how closely the game follows the PC versions of Destruction Derb
 
 | Rule | Status | Evidence |
 |---|---|---|
-| 20 cars; a fixed number of laps per layout (6–10, data-driven) | ☑️ | oval 8 laps, figure-8 6 laps (M6) |
+| 20 cars; a fixed number of laps per layout (data-driven; DD2's 5–8 min races) | ☑️ ✱ A34 | oval 14 laps, figure-8 10 laps (post-M8; 8 and 6 in M6) |
 | Total = spin and wreck points + finishing bonus | ✅ | `Finish_tables`; `RaceMode.EndRace`; Wreckin' sims (M1c–M6) |
 | One pit stop per race | ☑️ | `RulesConfig.WreckinPitStopsAllowed = 1`; the HUD says when none is left |
 | Wrecked cars stay on the track as obstacles | ☑️ | M6: the AI steers round them or shoves them aside |
@@ -201,6 +201,7 @@ Every addition that DD1 and DD2 did not have. "On" means it stays on in the Puri
 |---|---|---|
 | Graphics: baked lighting with three light presets per venue, the car paint shader, the Bowl and Speedway art | Presentation | on |
 | Layered deformation (crush, dents, folds), detachable parts, glass and lamps | Presentation | on |
+| Car detail (post-M8): the venues reflected in the paint, chrome and glass (reflection probes), tyre sidewall lettering, brake discs and drums, dust that builds up during an event, emblems, a model script and a swaying whip aerial | Presentation | on |
 | VFX: smoke, fire, sparks, debris, dust, ground marks, oil trails | Presentation | on |
 | A crowd of about 1,500 that reacts to hits and the shrinking field | Presentation | on |
 | Audio: synthesized granular engines, 45 effects, a mix with ducking | Presentation | on |
@@ -234,8 +235,9 @@ Every addition that DD1 and DD2 did not have. "On" means it stays on in the Puri
 | Optional handbrake binding | Gameplay-affecting assist | not built |
 | SPIN_ASSIST (1.5) and post-hit grip loss (0.8 s): a tapped rear spins, as in DD | Calibration | on |
 | DD cornering at speed (✱ A33, post-M8): grip ×2.3 from 108 km/h and a yaw control that holds the turn the keys ask for and stops it when they come up; the brake loosens it (DD2's brake-dab powerslide) | Calibration | on |
+| DD2's tail-out slide (✱ A35, post-M8): the car on screen turns past the physics body in fast turns, by up to 24°; only the look | Calibration | on |
 | Opening-crunch damage ramp (✱ A19): ×0.4 at GO to ×1 over 90 s since M4 | Calibration | on |
-| Race damage ×0.5 (✱ A21) | Calibration | on |
+| Race damage ×0.32 (✱ A21, A34: ×0.5 until DD2's race length) | Calibration | on |
 | Division pace and aggression (✱ A22, A25): pace ×1.0 → ×1.045 (×0.97 → ×1.015 until post-M8), aggression ×0.8 → ×1 | Calibration | on |
 | The attacker's share of contact damage, 0.7 in one-sided rams (M4) | Calibration | on |
 | Stock Car AI pace ×1.03 against Wreckin' | Calibration | on |
@@ -272,7 +274,7 @@ Measured from DD1 and DD2 PC gameplay videos (`docs/reference_feel.md`); ours as
 | Far chase camera (car width / bumper / horizon) | DD1: 19% / 72% / 46% | 19% / 69% / 47% |
 | Camera behaviour | follows the body's heading at a fixed distance | low, at a fixed distance (M1) |
 | Field | DD1 16 cars; DD2 20 cars | 20 cars |
-| Race length | DD1: 12 laps of ~15 s, ~3.5 min; DD2: 5, 8 or 10 laps, ~37.5 s laps, ~5 min | oval 8 laps of 31–37 s, figure-8 6 laps of 38–42 s (M6); the winner needs ~250 s for 6 laps (M1c) |
+| Race length | DD1: 12 laps of ~15 s, ~3.5 min; DD2: 5, 8 or 10 laps, ~37.5 s laps, ~5 min | oval 14 laps, figure-8 10 laps (✱ A34, post-M8): the winner needs 368 s and 343 s (Wreckin' sims, medians) |
 | Derby length | DD1: ~60 s from GO to "Race Over" (the player in that video) | player survival 90 s, event 181 s (medians, M6 derby sims) |
 | A rear-quarter tap spins the target | within ~0.5 s (DD1) | a 12 km/h tap spins an unprepared car 90–180° (T2 10/10); time to spin not measured |
 | HUD | DD1 / DD2 layouts: points top left, damage diagram, laps, big position | DD2 layout (M1b), broadcast style since M4 |

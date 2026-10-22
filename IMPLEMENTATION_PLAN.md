@@ -166,7 +166,7 @@ v1 ships **one ruleset, "Standard"**, which follows **DD2 PC**. Our physics and 
 
 ### 4.2 Wreckin' Racing
 **Rules**
-- **The race:** 20 cars and a fixed number of laps per layout (6–10, data‑driven, short laps).
+- **The race:** 20 cars and a fixed number of laps per layout (data‑driven, short laps): DD2's 5–8 minute races, 14 laps of the oval and 10 of the figure‑8 since post-M8 (✱ A34; 8 and 6 until then).
 - **Total score:** spin and wreck points + finishing bonus.
 - **Pit stop:** once per race.
 - **Hazards:** wrecked cars stay on track as obstacles. Flipped cars are auto‑righted after a penalty.
@@ -900,7 +900,7 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A18 | Damage on a destroyed zone | Half of it reaches the front (engine) | Without it, cars with destroyed sides and rear could never be finished off |
 | A19 | Opening crunch and first minute | Derby damage starts at ×0.4 at GO and ramps to ×1 over 90 s (calibration; M1b had ×0.6 over 60 s, M1c–M3 ×0.5 over 75 s, M4 ×0.4 over 90 s for the harder-hitting derby AI) | Frustration targets: player wrecked in 30 s ≤ 5%, in 60 s ≤ 15% |
 | A20 | DD2 Fast Steer at derby speeds | Loosens the rear and adds yaw torque below ~80 km/h, so sharp turns (DD Code T5) are possible | The DD2 manual only says "fast steering" |
-| A21 | Race damage | All damage in a race is ×0.5 (`RaceDamageScale`, calibration) | At ×1 the PlayerProxy was wrecked before half distance in 83–100% of races (target ≤ 10%): race contact is constant and incidental, the derby curve assumes deliberate rams |
+| A21 | Race damage | All damage in a race is ×0.5 (`RaceDamageScale`, calibration); ×0.32 since DD2's race length (✱ A34) | At ×1 the PlayerProxy was wrecked before half distance in 83–100% of races (target ≤ 10%): race contact is constant and incidental, the derby curve assumes deliberate rams |
 | A22 | AI pace in Division 4 | The racing AI drives at ×1.0 of its skill's pace (division scaling, §10.5); ×0.97 until the post-M8 handling | M1c: at ×1 the AI racers out‑paced an average player, so only hunting paid; ×0.97 brought racer and hunter bots within ±15%. Post-M8, with DD2's grip on the cars and in the AI's speed profile, the playtest found the field slow. At ×1.0 the field's best laps in traffic are about 10% faster than the average bot's and level with the skilled bot's clean laps; racer and hunter bots are 5% apart over both layouts (oval: hunter +16%, figure‑8: racer +22%, 32 seed pairs each) |
 | A23 | Crossover and wall ends | The walls open where the figure‑8 legs cross; where a wall resumes it is flared (≈8°) and the four corners are closed | Blunt wall ends at the opening wrecked cars that drifted into the gap; DD1 footage shows no detail |
 | A24 | Race end | The race ends when the player finishes; if the player is wrecked, when the winner takes the flag. Everyone else is classified by distance | Not documented; keeps "skip to results" short |
@@ -913,6 +913,8 @@ Compared with the scope you agreed ("more or less"), v1 adds the Stock Car and T
 | A31 | Shadowed lights at night | The 10 floodlights cast shadows (the M6 night look you approved) | Plan §16 says ≤ 6; 4K Ultra stays ≥ 120 fps after the M8 draw-call cuts |
 | A32 | Spin cap after hits | The car's 14 rad/s spin cap also applies after a hit's spin assist (a 360° still takes 0.45 s) | The pileup stress test found 29 rad/s spins that broke its checks (M8) |
 | A33 | DD cornering at speed | Cornering grip ×2.3 from 108 km/h (×1 below 50 km/h), and a yaw-rate controller: a held key is a steady turn at the rate the lock asks for (capped by the grip), a released key stops it in about 0.25 s; the brake loosens it (`CarTuning.ArcadeGrip`, `YawControl*`). The AI's speed profile uses the same grip curve | Measured from DD2 PC footage (post-M8, `docs/reference_feel.md`): 2.2–2.4 g at 100–170 km/h; the M1–M8 cars held 0.8 g, slid on for 2 s after the key came up at 130 km/h and spun at 150 km/h ("very hard to steer", post-M8 playtest). Below 40–50 km/h the car is unchanged. The derby uses it too, as DD2's Bowl does: its targets still pass (the bot survives 113 s instead of 90 s, 19 hits a minute instead of 24) |
+| A34 | Race length | Oval 14 laps, figure‑8 10 (were 8 and 6), and race damage ×0.32 instead of ×0.5 (A21) | DD2's races last 5–8 min (`docs/reference_feel.md`); the winner now needs 5.5–6 min. At ×0.5 over the longer races half the field was wrecked and the bot finished one race in six. At ×0.32 a Wreckin' race wrecks 3.6–4.7 cars (DD2: 4.75) and the bot is wrecked before half distance in 0–6% (32 races per layout). Stock Car's close battles on the oval fell from 47% to 31% of races (target ≥ 50%) |
+| A35 | The slide | The car on screen turns past the physics body into a fast turn, tail out, by up to 24° (`CarTuning.Drift*`, `CarVisual.UpdateSlide`); the physics, the collisions and the AI are A33's. It narrows near a wall or a car alongside, and replays record it | DD2's cars run visibly turned into the corners, about 15° in fast bends and 30–40° in tight ones; the post-M8 playtest asked for that tail-out slide. A physical slide put the tails into the walls: the bot was wrecked before half distance in 25% of races instead of 4% (8-lap oval, 24 races each), so the slide is only the look |
 
 ---
 

@@ -17,6 +17,8 @@ public struct CarFrame
     public Vector3 Position;
     public Quaternion Rotation;
     public float Steer;
+    /// <summary>DD2's slide (Car.DriftAngle), for the chase camera.</summary>
+    public float Drift;
     public float Spin0, Spin1, Spin2, Spin3;
     public float HealthF, HealthR, HealthL, HealthRt;
     public float Speed;
@@ -154,6 +156,7 @@ public partial class ReplayRecorder : Node
                 Position = xf.Origin,
                 Rotation = xf.Basis.GetRotationQuaternion(),
                 Steer = c.SteerAngle,
+                Drift = c.DriftAngle,
                 Spin0 = c.WheelSpin(0), Spin1 = c.WheelSpin(1), Spin2 = c.WheelSpin(2), Spin3 = c.WheelSpin(3),
                 HealthF = c.Health(DamageZone.Front), HealthR = c.Health(DamageZone.Rear),
                 HealthL = c.Health(DamageZone.Left), HealthRt = c.Health(DamageZone.Right),
@@ -399,6 +402,7 @@ public partial class ReplayPlayer : Node
             var car = Cars[c];
             car.GlobalTransform = new Transform3D(new Basis(a.Rotation.Slerp(b.Rotation, k)), a.Position.Lerp(b.Position, k));
             car.ReplaySteer = Mathf.Lerp(a.Steer, b.Steer, k);
+            car.ReplayDrift = Mathf.Lerp(a.Drift, b.Drift, k);
             car.ReplaySpin[0] = Mathf.Lerp(a.Spin0, b.Spin0, k);
             car.ReplaySpin[1] = Mathf.Lerp(a.Spin1, b.Spin1, k);
             car.ReplaySpin[2] = Mathf.Lerp(a.Spin2, b.Spin2, k);

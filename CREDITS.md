@@ -50,6 +50,7 @@ CC0 needs no attribution; we credit Poly Haven and its authors anyway.
 - **Liveries and race numbers:** this project's work. The digits are our own block face, drawn in `tools/carsmith/digits.py`, so no font licence is involved.
 - **Fictional brands** (Aldridge, Columbia, Nordvik, Adler, Volant, Hikari, Ryujin, Kitsune): this project's own work.
 - **Fictional sponsors** (Kraken Motor Oil, Volta Spark Plugs, Dustbowl Tyres, Hammerhead Auto Parts, Fizz-O Cola, Ironside Insurance, Rusty's Scrapyard, Big Jim's Towing): invented and drawn by this project (`tools/liverysmith/sponsors.py`, `assets/textures/sponsors.png`). The lettering is set in Barlow Condensed (above); the OFL allows text rendered with the font in artwork.
+- **Tyre sidewall lettering** ("DUSTBOWL", the fictional Dustbowl Tyres above, and the tyre size): drawn by this project in Barlow Condensed (`tools/liverysmith/tyre_lettering.py`, `assets/textures/tyre_lettering.png`).
 - **The 19 drivers** (names, nationalities, liveries, radio lines): invented for the game; any likeness to real people is unintended.
 - **Engine sounds:** synthesized by this project (`tools/enginesynth`); there are no recordings.
 - **Sound effects** (crashes, glass, scrapes, tyres, the crowd, stings and UI sounds): synthesized by this project (`tools/sfxsynth`); there are no recordings.
