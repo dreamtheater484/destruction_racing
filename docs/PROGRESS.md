@@ -9,6 +9,20 @@
 - **Docs:** `docs/reference_board.md` and `docs/fallback_car_models.md`.
 - **Not done yet:** the reference feel sheet (needs your OK to watch DD gameplay videos).
 
+## Post-M8: the TV cameras clear of the roofs — ready for your playtest (2026‑10‑22)
+Your report: watching a race after a wreck, many TV shots were a big grey corrugated roof, with the cars hidden behind it.
+- **What it was:** four TV cameras were on the floodlight towers behind the two stands, 18 m up and 5 m behind the roofs. The director only looked at the distance to the car, so for cars on the straights these were often its first choice. But the stand roof hid the straight from them 97–100% of the time. Every roof shot in the old captures (`out/aa_0`) was the main stand's roof; the pit garages were only in the background.
+- **Now:**
+  - Those four cameras are above the outer wall where the straights meet the turns (12 m up), where there was no high camera.
+  - The stand cameras sat 3 m above the front of the roof; when the car was near the stand the roof filled the side of the frame. They are now just in front of and under the roof's edge (8 m up), so the crowd is at the side of the frame. The middle one moved off the oval's start gantry, whose beam was right under the lens.
+  - The infield tower cameras are 6 m higher (22 m), looking over the pit garages' roofs at the main straight.
+  - **A line-of-sight check:** the director skips a camera when one of the venue's buildings is between it and the car, or covers a large part of the frame (rays to the car and to five points across the frame). The buildings are the roofs, the pit garages, the gantry beams, the billboards and the trailers; the stands' terraces count only when they hide the car. When the car goes behind a building, the director cuts at once. The live TV view, the replay and the highlights all use it.
+- **Checks:**
+  - A survey of every camera along the racing line (`--tvcheck`): on the oval the best-placed camera was blocked on 8% of the lap, now 0%. Every part of both layouts still has a clear camera.
+  - Your command (oval, wrecked, watching), the figure-8, a replay and the highlights: no roof shots in about 800 TV frames (the old captures: 11 of 70). Sheets: `out/tvcheck_sheets/`.
+  - Unit tests: 102 of 102 pass.
+- The derby's TV cameras (the Bowl) are unchanged.
+
 ## Post-M8: DD2's race length, the slide and the cars' details — ready for your playtest (2026‑10‑22)
 Your requests: races as long as DD2's, a bit of a tail-out slide, and items 1, 2, 5 and 6 of the car-looks list, kept only where they look real.
 - **Play it:** double-click **Play Destruction Racing.cmd**, as before. Your settings and championships carry over.

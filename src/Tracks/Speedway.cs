@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DestructionRacing.Vehicles;
 using Godot;
 
@@ -55,8 +56,10 @@ public partial class Speedway : Node3D
     }
 
     /// <summary>
-    /// TV cameras for the replay (plan §15.5): high on the floodlight towers and the stand roofs, and low on the
-    /// wall tops every 55 m round the layout, on its outside.
+    /// TV cameras for the replay and the wrecked player's view (plan §15.5): high on the turn and infield floodlight
+    /// towers, above the front of the stand roofs and above the outer wall where the straights meet the turns, and
+    /// low on the wall tops every 55 m round the layout, on its outside. The director skips a post when one of the
+    /// venue's buildings (<see cref="TvBlockers"/>) is in the way.
     /// </summary>
     public List<Vector3> TvPosts()
     {
@@ -64,13 +67,19 @@ public partial class Speedway : Node3D
         foreach (float sx in new[] { -1f, 1f })
             foreach (float sz in new[] { -1f, 1f })
             {
-                posts.Add(new Vector3(sx * 25f, 18f, sz * 96f));
+                // Not on the floodlight towers behind the stands: from there the stand roof hid the whole straight
+                // and filled the long lens with corrugated sheet.
+                posts.Add(new Vector3(sx * 110f, 12f, sz * 80f));
                 posts.Add(new Vector3(sx * 204f, 18f, sz * 18f));
             }
-        posts.Add(new Vector3(0f, 16f, 30f));
-        posts.Add(new Vector3(0f, 16f, -30f));
-        foreach (float x in new[] { -45f, 0f, 45f }) posts.Add(new Vector3(x, 12.5f, 77f));
-        foreach (float x in new[] { -25f, 25f }) posts.Add(new Vector3(x, 11.5f, -77f));
+        // High enough on the infield towers to look over the pit garages' roofs at the main straight.
+        posts.Add(new Vector3(0f, 22f, 30f));
+        posts.Add(new Vector3(0f, 22f, -30f));
+        // Just in front of and below the front edge of the stand roofs (9.5 m, right above the outer wall): from on
+        // top of the roof, the roof filled the side of the frame whenever the car was near the stand. Not at x = 0:
+        // the oval's start gantry spans the straight there, its beam right under the lens.
+        foreach (float x in new[] { -45f, -15f, 45f }) posts.Add(new Vector3(x, 8f, 76f));
+        foreach (float x in new[] { -25f, 25f }) posts.Add(new Vector3(x, 8f, -76f));
         var path = Layout.Path;
         float half = path.Width * 0.5f + 0.4f;
         for (float s = 0f; s < path.Length; s += 55f)
@@ -80,6 +89,58 @@ public partial class Speedway : Node3D
             posts.Add(new Vector3(p.X, Data.HeightAt(p.X, p.Z) + 2.2f, p.Z));
         }
         return posts;
+    }
+
+    /// <summary>The buildings the TV cameras can't see through (none in the grey box or headless).</summary>
+    public IReadOnlyList<Cameras.TvDirector.Blocker>? TvBlockers() => Look?.TvBlockers();
+
+    /// <summary>
+    /// --tvcheck: along the racing line, for each TV post placed well for a car there, how often a building hides
+    /// the car or fills a side or the bottom of the frame; and how often the best-placed post was blocked (the director
+    /// without its line-of-sight check) or no post had a clear shot.
+    /// </summary>
+    private void TvCheck()
+    {
+        var posts = TvPosts();
+        if (TvBlockers() is not { } blockers) { GD.Print("[TvCheck] no look, no blockers"); return; }
+        var path = Layout.Path;
+        int n = posts.Count, samples = 0, wasBlocked = 0, gaps = 0;
+        var good = new int[n];
+        var hidden = new int[n];
+        var filled = new int[n];
+        var by = new Dictionary<string, int>[n];
+        for (int i = 0; i < n; i++) by[i] = new Dictionary<string, int>();
+        for (float s = 0f; s < path.Length; s += 4f)
+            foreach (float lat in new[] { -0.3f, 0f, 0.3f })
+            {
+                Vector3 p = path.PositionAt(s, lat * path.Width * 0.5f);
+                Vector3 car = new(p.X, Data.HeightAt(p.X, p.Z) + 1.1f, p.Z);
+                samples++;
+                int oldBest = 0;
+                float oldScore = -1f, newScore = -1f;
+                for (int i = 0; i < n; i++)
+                {
+                    float placed = Cameras.TvDirector.Score(posts[i], car, car, -1f, null);
+                    int h = Cameras.TvDirector.Hidden(posts[i], car, blockers, 16f / 9f, out string? what);
+                    if (placed > 0.5f)
+                    {
+                        good[i]++;
+                        if (h == 1) hidden[i]++;
+                        else if (h == 2) filled[i]++;
+                        if (what != null) by[i][what] = by[i].GetValueOrDefault(what) + 1;
+                    }
+                    if (placed > oldScore) { oldScore = placed; oldBest = i; }
+                    newScore = Mathf.Max(newScore, h == 0 ? placed : 0f);
+                }
+                if (Cameras.TvDirector.Hidden(posts[oldBest], car, blockers) != 0) wasBlocked++;
+                if (newScore < 0.3f) gaps++;
+            }
+        GD.Print($"[TvCheck] {Layout.Name}: {n} posts, {blockers.Count} blockers, {samples} samples; the best-placed post was blocked at " +
+                 $"{100f * wasBlocked / samples:0}%, no clear shot scoring 0.3 at {100f * gaps / samples:0}%");
+        for (int i = 0; i < n; i++)
+            GD.Print($"[TvCheck]   post {i,2} ({posts[i].X:0.0}, {posts[i].Y:0.0}, {posts[i].Z:0.0}): good for {good[i],4} samples, " +
+                     $"car hidden {(good[i] > 0 ? 100f * hidden[i] / good[i] : 0f),3:0}%, frame filled {(good[i] > 0 ? 100f * filled[i] / good[i] : 0f),3:0}%" +
+                     (by[i].Count > 0 ? $" ({string.Join(", ", by[i].OrderByDescending(kv => kv.Value).Take(3).Select(kv => $"{kv.Key} {kv.Value}"))})" : ""));
     }
 
     private bool BarrelsClear(Vector2 at, Vector2 dir)
@@ -148,6 +209,7 @@ public partial class Speedway : Node3D
         Car.SurfaceGripAt = Data.GripAt;
         if (Visuals) LoadLook();
         if (Core.DevTools.Instance?.Arg("speedwaycheck") != null) CallDeferred(MethodName.Probe);
+        if (Core.DevTools.Instance?.Arg("tvcheck") != null) CallDeferred(MethodName.TvCheck);
     }
 
     /// <summary>--speedwaycheck: the physics ground against the data, and the grip, at points around the lap.</summary>

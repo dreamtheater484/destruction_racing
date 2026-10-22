@@ -113,6 +113,18 @@ public partial class SpeedwayLook : Node3D
         AddMulti("BarriersWhite", block, white, new StandardMaterial3D { AlbedoColor = new Color(0.86f, 0.86f, 0.84f), Roughness = 0.6f });
     }
 
+    private List<Cameras.TvDirector.Blocker>? _tvBlockers;
+
+    /// <summary>
+    /// What the TV cameras can't see through: the roofs, the pit garages, the start gantries' beams, the billboards
+    /// and the trailers, and as a backdrop the stands' terraces and back walls.
+    /// </summary>
+    public List<Cameras.TvDirector.Blocker> TvBlockers() => _tvBlockers ??= Cameras.TvDirector.BlockersIn(this, name =>
+        name.EndsWith("Stand_Back") || name.Contains("Stand_Terrace_") ? true
+        : name.EndsWith("_Roof") || name.EndsWith("_Beam") || name.StartsWith("Garage_") && (name.EndsWith("_Back") || name.EndsWith("_Lintel") || name.Contains("_Side_"))
+          || name.StartsWith("Billboard_") && name.EndsWith("_Frame") || name.StartsWith("Trailer_") && name.EndsWith("_Body") ? false
+        : null);
+
     /// <summary>Crash cushions on the pit-wall noses and the crossover's island tips: yellow water barrels.</summary>
     public void BuildCushions(SpeedwayData data, IEnumerable<(Vector2 At, Vector2 Out)> noses)
     {

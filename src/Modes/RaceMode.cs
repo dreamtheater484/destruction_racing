@@ -1025,6 +1025,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
             Rig = _rig,
             Highlights = highlights,
             TvPosts = _venue.TvPosts(),
+            TvBlockers = _venue.TvBlockers(),
         };
         if (Sound != null) _replay.ImpactPlayed += Sound.PlayReplayImpact;
         _replay.Closed += () =>
@@ -1176,7 +1177,7 @@ public partial class RaceMode : Node3D, IRaceView, IHudMode, Audio.IEventSound
         _rig.Target = _player;
         if (_tvLive == null)
         {
-            _tvLive = new TvDirector { Posts = _venue.TvPosts() };
+            _tvLive = new TvDirector { Posts = _venue.TvPosts(), Blockers = _venue.TvBlockers() };
             AddChild(_tvLive);
         }
         _tvLive.Focus = _player;

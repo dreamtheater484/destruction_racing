@@ -200,6 +200,8 @@ public partial class ReplayPlayer : Node
     public CameraRig? Rig { get; set; }
     /// <summary>The venue's TV camera posts (the Bowl's when not set).</summary>
     public IReadOnlyList<Vector3>? TvPosts { get; set; }
+    /// <summary>The venue's buildings that the TV cameras can't see through.</summary>
+    public IReadOnlyList<TvDirector.Blocker>? TvBlockers { get; set; }
     /// <summary>The highlights reel: the top three moments in slow motion, then back.</summary>
     public bool Highlights { get; set; }
 
@@ -239,7 +241,7 @@ public partial class ReplayPlayer : Node
             if (!d.Piece.Freeze) d.Piece.FreezeMode = RigidBody3D.FreezeModeEnum.Kinematic;
             d.Piece.Freeze = true;
         }
-        _tv = new TvDirector { Posts = TvPosts };
+        _tv = new TvDirector { Posts = TvPosts, Blockers = TvBlockers };
         AddChild(_tv);
         _free = new Camera3D { Name = "FreeCamera", Fov = 60f, Far = 900f };
         AddChild(_free);
